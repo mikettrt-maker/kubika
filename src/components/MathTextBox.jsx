@@ -77,6 +77,10 @@ export default function MathTextBox({
     { label: '∛x', latex: '\\sqrt[3]{x}', title: 'Raíz cúbica' },
     { label: '×', latex: '\\times', title: 'Multiplicación' },
     { label: '÷', latex: '\\div', title: 'División' },
+    { label: '[ ]', latex: '[', title: 'Corchete izquierdo' },
+    { label: ']', latex: ']', title: 'Corchete derecho' },
+    { label: '{ }', latex: '\\{', title: 'Llave izquierda' },
+    { label: '}', latex: '\\}', title: 'Llave derecha' },
   ];
 
   const insertLatex = (latexStr) => {
