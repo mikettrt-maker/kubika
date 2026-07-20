@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Kubika - Tarjetas de Acceso</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; }
+    .page { page-break-after: always; padding: 10mm; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8mm; }
+    .card {
+      border: 1.5px dashed #ccc;
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      break-inside: avoid;
+    }
+    .card .logo { font-size: 18px; font-weight: 800; color: #4c6ef5; margin-bottom: 4px; }
+    .card .sub { font-size: 9px; color: #999; margin-bottom: 8px; }
+    .card .field { margin: 4px 0; }
+    .card .label { font-size: 9px; color: #666; text-transform: uppercase; letter-spacing: 1px; }
+    .card .value { font-size: 13px; font-weight: 700; color: #333; font-family: 'Courier New', monospace; }
+    .card .divider { border-top: 1px solid #eee; margin: 6px 0; }
+    @media print {
+      .no-print { display: none; }
+      body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print" style="padding: 20px; background: #f0f4ff; text-align: center; margin-bottom: 20px;">
+    <h2 style="color: #4c6ef5;">Kubika - Tarjetas de Acceso para Alumnos</h2>
+    <p>Imprime esta página y recorta las tarjetas por las líneas punteadas.</p>
+    <button onclick="window.print()" style="margin-top: 10px; padding: 10px 30px; background: #4c6ef5; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600;">🖨️ Imprimir</button>
+  </div>
+  <div class="page">
+    <div class="grid">
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno001</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">9Nk*DC</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #1</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno002</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">N*q$6M</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #2</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno003</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">a!N8fo</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #3</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno004</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">*s4wRo</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #4</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno005</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">8si*wD</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #5</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno006</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">2G%uDY</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #6</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno007</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">28*D9q</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #7</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno008</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">yM3#CE</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #8</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno009</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">?L57cN</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #9</div>
+      </div>
+    </div>
+  </div>
+  <div class="page">
+    <div class="grid">
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno010</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">$b2MvG</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #10</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno011</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">VYLg8&</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #11</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno012</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">$xA8Co</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #12</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno013</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">R%86uN</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #13</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno014</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">vPq@5n</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #14</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno015</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">4!K#yc</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #15</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno016</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">?Bo2dH</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #16</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno017</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">DCc9@H</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #17</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno018</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">Xu4@82</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #18</div>
+      </div>
+    </div>
+  </div>
+  <div class="page">
+    <div class="grid">
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno019</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">t6hL?E</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #19</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno020</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">T3HV@i</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #20</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno021</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">Bbg73?</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #21</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno022</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">!6iS2i</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #22</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno023</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">8ADw!h</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #23</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno024</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">hX#542</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #24</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno025</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">o9!ET8</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #25</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno026</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">ec$Eg9</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #26</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno027</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">th2?Mm</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #27</div>
+      </div>
+    </div>
+  </div>
+  <div class="page">
+    <div class="grid">
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno028</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">!9fNbo</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #28</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno029</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">r6Lgo@</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #29</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno030</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">%MxHN7</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #30</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno031</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">Cco6*H</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #31</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno032</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">*9a#PB</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #32</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno033</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">3TY%f%</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #33</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno034</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">5zk?mG</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #34</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno035</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">A&oiW2</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #35</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno036</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">N2i@MC</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #36</div>
+      </div>
+    </div>
+  </div>
+  <div class="page">
+    <div class="grid">
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno037</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">m&6fXV</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #37</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno038</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">h8*nDh</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #38</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno039</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">7%Z9gW</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #39</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno040</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">wW$7p3</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #40</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno041</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">u$F@8@</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #41</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno042</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">j?a5bW</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #42</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno043</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">#GFa84</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #43</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno044</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">3XXjv%</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #44</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno045</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">e3@Pbs</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #45</div>
+      </div>
+    </div>
+  </div>
+  <div class="page">
+    <div class="grid">
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno046</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">57W#5k</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #46</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno047</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">%e$3C*</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #47</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno048</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">6oW@dD</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #48</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno049</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">?qhN74</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #49</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno050</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">p&79Vo</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #50</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno051</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">*L*$k6</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #51</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno052</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">5?M@f5</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #52</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno053</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">p!G4rA</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #53</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno054</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">N%k@8G</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #54</div>
+      </div>
+    </div>
+  </div>
+  <div class="page">
+    <div class="grid">
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno055</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">S7cSa#</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #55</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno056</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">@24Xb%</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #56</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno057</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">xF6Z#q</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #57</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno058</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">GW!z4i</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #58</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno059</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">u5xv$A</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #59</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno060</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">5Q3#gX</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #60</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno061</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">3aQp9*</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #61</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno062</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">yVT?28</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #62</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno063</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">$c35PX</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #63</div>
+      </div>
+    </div>
+  </div>
+  <div class="page">
+    <div class="grid">
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno064</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">8fLV%5</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #64</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno065</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">A!FkZ4</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #65</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno066</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">9RG*kJ</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #66</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno067</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">ss%W8B</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #67</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno068</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">737P*x</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #68</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno069</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">wyNU2!</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #69</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno070</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">s#V4Dr</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #70</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno071</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">JHJ#x5</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #71</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno072</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">mSn2?C</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #72</div>
+      </div>
+    </div>
+  </div>
+  <div class="page">
+    <div class="grid">
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno073</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">sS%Ro2</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #73</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno074</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">8!Spj8</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #74</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno075</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">4LpV!j</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #75</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno076</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">t9J%9e</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #76</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno077</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">3*jBAs</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #77</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno078</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">P#aJD9</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #78</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno079</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">4bCf#x</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #79</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno080</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">yhMT2$</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #80</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno081</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">!3ju2Q</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #81</div>
+      </div>
+    </div>
+  </div>
+  <div class="page">
+    <div class="grid">
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno082</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">58bz!D</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #82</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno083</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">&C8wmq</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #83</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno084</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">%MBz43</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #84</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno085</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">3Fh#W!</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #85</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno086</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">uQbe4?</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #86</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno087</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">b67d!Y</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #87</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno088</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">XAk4%z</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #88</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno089</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">TxJ*#3</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #89</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno090</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">6Kg2Q!</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #90</div>
+      </div>
+    </div>
+  </div>
+  <div class="page">
+    <div class="grid">
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno091</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">x?fG%4</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #91</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno092</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">!WmKd2</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #92</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno093</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">CT4@nn</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #93</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno094</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">dD*6fQ</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #94</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno095</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">PxK8!S</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #95</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno096</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">JV?z8f</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #96</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno097</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">2#xpaD</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #97</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno098</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">fa%7M%</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #98</div>
+      </div>
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno099</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">4c@ZzX</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #99</div>
+      </div>
+    </div>
+  </div>
+  <div class="page">
+    <div class="grid">
+      <div class="card">
+        <div class="logo">K Kubika</div>
+        <div class="sub">Regletas de Cuisenaire</div>
+        <div class="divider"></div>
+        <div class="field">
+          <div class="label">Usuario</div>
+          <div class="value">kubika.alumno100</div>
+        </div>
+        <div class="field">
+          <div class="label">Contraseña</div>
+          <div class="value">f7N%AF</div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-size: 8px; color: #aaa;">Alumno #100</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -1,0 +1,484 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ========== Variables Globales ========== */
+:root {
+  --canvas-bg: #ffffff;
+  --grid-color: #94a3b8; /* Color de línea de cuaderno más visible */
+  --grid-size: 40px; /* Exactamente 1 unidad base */
+}
+
+/* ========== Reset & Base ========== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========== Cuadrícula del Lienzo (Estilo Cuaderno) ========== */
+.canvas-grid {
+  background-color: var(--canvas-bg);
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.4) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.4) 1px, transparent 1px);
+  background-size: var(--grid-size) var(--grid-size);
+  background-position: 0 0;
+}
+
+/* ========== Estilos 3D para Regletas (Ángulos perfectos de 90°) ========== */
+.rod-3d {
+  position: relative;
+  border-radius: 0; /* Ángulos de 90 grados */
+  border: 1px solid rgba(0, 0, 0, 0.25); /* Borde sutil para distinguir regletas */
+  box-sizing: border-box; /* El borde hacia adentro, no afecta la medida */
+  cursor: grab;
+  transition: box-shadow 0.2s ease, transform 0.1s ease;
+  user-select: none;
+  touch-action: none;
+}
+
+.rod-3d::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.1) 30%,
+    rgba(0, 0, 0, 0.05) 70%,
+    rgba(0, 0, 0, 0.2) 100%
+  );
+  pointer-events: none;
+}
+
+.rod-3d::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 20%;
+  border-radius: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  pointer-events: none;
+}
+
+.rod-3d:hover {
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25),
+              inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transform: translateY(-1px);
+}
+
+.rod-3d:active,
+.rod-3d.dragging {
+  cursor: grabbing;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3),
+              inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transform: scale(1.03);
+  z-index: 1000;
+}
+
+/* Regleta blanca necesita borde especial para verse en el cuaderno */
+.rod-white {
+  border-color: #000000 !important;
+}
+
+/* Regleta negra - texto blanco */
+.rod-dark .rod-label {
+  color: white;
+}
+
+/* ========== Menú Contextual ========== */
+.context-menu {
+  animation: contextMenuIn 0.15s ease-out;
+}
+
+@keyframes contextMenuIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(-4px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* ========== Caja de Texto Matemático ========== */
+.math-box {
+  position: absolute;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  min-width: 80px;
+  min-height: 40px;
+}
+
+.math-box:active {
+  cursor: grabbing;
+}
+
+.math-box .katex {
+  font-size: 1.4em;
+}
+
+.math-box-editing {
+  cursor: text;
+}
+
+.math-input {
+  font-family: 'Courier New', monospace;
+  font-size: 14px;
+  resize: both;
+  outline: none;
+  min-width: 120px;
+  min-height: 36px;
+}
+
+/* ========== Panel de Regletas (Sidebar) ========== */
+.rod-panel {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(99, 102, 241, 0.3) transparent;
+}
+
+.rod-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.rod-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.rod-panel::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.3);
+  border-radius: 3px;
+}
+
+/* ========== Glassmorphism ========== */
+.glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.glass-dark {
+  background: rgba(30, 41, 59, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* ========== Botones ========== */
+.btn-primary {
+  @apply px-4 py-2 bg-gradient-to-r from-kubika-600 to-kubika-700 text-white rounded-xl
+         font-semibold text-sm shadow-lg hover:shadow-xl
+         hover:from-kubika-500 hover:to-kubika-600
+         active:scale-95 transition-all duration-200;
+}
+
+.btn-secondary {
+  @apply px-4 py-2 bg-white/80 text-kubika-700 rounded-xl
+         font-semibold text-sm border border-kubika-200 shadow-sm
+         hover:bg-kubika-50 hover:border-kubika-300 hover:shadow-md
+         active:scale-95 transition-all duration-200;
+}
+
+.btn-danger {
+  @apply px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl
+         font-semibold text-sm shadow-lg hover:shadow-xl
+         hover:from-red-400 hover:to-red-500
+         active:scale-95 transition-all duration-200;
+}
+
+.btn-icon {
+  @apply rounded-xl bg-white/60 text-slate-600
+         hover:bg-white hover:text-kubika-600 hover:shadow-md
+         active:scale-90 transition-all duration-200;
+}
+
+/* ========== Inputs ========== */
+.input-field {
+  @apply w-full px-4 py-3 rounded-xl border border-slate-200
+         bg-white/80 text-slate-700 placeholder-slate-400
+         focus:outline-none focus:ring-2 focus:ring-kubika-400 focus:border-transparent
+         transition-all duration-200;
+}
+
+/* ========== Tooltip ========== */
+.tooltip {
+  @apply invisible opacity-0 group-hover:visible group-hover:opacity-100
+         absolute z-50 px-2 py-1 text-xs font-medium text-white
+         bg-slate-800 rounded-lg shadow-lg
+         transition-all duration-200 whitespace-nowrap;
+}
+
+/* ========== Botón con Ripple Effect ========== */
+.btn-ripple {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-ripple::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--ripple-x, 50%) var(--ripple-y, 50%), rgba(255,255,255,0.4) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.btn-ripple:active::after {
+  opacity: 1;
+  transition: opacity 0s;
+}
+
+/* ========== Shimmer en botones ========== */
+.btn-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-shimmer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.2) 50%,
+    transparent 100%
+  );
+  transform: translateX(-100%);
+  animation: shimmer 2s linear infinite;
+  pointer-events: none;
+}
+
+/* ========== Glass morphism mejorado ========== */
+.glass-modern {
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.glass-modern-dark {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* ========== Animación de brillo hover ========== */
+.hover-glow {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 20px rgba(76, 110, 245, 0.25), 0 0 40px rgba(76, 110, 245, 0.1);
+  transform: translateY(-1px);
+}
+
+/* ========== Scrollbar moderna global ========== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 3px;
+  transition: background 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5);
+}
+
+/* ========== Splash Screen ========== */
+.splash-container {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #1e3a5f 0%, #1a1a3e 50%, #2d1b69 100%);
+  overflow: hidden;
+}
+
+.splash-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 50%, rgba(76, 110, 245, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 50%, rgba(124, 58, 237, 0.15) 0%, transparent 50%);
+}
+
+.splash-logo {
+  animation: splashLogo 1.2s ease-out forwards;
+}
+
+@keyframes splashLogo {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.splash-progress-track {
+  width: 220px;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 99px;
+  overflow: hidden;
+  margin-top: 32px;
+}
+
+.splash-progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, #4c6ef5, #7c3aed);
+  border-radius: 99px;
+  animation: splashBar 2s ease-in-out forwards;
+}
+
+@keyframes splashBar {
+  0% { width: 0%; }
+  30% { width: 30%; }
+  60% { width: 65%; }
+  100% { width: 100%; }
+}
+
+.splash-dots {
+  display: flex;
+  gap: 6px;
+  margin-top: 16px;
+}
+
+.splash-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  animation: splashDot 1.4s ease-in-out infinite;
+}
+
+.splash-dot:nth-child(2) { animation-delay: 0.2s; }
+.splash-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes splashDot {
+  0%, 100% { transform: scale(1); opacity: 0.4; }
+  50% { transform: scale(1.5); opacity: 1; }
+}
+
+/* ========== Animación de regletas flotantes en login ========== */
+.floating-rod {
+  position: absolute;
+  border-radius: 8px;
+  opacity: 0.15;
+  animation: floatRod 6s ease-in-out infinite;
+}
+
+@keyframes floatRod {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-15px) rotate(2deg);
+  }
+  75% {
+    transform: translateY(10px) rotate(-1deg);
+  }
+}
+
+/* ========== Card hover elevado ========== */
+.card-elevate {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-elevate:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* ========== Transiciones suaves para elementos del canvas ========== */
+.canvas-element {
+  transition: filter 0.2s ease, opacity 0.2s ease;
+}
+
+.canvas-element:hover {
+  filter: brightness(1.05);
+}
+
+/* ========== Notificación animada ========== */
+.notification-toast {
+  animation: notificationIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes notificationIn {
+  0% {
+    transform: translateX(100%) scale(0.8);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0) scale(1);
+    opacity: 1;
+  }
+}
+
+/* ========== Animación de entrada del Login ========== */
+.login-card {
+  animation: loginFloat 0.6s ease-out;
+}
+
+@keyframes loginFloat {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.95);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ========== Drop Zone Highlight ========== */
+.drop-zone-active {
+  background-color: rgba(99, 102, 241, 0.05);
+  outline: 2px dashed rgba(99, 102, 241, 0.3);
+  outline-offset: -2px;
+}
+
+/* ========== Print/PDF styles ========== */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
