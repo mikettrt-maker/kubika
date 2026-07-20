@@ -11,9 +11,5 @@ export default defineConfig({
   build: {
     outDir: 'docs',
     sourcemap: false
-  },
-  server: {
-    port: 3000,
-    open: true
   }
 })
