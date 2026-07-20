@@ -44,12 +44,15 @@ function isOverlapping(newRod, allRods) {
 export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTexts, freeTexts, setFreeTexts, toolMode, geoPivots, geoBands, selectedPivotId, onGeoPivotClick, onGeoBandContext, onGeoCanvasClick, manualPivots, isInsertingPivot, onInsertPivot, onDeleteManualPivot, antennas, onAntennaUpdate, onAntennaDelete }) {
   // Estado del menú contextual
   const [contextMenu, setContextMenu] = useState(null);
-  // Estado del drag dentro del lienzo
   const [dragging, setDragging] = useState(null);
-  // Elemento seleccionado actualmente
   const [selectedId, setSelectedId] = useState(null);
-  // Ref interna del contenedor del lienzo
+  const selectedRef = useRef(null);
   const innerRef = useRef(null);
+
+  const updateSelection = useCallback((id) => {
+    updateSelection(id);
+    selectedRef.current = id;
+  }, []);
 
   // Combinar refs
   const setCanvasRef = useCallback((node) => {
@@ -92,7 +95,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
 
       if (!isOverlapping(newRod, rods)) {
         setRods(prev => [...prev, newRod]);
-        setSelectedId(newRod.id);
+        updateSelection(newRod.id);
       }
     } catch {
       // Ignorar datos inválidos
@@ -105,7 +108,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
     e.preventDefault();
     e.stopPropagation();
 
-    setSelectedId(rodId);
+    updateSelection(rodId);
 
     const rod = rods.find(r => r.id === rodId);
     if (!rod) return;
@@ -158,7 +161,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
     e.preventDefault();
     e.stopPropagation();
 
-    setSelectedId(mathId);
+    updateSelection(mathId);
 
     const mathBox = mathTexts.find(m => m.id === mathId);
     if (!mathBox) return;
@@ -196,7 +199,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
     e.preventDefault();
     e.stopPropagation();
 
-    setSelectedId(textId);
+    updateSelection(textId);
 
     const textBox = freeTexts.find(t => t.id === textId);
     if (!textBox) return;
@@ -235,7 +238,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
     e.preventDefault();
     e.stopPropagation();
 
-    setSelectedId(antennaId);
+    updateSelection(antennaId);
 
     const antenna = antennas.find(a => a.id === antennaId);
     if (!antenna) return;
@@ -273,7 +276,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
     const rod = rods.find(r => r.id === rodId);
     if (!rod) return;
 
-    setSelectedId(rodId);
+    updateSelection(rodId);
     setContextMenu({
       x: e.clientX,
       y: e.clientY,
@@ -300,7 +303,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
           danger: true,
           action: () => {
             setRods(prev => prev.filter(r => r.id !== rodId));
-            setSelectedId(null);
+            updateSelection(null);
           },
         },
       ],
@@ -311,7 +314,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
     e.preventDefault();
     e.stopPropagation();
 
-    setSelectedId(mathId);
+    updateSelection(mathId);
     setContextMenu({
       x: e.clientX,
       y: e.clientY,
@@ -329,7 +332,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
           danger: true,
           action: () => {
             setMathTexts(prev => prev.filter(m => m.id !== mathId));
-            setSelectedId(null);
+            updateSelection(null);
           },
         },
       ],
@@ -340,7 +343,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
     e.preventDefault();
     e.stopPropagation();
 
-    setSelectedId(textId);
+    updateSelection(textId);
     setContextMenu({
       x: e.clientX,
       y: e.clientY,
@@ -358,7 +361,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
           danger: true,
           action: () => {
             setFreeTexts(prev => prev.filter(t => t.id !== textId));
-            setSelectedId(null);
+            updateSelection(null);
           },
         },
       ],
@@ -369,7 +372,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
     e.preventDefault();
     e.stopPropagation();
 
-    setSelectedId(antennaId);
+    updateSelection(antennaId);
     setContextMenu({
       x: e.clientX,
       y: e.clientY,
@@ -381,7 +384,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
           danger: true,
           action: () => {
             if (onAntennaDelete) onAntennaDelete(antennaId);
-            setSelectedId(null);
+            updateSelection(null);
           },
         },
       ],
@@ -390,36 +393,38 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
 
   // ========== CLIC EN EL LIENZO (deseleccionar) ==========
   const handleCanvasClick = (e) => {
-    setSelectedId(null);
+    if (e.target.closest('[data-rod-id]')) return;
+    if (e.target.closest('[data-antenna-id]')) return;
+    updateSelection(null);
     if (onGeoCanvasClick) onGeoCanvasClick();
   };
 
   // ========== TECLADO ==========
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (!selectedId) return;
+      const id = selectedRef.current;
+      if (!id) return;
 
       if (e.key === 'Delete' || e.key === 'Backspace') {
         e.preventDefault();
-        setRods(prev => prev.filter(r => r.id !== selectedId));
-        setMathTexts(prev => prev.filter(m => m.id !== selectedId));
-        setFreeTexts(prev => prev.filter(t => t.id !== selectedId));
-        if (onAntennaDelete) onAntennaDelete(selectedId);
-        setSelectedId(null);
+        setRods(prev => prev.filter(r => r.id !== id));
+        setMathTexts(prev => prev.filter(m => m.id !== id));
+        setFreeTexts(prev => prev.filter(t => t.id !== id));
+        if (onAntennaDelete) onAntennaDelete(id);
+        updateSelection(null);
         return;
       }
 
       if (e.key.startsWith('Arrow')) {
         e.preventDefault();
-        const step = e.shiftKey ? GRID : GRID;
 
         setRods(prev => prev.map(r => {
-          if (r.id !== selectedId) return r;
+          if (r.id !== id) return r;
           let dx = 0, dy = 0;
-          if (e.key === 'ArrowLeft') dx = -step;
-          if (e.key === 'ArrowRight') dx = step;
-          if (e.key === 'ArrowUp') dy = -step;
-          if (e.key === 'ArrowDown') dy = step;
+          if (e.key === 'ArrowLeft') dx = -40;
+          if (e.key === 'ArrowRight') dx = 40;
+          if (e.key === 'ArrowUp') dy = -40;
+          if (e.key === 'ArrowDown') dy = 40;
           const newX = Math.max(0, r.x + dx);
           const newY = Math.max(0, r.y + dy);
           const tempRod = { ...r, x: newX, y: newY };
@@ -428,42 +433,28 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
         }));
 
         setMathTexts(prev => prev.map(m => {
-          if (m.id !== selectedId) return m;
+          if (m.id !== id) return m;
           let dx = 0, dy = 0;
-          if (e.key === 'ArrowLeft') dx = -step;
-          if (e.key === 'ArrowRight') dx = step;
-          if (e.key === 'ArrowUp') dy = -step;
-          if (e.key === 'ArrowDown') dy = step;
+          if (e.key === 'ArrowLeft') dx = -40;
+          if (e.key === 'ArrowRight') dx = 40;
+          if (e.key === 'ArrowUp') dy = -40;
+          if (e.key === 'ArrowDown') dy = 40;
           return { ...m, x: Math.max(0, m.x + dx), y: Math.max(0, m.y + dy) };
         }));
 
         setFreeTexts(prev => prev.map(t => {
-          if (t.id !== selectedId) return t;
-          let dx = 0, dy = 0;
-          if (e.key === 'ArrowLeft') dx = -step;
-          if (e.key === 'ArrowRight') dx = step;
-          if (e.key === 'ArrowUp') dy = -step;
-          if (e.key === 'ArrowDown') dy = step;
-          return { ...t, x: Math.max(0, t.x + dx), y: Math.max(0, t.y + dy) };
+          if (t.id !== id) return t;
+          if (e.key === 'ArrowLeft') return { ...t, x: Math.max(0, t.x - 40) };
+          if (e.key === 'ArrowRight') return { ...t, x: t.x + 40 };
+          if (e.key === 'ArrowUp') return { ...t, y: Math.max(0, t.y - 40) };
+          if (e.key === 'ArrowDown') return { ...t, y: t.y + 40 };
+          return t;
         }));
-
-        const antenna = antennas.find(a => a.id === selectedId);
-        if (antenna && onAntennaUpdate) {
-          let dx = 0, dy = 0;
-          if (e.key === 'ArrowLeft') dx = -step;
-          if (e.key === 'ArrowRight') dx = step;
-          if (e.key === 'ArrowUp') dy = -step;
-          if (e.key === 'ArrowDown') dy = step;
-          onAntennaUpdate(selectedId, {
-            x: Math.max(0, antenna.x + dx),
-            y: Math.max(0, antenna.y + dy),
-          });
-        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedId, onAntennaDelete, onAntennaUpdate]);
+  }, [onAntennaDelete, onAntennaUpdate]);
 
   const handleKeyDown = (e) => {
     if (!selectedId) return;
@@ -592,14 +583,15 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
 
         {/* Antenas (visibles en todos los modos) */}
         {antennas.map((antenna) => (
-          <Antenna
-            key={antenna.id}
-            antenna={antenna}
-            isSelected={selectedId === antenna.id}
-            onPointerDown={handlePointerDownOnAntenna}
-            onContextMenu={handleAntennaContextMenu}
-            onUpdate={onAntennaUpdate}
-          />
+          <div key={antenna.id} data-antenna-id={antenna.id}>
+            <Antenna
+              antenna={antenna}
+              isSelected={selectedId === antenna.id}
+              onPointerDown={handlePointerDownOnAntenna}
+              onContextMenu={handleAntennaContextMenu}
+              onUpdate={onAntennaUpdate}
+            />
+          </div>
         ))}
 
         {/* Mensaje de bienvenida según el modo activo */}
