@@ -31,8 +31,6 @@ export default function FreeTextBox({
     if (isEditing && inputRef.current) {
       inputRef.current.focus();
       inputRef.current.selectionStart = inputRef.current.value.length;
-      inputRef.current.style.height = 'auto';
-      inputRef.current.style.height = inputRef.current.scrollHeight + 'px';
     }
   }, [isEditing]);
 
@@ -47,7 +45,7 @@ export default function FreeTextBox({
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    if (e.key === 'Enter') {
       e.preventDefault();
       setIsEditing(false);
       if (onUpdate) onUpdate(id, { text, color, bold });
@@ -86,25 +84,22 @@ export default function FreeTextBox({
     >
       {isEditing ? (
         <div className="flex flex-col gap-2">
-          <textarea
+          <input
             ref={inputRef}
+            type="text"
             value={text}
             onChange={(e) => setText(e.target.value)}
             onBlur={handleBlur}
             onKeyDown={handleKeyDown}
             placeholder="Escribe una nota..."
-            className="w-full bg-transparent outline-none resize-none font-handwriting text-3xl leading-tight"
-            style={{ color, fontWeight: bold ? 700 : 500, overflow: 'hidden', minWidth: '150px' }}
-            rows={1}
-            onInput={(e) => {
-              e.target.style.height = 'auto';
-              e.target.style.height = e.target.scrollHeight + 'px';
-            }}
+            className="w-full bg-transparent outline-none font-handwriting text-3xl leading-tight"
+            style={{ color, fontWeight: bold ? 700 : 500, minWidth: '150px' }}
           />
           <div className="flex items-center gap-1.5">
             {TEXT_COLORS.map((c) => (
               <button
                 key={c.value}
+                onMouseDown={(e) => e.preventDefault()}
                 onClick={() => handleColorChange(c.value)}
                 className={`w-5 h-5 rounded-full border-2 transition-all ${color === c.value ? 'border-slate-800 scale-125' : 'border-transparent'}`}
                 style={{ backgroundColor: c.value }}
@@ -112,6 +107,7 @@ export default function FreeTextBox({
               />
             ))}
             <button
+              onMouseDown={(e) => e.preventDefault()}
               onClick={toggleBold}
               className={`ml-1 px-2 py-0.5 text-xs rounded font-bold border transition-all ${bold ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-100'}`}
               title="Negrita"
@@ -122,7 +118,7 @@ export default function FreeTextBox({
         </div>
       ) : (
         <div
-          className="font-handwriting text-3xl whitespace-pre-wrap leading-tight pointer-events-none select-none"
+          className="font-handwriting text-3xl whitespace-nowrap leading-tight pointer-events-none select-none"
           style={{ color, fontWeight: bold ? 700 : 500 }}
         >
           {text.trim() ? text : <span className="text-slate-400 italic text-2xl">Doble clic para escribir...</span>}
