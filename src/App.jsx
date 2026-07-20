@@ -336,27 +336,26 @@ export default function App() {
     <div className="h-screen flex flex-col bg-slate-50 overflow-hidden">
       {/* ===== BARRA SUPERIOR ===== */}
       <header className="no-print animate-header-slide flex items-center justify-between px-2 py-1.5 bg-white/70 backdrop-blur-xl border-b border-slate-200/50 shadow-sm z-50">
-        {/* Logo (izquierda) */}
-        <div className="flex items-center flex-shrink-0 w-[160px]">
-          <img 
-            src="logo.png" 
-            alt="Logo" 
-            style={{ height: '95px', width: 'auto', maxWidth: '220px' }}
-            className="object-contain"
-            onError={(e) => {
-              e.target.style.display = 'none';
-              e.target.nextSibling.style.display = 'flex';
-            }}
-          />
-          <div className="hidden w-8 h-8 rounded-xl bg-gradient-to-br from-kubika-500 to-purple-600 items-center justify-center shadow-lg">
-            <span className="text-base font-display font-extrabold text-white">K</span>
+        {/* Grupo izquierdo: Logo + Título */}
+        <div className="flex items-center gap-1 flex-shrink-0">
+          <div className="flex items-center flex-shrink-0" style={{ width: '140px' }}>
+            <img 
+              src="logo.png" 
+              alt="Logo" 
+              style={{ height: '95px', width: 'auto', maxWidth: '220px' }}
+              className="object-contain"
+              onError={(e) => {
+                e.target.style.display = 'none';
+                e.target.nextSibling.style.display = 'flex';
+              }}
+            />
+            <div className="hidden w-8 h-8 rounded-xl bg-gradient-to-br from-kubika-500 to-purple-600 items-center justify-center shadow-lg">
+              <span className="text-base font-display font-extrabold text-white">K</span>
+            </div>
           </div>
-        </div>
 
-        {/* Herramientas (centro) */}
-        <div className="flex items-center justify-center gap-0.5 flex-1 min-w-0">
           {/* Título tipo Canva */}
-          <div className="mr-1 flex items-center shrink min-w-0 max-w-[120px]">
+          <div className="flex items-center" style={{ width: '200px' }}>
             {isEditingName ? (
               <input
                 type="text"
@@ -369,14 +368,14 @@ export default function App() {
                     handleSave();
                   }
                 }}
-                className="px-2 py-1 text-xs font-bold text-slate-800 bg-white border-2 border-kubika-400 rounded-lg outline-none w-24 shadow-sm"
+                className="px-2 py-1 text-xs font-bold text-slate-800 bg-white border-2 border-kubika-400 rounded-lg outline-none w-full shadow-sm"
                 autoFocus
                 placeholder="Nombre del diseño"
               />
             ) : (
               <div 
                 onClick={() => setIsEditingName(true)}
-                className="px-1.5 py-1 text-xs font-bold text-slate-800 hover:bg-slate-100 rounded-lg cursor-text transition-colors border border-transparent hover:border-slate-300 flex items-center gap-1 group truncate max-w-[110px]"
+                className="px-1.5 py-1 text-xs font-bold text-slate-800 hover:bg-slate-100 rounded-lg cursor-text transition-colors border border-transparent hover:border-slate-300 flex items-center gap-1 group truncate w-full"
                 title="Clic para renombrar"
               >
                 <span className="truncate">{workspaceName || 'Diseño sin título'}</span>
@@ -386,7 +385,10 @@ export default function App() {
               </div>
             )}
           </div>
+        </div>
 
+        {/* Herramientas (centro) */}
+        <div className="flex items-center justify-center gap-0.5 flex-1 min-w-0">
           {/* Agregar texto libre */}
           <button
             onClick={addFreeText}
