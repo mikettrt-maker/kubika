@@ -26,7 +26,7 @@ export default function MathTextBox({
       try {
         const html = katex.renderToString(latex, {
           throwOnError: false,
-          displayMode: true,
+          displayMode: false,
           output: 'html',
         });
         setRenderedHtml(html);
@@ -156,7 +156,7 @@ export default function MathTextBox({
         <div ref={renderRef}>
           {latex.trim() ? (
             <div
-              className="katex-display-container"
+              className="katex-display-container text-lg"
               dangerouslySetInnerHTML={{ __html: renderedHtml }}
             />
           ) : (
