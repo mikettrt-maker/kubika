@@ -14,6 +14,8 @@ export function useWorkspace(userId) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const MAX_WORKSPACES = 10;
+
   const saveWorkspace = useCallback(async (name, canvasState) => {
     setError(null);
     setLoading(true);
@@ -22,6 +24,17 @@ export function useWorkspace(userId) {
 
     if (isSupabaseConfigured && email) {
       try {
+        const { count, error: countError } = await supabase
+          .from('workspaces')
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', email);
+
+        if (!countError && count >= MAX_WORKSPACES) {
+          setLoading(false);
+          setError(`Límite de ${MAX_WORKSPACES} trabajos alcanzado. Eliminá uno antes de guardar.`);
+          return { data: null, error: 'Límite alcanzado' };
+        }
+
         const { data, error: dbError } = await supabase
           .from('workspaces')
           .insert({
