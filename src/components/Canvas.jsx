@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import DraggableRod from './DraggableRod';
 import MathTextBox from './MathTextBox';
 import FreeTextBox from './FreeTextBox';
@@ -32,7 +32,6 @@ function isOverlapping(newRod, allRods) {
   for (const rod of allRods) {
     if (rod.id === newRod.id) continue;
     const box2 = getBoundingBox(rod);
-    // Margen mínimo de tolerancia para bordes compartidos:
     if (checkCollision(box1, box2)) return true;
   }
   return false;
@@ -100,9 +99,8 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
     }
   };
 
-  // ========== MOVER ELEMENTOS (pointer events) ==========
+  // ========== MOVER ELEMENTOS ==========
   const handlePointerDownOnRod = (e, rodId) => {
-    // Solo botón izquierdo
     if (e.button !== 0) return;
     e.preventDefault();
     e.stopPropagation();
@@ -112,20 +110,14 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
     const rod = rods.find(r => r.id === rodId);
     if (!rod) return;
 
-    const rect = innerRef.current.getBoundingClientRect();
     const startX = e.clientX;
     const startY = e.clientY;
     const origX = rod.x;
     const origY = rod.y;
 
-    const target = e.currentTarget;
-    target.setPointerCapture(e.pointerId);
-    target.style.cursor = 'grabbing';
-
     const handleMove = (moveEvent) => {
       const dx = moveEvent.clientX - startX;
       const dy = moveEvent.clientY - startY;
-      
       const snappedX = Math.round(Math.max(0, origX + dx) / GRID) * GRID;
       const snappedY = Math.round(Math.max(0, origY + dy) / GRID) * GRID;
 
@@ -139,10 +131,6 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
     };
 
     const handleUp = () => {
-      target.releasePointerCapture(e.pointerId);
-      target.style.cursor = 'grab';
-      
-      // Revertir si hay colisión, o limpiar flag de isInvalid
       setRods(prev => prev.map(r => {
         if (r.id === rodId) {
           if (r.isInvalid) {
@@ -153,12 +141,12 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
         return r;
       }));
 
-      target.removeEventListener('pointermove', handleMove);
-      target.removeEventListener('pointerup', handleUp);
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mouseup', handleUp);
     };
 
-    target.addEventListener('pointermove', handleMove);
-    target.addEventListener('pointerup', handleUp);
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleUp);
   };
 
   const handlePointerDownOnMath = (e, mathId) => {
@@ -403,16 +391,24 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
   };
 
   // ========== TECLADO ==========
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (!selectedId) return;
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        e.preventDefault();
+        setRods(prev => prev.filter(r => r.id !== selectedId));
+        setMathTexts(prev => prev.filter(m => m.id !== selectedId));
+        setFreeTexts(prev => prev.filter(t => t.id !== selectedId));
+        if (onAntennaDelete) onAntennaDelete(selectedId);
+        setSelectedId(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedId, onAntennaDelete]);
+
   const handleKeyDown = (e) => {
     if (!selectedId) return;
-
-    if (e.key === 'Delete' || e.key === 'Backspace') {
-      setRods(prev => prev.filter(r => r.id !== selectedId));
-      setMathTexts(prev => prev.filter(m => m.id !== selectedId));
-      setFreeTexts(prev => prev.filter(t => t.id !== selectedId));
-      if (onAntennaDelete) onAntennaDelete(selectedId);
-      setSelectedId(null);
-    }
 
     if (e.key === 'r' || e.key === 'R') {
       setRods(prev => {
@@ -457,10 +453,15 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
             {rods.map((rod) => (
               <div
                 key={rod.id}
+                data-rod-id={rod.id}
+                onPointerDown={(e) => handlePointerDownOnRod(e, rod.id)}
+                onContextMenu={(e) => handleRodContextMenu(e, rod.id)}
                 style={{
                   position: 'absolute',
                   left: `${rod.x}px`,
                   top: `${rod.y}px`,
+                  touchAction: 'none',
+                  cursor: 'grab',
                 }}
               >
                 <DraggableRod
@@ -468,7 +469,6 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
                   showValue={rod.showValue}
                   rotation={rod.rotation}
                   isSelected={selectedId === rod.id}
-                  onPointerDown={(e) => handlePointerDownOnRod(e, rod.id)}
                   onContextMenu={(e) => handleRodContextMenu(e, rod.id)}
                 />
               </div>
