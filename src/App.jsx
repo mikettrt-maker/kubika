@@ -559,7 +559,6 @@ export default function App() {
           onInsertPivot={handleInsertPivot}
           onDeleteManualPivot={handleDeleteManualPivot}
         />
-        />
       </div>
 
       {/* ===== MODAL CARGAR (Solo para cargar ahora) ===== */}
