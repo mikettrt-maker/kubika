@@ -152,16 +152,6 @@ export default function AuthForm({ onLogin, onLoginStart, error: externalError, 
               </div>
             )}
 
-            {/* Aviso modo local */}
-            {!isConfigured && (
-              <div className="flex items-center gap-2 p-3 bg-amber-50 text-amber-700 rounded-xl text-xs font-medium">
-                <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Modo local – los datos se guardan solo en este navegador
-              </div>
-            )}
-
             {/* Botón de login */}
             <button
               type="submit"
