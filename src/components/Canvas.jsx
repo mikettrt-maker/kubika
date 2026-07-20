@@ -102,8 +102,8 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
     }
   };
 
-  // ========== MOVER ELEMENTOS (puntero) ==========
-  const handlePointerDownOnRod = (e, rodId) => {
+  // ========== MOVER ELEMENTOS ==========
+  const handleMouseDownOnRod = (e, rodId) => {
     if (e.button !== 0) return;
     e.preventDefault();
     e.stopPropagation();
@@ -118,42 +118,29 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
     const origX = rod.x;
     const origY = rod.y;
 
-    const target = e.currentTarget;
-    target.setPointerCapture(e.pointerId);
-
     const handleMove = (moveEvent) => {
-      const dx = moveEvent.clientX - startX;
-      const dy = moveEvent.clientY - startY;
-      const snappedX = Math.round(Math.max(0, origX + dx) / GRID) * GRID;
-      const snappedY = Math.round(Math.max(0, origY + dy) / GRID) * GRID;
+      const snappedX = Math.round(Math.max(0, origX + moveEvent.clientX - startX) / GRID) * GRID;
+      const snappedY = Math.round(Math.max(0, origY + moveEvent.clientY - startY) / GRID) * GRID;
 
       setRods(prev => prev.map(r => {
-        if (r.id === rodId) {
-          const tempRod = { ...r, x: snappedX, y: snappedY };
-          return { ...tempRod, isInvalid: isOverlapping(tempRod, prev) };
-        }
-        return r;
+        if (r.id !== rodId) return r;
+        const tempRod = { ...r, x: snappedX, y: snappedY };
+        return { ...tempRod, isInvalid: isOverlapping(tempRod, prev) };
       }));
     };
 
     const handleUp = () => {
-      target.releasePointerCapture(e.pointerId);
       setRods(prev => prev.map(r => {
-        if (r.id === rodId) {
-          if (r.isInvalid) {
-            return { ...r, x: origX, y: origY, isInvalid: false };
-          }
-          return { ...r, isInvalid: false };
-        }
-        return r;
+        if (r.id !== rodId) return r;
+        if (r.isInvalid) return { ...r, x: origX, y: origY, isInvalid: false };
+        return { ...r, isInvalid: false };
       }));
-
-      target.removeEventListener('pointermove', handleMove);
-      target.removeEventListener('pointerup', handleUp);
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mouseup', handleUp);
     };
 
-    target.addEventListener('pointermove', handleMove);
-    target.addEventListener('pointerup', handleUp);
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleUp);
   };
 
   const handlePointerDownOnMath = (e, mathId) => {
@@ -232,8 +219,8 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
     target.addEventListener('pointerup', handleUp);
   };
 
-  // ========== MOVER ANTENA (pointer events) ==========
-  const handlePointerDownOnAntenna = (e, antennaId) => {
+  // ========== MOVER ANTENA ==========
+  const handleMouseDownOnAntenna = (e, antennaId) => {
     if (e.button !== 0) return;
     e.preventDefault();
     e.stopPropagation();
@@ -241,31 +228,27 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
     updateSelection(antennaId);
 
     const antenna = antennas.find(a => a.id === antennaId);
-    if (!antenna) return;
+    if (!antenna || !onAntennaUpdate) return;
 
-    const rect = innerRef.current.getBoundingClientRect();
     const startX = e.clientX;
     const startY = e.clientY;
     const origX = antenna.x;
     const origY = antenna.y;
 
-    const target = e.currentTarget;
-    target.setPointerCapture(e.pointerId);
-
     const handleMove = (moveEvent) => {
-      const dx = moveEvent.clientX - startX;
-      const dy = moveEvent.clientY - startY;
-      onAntennaUpdate(antennaId, { x: Math.max(0, origX + dx), y: Math.max(0, origY + dy) });
+      onAntennaUpdate(antennaId, {
+        x: Math.max(0, origX + moveEvent.clientX - startX),
+        y: Math.max(0, origY + moveEvent.clientY - startY),
+      });
     };
 
     const handleUp = () => {
-      target.releasePointerCapture(e.pointerId);
-      target.removeEventListener('pointermove', handleMove);
-      target.removeEventListener('pointerup', handleUp);
+      window.removeEventListener('mousemove', handleMove);
+      window.removeEventListener('mouseup', handleUp);
     };
 
-    target.addEventListener('pointermove', handleMove);
-    target.addEventListener('pointerup', handleUp);
+    window.addEventListener('mousemove', handleMove);
+    window.addEventListener('mouseup', handleUp);
   };
 
   // ========== MENÚ CONTEXTUAL ==========
@@ -503,13 +486,12 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
               <div
                 key={rod.id}
                 data-rod-id={rod.id}
-                onPointerDown={(e) => handlePointerDownOnRod(e, rod.id)}
+                onMouseDown={(e) => handleMouseDownOnRod(e, rod.id)}
                 onContextMenu={(e) => handleRodContextMenu(e, rod.id)}
                 style={{
                   position: 'absolute',
                   left: `${rod.x}px`,
                   top: `${rod.y}px`,
-                  touchAction: 'none',
                   cursor: 'grab',
                 }}
               >
@@ -587,7 +569,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
             <Antenna
               antenna={antenna}
               isSelected={selectedId === antenna.id}
-              onPointerDown={handlePointerDownOnAntenna}
+              onMouseDown={handleMouseDownOnAntenna}
               onContextMenu={handleAntennaContextMenu}
               onUpdate={onAntennaUpdate}
             />

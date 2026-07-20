@@ -7,7 +7,7 @@ const ROWS = 10;
 export default function Antenna({
   antenna,
   isSelected,
-  onPointerDown,
+  onMouseDown,
   onContextMenu,
   onUpdate,
 }) {
@@ -29,10 +29,10 @@ export default function Antenna({
 
   const dragHandleRef = useRef(null);
 
-  const handlePointerDown = useCallback((e) => {
+  const handleMouseDown = useCallback((e) => {
     if (e.button !== 0) return;
-    if (onPointerDown) onPointerDown(e, id);
-  }, [onPointerDown, id]);
+    if (onMouseDown) onMouseDown(e, id);
+  }, [onMouseDown, id]);
 
   const handleContext = useCallback((e) => {
     e.preventDefault();
@@ -43,7 +43,7 @@ export default function Antenna({
   return (
     <div
       ref={dragHandleRef}
-      onPointerDown={handlePointerDown}
+      onMouseDown={handleMouseDown}
       onContextMenu={handleContext}
       style={{
         position: 'absolute',
