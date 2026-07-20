@@ -99,7 +99,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
     }
   };
 
-  // ========== MOVER ELEMENTOS ==========
+  // ========== MOVER ELEMENTOS (puntero) ==========
   const handlePointerDownOnRod = (e, rodId) => {
     if (e.button !== 0) return;
     e.preventDefault();
@@ -114,6 +114,9 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
     const startY = e.clientY;
     const origX = rod.x;
     const origY = rod.y;
+
+    const target = e.currentTarget;
+    target.setPointerCapture(e.pointerId);
 
     const handleMove = (moveEvent) => {
       const dx = moveEvent.clientX - startX;
@@ -131,6 +134,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
     };
 
     const handleUp = () => {
+      target.releasePointerCapture(e.pointerId);
       setRods(prev => prev.map(r => {
         if (r.id === rodId) {
           if (r.isInvalid) {
@@ -141,12 +145,12 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
         return r;
       }));
 
-      window.removeEventListener('mousemove', handleMove);
-      window.removeEventListener('mouseup', handleUp);
+      target.removeEventListener('pointermove', handleMove);
+      target.removeEventListener('pointerup', handleUp);
     };
 
-    window.addEventListener('mousemove', handleMove);
-    window.addEventListener('mouseup', handleUp);
+    target.addEventListener('pointermove', handleMove);
+    target.addEventListener('pointerup', handleUp);
   };
 
   const handlePointerDownOnMath = (e, mathId) => {
@@ -394,6 +398,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (!selectedId) return;
+
       if (e.key === 'Delete' || e.key === 'Backspace') {
         e.preventDefault();
         setRods(prev => prev.filter(r => r.id !== selectedId));
@@ -401,11 +406,64 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
         setFreeTexts(prev => prev.filter(t => t.id !== selectedId));
         if (onAntennaDelete) onAntennaDelete(selectedId);
         setSelectedId(null);
+        return;
+      }
+
+      if (e.key.startsWith('Arrow')) {
+        e.preventDefault();
+        const step = e.shiftKey ? GRID : GRID;
+
+        setRods(prev => prev.map(r => {
+          if (r.id !== selectedId) return r;
+          let dx = 0, dy = 0;
+          if (e.key === 'ArrowLeft') dx = -step;
+          if (e.key === 'ArrowRight') dx = step;
+          if (e.key === 'ArrowUp') dy = -step;
+          if (e.key === 'ArrowDown') dy = step;
+          const newX = Math.max(0, r.x + dx);
+          const newY = Math.max(0, r.y + dy);
+          const tempRod = { ...r, x: newX, y: newY };
+          if (isOverlapping(tempRod, prev)) return r;
+          return { ...r, x: newX, y: newY };
+        }));
+
+        setMathTexts(prev => prev.map(m => {
+          if (m.id !== selectedId) return m;
+          let dx = 0, dy = 0;
+          if (e.key === 'ArrowLeft') dx = -step;
+          if (e.key === 'ArrowRight') dx = step;
+          if (e.key === 'ArrowUp') dy = -step;
+          if (e.key === 'ArrowDown') dy = step;
+          return { ...m, x: Math.max(0, m.x + dx), y: Math.max(0, m.y + dy) };
+        }));
+
+        setFreeTexts(prev => prev.map(t => {
+          if (t.id !== selectedId) return t;
+          let dx = 0, dy = 0;
+          if (e.key === 'ArrowLeft') dx = -step;
+          if (e.key === 'ArrowRight') dx = step;
+          if (e.key === 'ArrowUp') dy = -step;
+          if (e.key === 'ArrowDown') dy = step;
+          return { ...t, x: Math.max(0, t.x + dx), y: Math.max(0, t.y + dy) };
+        }));
+
+        const antenna = antennas.find(a => a.id === selectedId);
+        if (antenna && onAntennaUpdate) {
+          let dx = 0, dy = 0;
+          if (e.key === 'ArrowLeft') dx = -step;
+          if (e.key === 'ArrowRight') dx = step;
+          if (e.key === 'ArrowUp') dy = -step;
+          if (e.key === 'ArrowDown') dy = step;
+          onAntennaUpdate(selectedId, {
+            x: Math.max(0, antenna.x + dx),
+            y: Math.max(0, antenna.y + dy),
+          });
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedId, onAntennaDelete]);
+  }, [selectedId, onAntennaDelete, onAntennaUpdate]);
 
   const handleKeyDown = (e) => {
     if (!selectedId) return;
