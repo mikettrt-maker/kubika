@@ -505,8 +505,8 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
     setMathTexts(prev => prev.map(m => m.id === id ? { ...m, latex } : m));
   };
 
-  const handleFreeTextUpdate = (id, text) => {
-    setFreeTexts(prev => prev.map(t => t.id === id ? { ...t, text } : t));
+  const handleFreeTextUpdate = (id, data) => {
+    setFreeTexts(prev => prev.map(t => t.id === id ? { ...t, ...data } : t));
   };
 
   return (
@@ -584,6 +584,8 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
                 <FreeTextBox
                   id={ft.id}
                   initialText={ft.text}
+                  initialColor={ft.color || '#1e293b'}
+                  initialBold={ft.bold || false}
                   isSelected={selectedId === ft.id}
                   onPointerDown={(e) => handlePointerDownOnFreeText(e, ft.id)}
                   onContextMenu={(e) => handleFreeTextContextMenu(e, ft.id)}

@@ -163,6 +163,8 @@ export default function App() {
         x: t.x,
         y: t.y,
         text: t.text,
+        color: t.color,
+        bold: t.bold,
       })),
       antennas: antennas.map(a => ({
         id: a.id,
@@ -242,6 +244,8 @@ export default function App() {
       x: 100 + Math.random() * 200,
       y: 200 + Math.random() * 200,
       text: '',
+      color: '#1e293b',
+      bold: false,
     };
     setFreeTexts(prev => [...prev, newText]);
   };
@@ -336,7 +340,7 @@ export default function App() {
     <div className="h-screen flex flex-col bg-slate-50 overflow-hidden">
       {/* ===== BARRA SUPERIOR ===== */}
       <header className="no-print animate-header-slide flex items-center justify-between px-2 py-1.5 bg-white/70 backdrop-blur-xl border-b border-slate-200/50 shadow-sm z-50">
-        {/* Grupo izquierdo: Logo + Título */}
+        {/* Grupo izquierdo: Logo + Título + Usuario */}
         <div className="flex items-center gap-1 flex-shrink-0">
           <div className="flex items-center flex-shrink-0" style={{ width: '140px' }}>
             <img 
@@ -384,6 +388,23 @@ export default function App() {
                 </svg>
               </div>
             )}
+          </div>
+
+          {/* Usuario */}
+          <div className="flex items-center gap-1 ml-1 border-l border-slate-200 pl-2">
+            <div className="max-w-[130px] truncate">
+              <p className="text-sm font-semibold text-slate-700 truncate" title={displayName}>{displayName}</p>
+              <p className="text-[11px] text-slate-400">Alumno</p>
+            </div>
+            <button
+              onClick={signOut}
+              className="btn-ripple flex items-center justify-center w-10 h-10 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all active:scale-90"
+              title="Cerrar sesión"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+            </button>
           </div>
         </div>
 
@@ -499,22 +520,6 @@ export default function App() {
           </button>
         </div>
 
-        {/* Usuario (derecha) */}
-        <div className="flex items-center gap-1.5 flex-shrink-0 w-[160px] justify-end">
-          <div className="text-right max-w-[120px] truncate">
-            <p className="text-sm font-semibold text-slate-700 truncate" title={displayName}>{displayName}</p>
-            <p className="text-[11px] text-slate-400">Alumno</p>
-          </div>
-          <button
-            onClick={signOut}
-            className="btn-ripple flex items-center justify-center w-8 h-8 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all active:scale-90"
-            title="Cerrar sesión"
-          >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-          </button>
-        </div>
       </header>
 
       {/* ===== CONTENIDO PRINCIPAL ===== */}

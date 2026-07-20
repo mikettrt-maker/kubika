@@ -1,18 +1,29 @@
 import { useState, useRef, useEffect } from 'react';
 
-/**
- * Cuadro de texto libre con fuente manuscrita (Caveat).
- * Doble clic para editar, fondo transparente.
- */
+const TEXT_COLORS = [
+  { label: 'Negro', value: '#1e293b' },
+  { label: 'Rojo', value: '#dc2626' },
+  { label: 'Azul', value: '#2563eb' },
+  { label: 'Verde', value: '#16a34a' },
+  { label: 'Naranja', value: '#ea580c' },
+  { label: 'Morado', value: '#9333ea' },
+  { label: 'Rosa', value: '#db2777' },
+  { label: 'Gris', value: '#64748b' },
+];
+
 export default function FreeTextBox({
   id,
   initialText = '',
+  initialColor = '#1e293b',
+  initialBold = false,
   onPointerDown,
   onContextMenu,
   onUpdate,
   isSelected,
 }) {
   const [text, setText] = useState(initialText);
+  const [color, setColor] = useState(initialColor);
+  const [bold, setBold] = useState(initialBold);
   const [isEditing, setIsEditing] = useState(!initialText);
   const inputRef = useRef(null);
 
@@ -20,7 +31,6 @@ export default function FreeTextBox({
     if (isEditing && inputRef.current) {
       inputRef.current.focus();
       inputRef.current.selectionStart = inputRef.current.value.length;
-      // Auto resize height
       inputRef.current.style.height = 'auto';
       inputRef.current.style.height = inputRef.current.scrollHeight + 'px';
     }
@@ -33,14 +43,14 @@ export default function FreeTextBox({
 
   const handleBlur = () => {
     setIsEditing(false);
-    if (onUpdate) onUpdate(id, text);
+    if (onUpdate) onUpdate(id, { text, color, bold });
   };
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       setIsEditing(false);
-      if (onUpdate) onUpdate(id, text);
+      if (onUpdate) onUpdate(id, { text, color, bold });
     }
     if (e.key === 'Escape') {
       setIsEditing(false);
@@ -48,9 +58,20 @@ export default function FreeTextBox({
     e.stopPropagation();
   };
 
+  const handleColorChange = (c) => {
+    setColor(c);
+    if (onUpdate) onUpdate(id, { text, color: c, bold });
+  };
+
+  const toggleBold = () => {
+    const newBold = !bold;
+    setBold(newBold);
+    if (onUpdate) onUpdate(id, { text, color, bold: newBold });
+  };
+
   return (
     <div
-      className={`absolute ${isEditing ? 'cursor-text' : 'cursor-grab'} 
+      className={`absolute ${isEditing ? 'cursor-text' : 'cursor-grab'}
                  ${isSelected ? 'ring-2 ring-kubika-400 ring-offset-2' : ''}
                  transition-all duration-200
                  ${isEditing
@@ -64,23 +85,46 @@ export default function FreeTextBox({
       onClick={(e) => e.stopPropagation()}
     >
       {isEditing ? (
-        <textarea
-          ref={inputRef}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onBlur={handleBlur}
-          onKeyDown={handleKeyDown}
-          placeholder="Escribe una nota..."
-          className="w-full bg-transparent outline-none resize-none font-handwriting text-3xl text-slate-800 leading-tight"
-          rows={1}
-          style={{ overflow: 'hidden', minWidth: '150px' }}
-          onInput={(e) => {
-            e.target.style.height = 'auto';
-            e.target.style.height = e.target.scrollHeight + 'px';
-          }}
-        />
+        <div className="flex flex-col gap-2">
+          <textarea
+            ref={inputRef}
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            placeholder="Escribe una nota..."
+            className="w-full bg-transparent outline-none resize-none font-handwriting text-3xl leading-tight"
+            style={{ color, fontWeight: bold ? 700 : 500, overflow: 'hidden', minWidth: '150px' }}
+            rows={1}
+            onInput={(e) => {
+              e.target.style.height = 'auto';
+              e.target.style.height = e.target.scrollHeight + 'px';
+            }}
+          />
+          <div className="flex items-center gap-1.5">
+            {TEXT_COLORS.map((c) => (
+              <button
+                key={c.value}
+                onClick={() => handleColorChange(c.value)}
+                className={`w-5 h-5 rounded-full border-2 transition-all ${color === c.value ? 'border-slate-800 scale-125' : 'border-transparent'}`}
+                style={{ backgroundColor: c.value }}
+                title={c.label}
+              />
+            ))}
+            <button
+              onClick={toggleBold}
+              className={`ml-1 px-2 py-0.5 text-xs rounded font-bold border transition-all ${bold ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-100'}`}
+              title="Negrita"
+            >
+              B
+            </button>
+          </div>
+        </div>
       ) : (
-        <div className="font-handwriting text-3xl text-slate-800 whitespace-pre-wrap leading-tight pointer-events-none select-none">
+        <div
+          className="font-handwriting text-3xl whitespace-pre-wrap leading-tight pointer-events-none select-none"
+          style={{ color, fontWeight: bold ? 700 : 500 }}
+        >
           {text.trim() ? text : <span className="text-slate-400 italic text-2xl">Doble clic para escribir...</span>}
         </div>
       )}
