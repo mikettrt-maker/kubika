@@ -14,7 +14,7 @@ export function useWorkspace(userId) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const MAX_WORKSPACES = 10;
+  const MAX_WORKSPACES = 50;
 
   const saveWorkspace = useCallback(async (name, canvasState) => {
     setError(null);
