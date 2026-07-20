@@ -368,14 +368,14 @@ export default function App() {
                     handleSave();
                   }
                 }}
-                className="px-2 py-1 text-xs font-bold text-slate-800 bg-white border-2 border-kubika-400 rounded-lg outline-none w-full shadow-sm"
+                className="px-2 py-1 text-sm font-bold text-slate-800 bg-white border-2 border-kubika-400 rounded-lg outline-none w-full shadow-sm"
                 autoFocus
                 placeholder="Nombre del diseño"
               />
             ) : (
               <div 
                 onClick={() => setIsEditingName(true)}
-                className="px-1.5 py-1 text-xs font-bold text-slate-800 hover:bg-slate-100 rounded-lg cursor-text transition-colors border border-transparent hover:border-slate-300 flex items-center gap-1 group truncate w-full"
+                className="px-1.5 py-1 text-sm font-bold text-slate-800 hover:bg-slate-100 rounded-lg cursor-text transition-colors border border-transparent hover:border-slate-300 flex items-center gap-1 group truncate w-full"
                 title="Clic para renombrar"
               >
                 <span className="truncate">{workspaceName || 'Diseño sin título'}</span>
@@ -502,8 +502,8 @@ export default function App() {
         {/* Usuario (derecha) */}
         <div className="flex items-center gap-1.5 flex-shrink-0 w-[160px] justify-end">
           <div className="text-right max-w-[120px] truncate">
-            <p className="text-xs font-semibold text-slate-700 truncate" title={displayName}>{displayName}</p>
-            <p className="text-[10px] text-slate-400">Alumno</p>
+            <p className="text-sm font-semibold text-slate-700 truncate" title={displayName}>{displayName}</p>
+            <p className="text-[11px] text-slate-400">Alumno</p>
           </div>
           <button
             onClick={signOut}

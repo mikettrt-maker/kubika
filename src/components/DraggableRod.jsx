@@ -33,6 +33,8 @@ export default function DraggableRod({
             : '0 2px 6px rgba(0,0,0,0.2)',
         zIndex: isSelected || rod.isInvalid ? 100 : 1,
         cursor: rod.isInvalid ? 'not-allowed' : 'grab',
+        transition: 'box-shadow 0.15s ease, transform 0.1s ease',
+        userSelect: 'none',
       }}
       onPointerDown={onPointerDown}
       onContextMenu={onContextMenu}
