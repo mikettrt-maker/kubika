@@ -53,46 +53,23 @@ export function useAuth() {
     setError(null);
     setLoading(true);
 
-    if (!isSupabaseConfigured) {
-      const users = await loadUsers();
-      const user = users.find(u => u.email === email && u.password === password);
-      if (!user) {
-        setError('Usuario o contraseña incorrectos');
-        setLoading(false);
-        return { user: null, error: 'Usuario o contraseña incorrectos' };
-      }
-      const localUser = {
-        id: 'local-' + email,
-        email: email,
-        user_metadata: { display_name: user.username },
-      };
-      localStorage.setItem('kubika_local_user', JSON.stringify(localUser));
-      setUser(localUser);
+    const users = await loadUsers();
+    const matchedUser = users.find(u => u.email === email && u.password === password);
+    if (!matchedUser) {
+      setError('Usuario o contraseña incorrectos');
       setLoading(false);
-      return { user: localUser, error: null };
+      return { user: null, error: 'Usuario o contraseña incorrectos' };
     }
 
-    try {
-      const { data, error: authError } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (authError) {
-        setError(authError.message);
-        setLoading(false);
-        return { user: null, error: authError.message };
-      }
-
-      setUser(data.user);
-      setLoading(false);
-      return { user: data.user, error: null };
-    } catch (err) {
-      const msg = err.message || 'Error al iniciar sesión';
-      setError(msg);
-      setLoading(false);
-      return { user: null, error: msg };
-    }
+    const localUser = {
+      id: 'local-' + email,
+      email: email,
+      user_metadata: { display_name: matchedUser.username },
+    };
+    localStorage.setItem('kubika_local_user', JSON.stringify(localUser));
+    setUser(localUser);
+    setLoading(false);
+    return { user: localUser, error: null };
   }, []);
 
   /**
@@ -100,14 +77,7 @@ export function useAuth() {
    */
   const signOut = useCallback(async () => {
     setError(null);
-
-    if (!isSupabaseConfigured) {
-      localStorage.removeItem('kubika_local_user');
-      setUser(null);
-      return;
-    }
-
-    await supabase.auth.signOut();
+    localStorage.removeItem('kubika_local_user');
     setUser(null);
   }, []);
 
