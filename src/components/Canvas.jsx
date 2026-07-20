@@ -50,7 +50,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
   const innerRef = useRef(null);
 
   const updateSelection = useCallback((id) => {
-    updateSelection(id);
+    setSelectedId(id);
     selectedRef.current = id;
   }, []);
 
@@ -103,44 +103,78 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
   };
 
   // ========== MOVER ELEMENTOS ==========
-  const handleMouseDownOnRod = (e, rodId) => {
+  const handleCanvasMouseDown = (e) => {
     if (e.button !== 0) return;
-    e.preventDefault();
-    e.stopPropagation();
 
-    updateSelection(rodId);
+    const rodEl = e.target.closest('[data-rod-id]');
+    if (rodEl) {
+      const rodId = rodEl.getAttribute('data-rod-id');
+      e.preventDefault();
+      updateSelection(rodId);
 
-    const rod = rods.find(r => r.id === rodId);
-    if (!rod) return;
+      const rod = rods.find(r => r.id === rodId);
+      if (!rod) return;
 
-    const startX = e.clientX;
-    const startY = e.clientY;
-    const origX = rod.x;
-    const origY = rod.y;
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const origX = rod.x;
+      const origY = rod.y;
 
-    const handleMove = (moveEvent) => {
-      const snappedX = Math.round(Math.max(0, origX + moveEvent.clientX - startX) / GRID) * GRID;
-      const snappedY = Math.round(Math.max(0, origY + moveEvent.clientY - startY) / GRID) * GRID;
+      const handleMove = (moveEvent) => {
+        const snappedX = Math.round(Math.max(0, origX + moveEvent.clientX - startX) / GRID) * GRID;
+        const snappedY = Math.round(Math.max(0, origY + moveEvent.clientY - startY) / GRID) * GRID;
+        setRods(prev => prev.map(r => {
+          if (r.id !== rodId) return r;
+          const tempRod = { ...r, x: snappedX, y: snappedY };
+          return { ...tempRod, isInvalid: isOverlapping(tempRod, prev) };
+        }));
+      };
 
-      setRods(prev => prev.map(r => {
-        if (r.id !== rodId) return r;
-        const tempRod = { ...r, x: snappedX, y: snappedY };
-        return { ...tempRod, isInvalid: isOverlapping(tempRod, prev) };
-      }));
-    };
+      const handleUp = () => {
+        setRods(prev => prev.map(r => {
+          if (r.id !== rodId) return r;
+          if (r.isInvalid) return { ...r, x: origX, y: origY, isInvalid: false };
+          return { ...r, isInvalid: false };
+        }));
+        window.removeEventListener('mousemove', handleMove);
+        window.removeEventListener('mouseup', handleUp);
+      };
 
-    const handleUp = () => {
-      setRods(prev => prev.map(r => {
-        if (r.id !== rodId) return r;
-        if (r.isInvalid) return { ...r, x: origX, y: origY, isInvalid: false };
-        return { ...r, isInvalid: false };
-      }));
-      window.removeEventListener('mousemove', handleMove);
-      window.removeEventListener('mouseup', handleUp);
-    };
+      window.addEventListener('mousemove', handleMove);
+      window.addEventListener('mouseup', handleUp);
+      return;
+    }
 
-    window.addEventListener('mousemove', handleMove);
-    window.addEventListener('mouseup', handleUp);
+    const antennaEl = e.target.closest('[data-antenna-id]');
+    if (antennaEl && onAntennaUpdate) {
+      const antennaId = antennaEl.getAttribute('data-antenna-id');
+      e.preventDefault();
+      updateSelection(antennaId);
+
+      const antenna = antennas.find(a => a.id === antennaId);
+      if (!antenna) return;
+
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const origX = antenna.x;
+      const origY = antenna.y;
+
+      const handleMove = (moveEvent) => {
+        onAntennaUpdate(antennaId, {
+          x: Math.max(0, origX + moveEvent.clientX - startX),
+          y: Math.max(0, origY + moveEvent.clientY - startY),
+        });
+      };
+
+      const handleUp = () => {
+        window.removeEventListener('mousemove', handleMove);
+        window.removeEventListener('mouseup', handleUp);
+      };
+
+      window.addEventListener('mousemove', handleMove);
+      window.addEventListener('mouseup', handleUp);
+      return;
+    }
   };
 
   const handlePointerDownOnMath = (e, mathId) => {
@@ -433,11 +467,24 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
           if (e.key === 'ArrowDown') return { ...t, y: t.y + 40 };
           return t;
         }));
+
+        const antenna = antennas.find(a => a.id === id);
+        if (antenna && onAntennaUpdate) {
+          let dx = 0, dy = 0;
+          if (e.key === 'ArrowLeft') dx = -40;
+          if (e.key === 'ArrowRight') dx = 40;
+          if (e.key === 'ArrowUp') dy = -40;
+          if (e.key === 'ArrowDown') dy = 40;
+          onAntennaUpdate(id, {
+            x: Math.max(0, antenna.x + dx),
+            y: Math.max(0, antenna.y + dy),
+          });
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onAntennaDelete, onAntennaUpdate]);
+  }, [onAntennaDelete, onAntennaUpdate, antennas]);
 
   const handleKeyDown = (e) => {
     if (!selectedId) return;
@@ -467,9 +514,10 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
       className="relative flex-1 overflow-auto bg-slate-100"
       onDragOver={handleDragOver}
       onDrop={handleDrop}
+      onMouseDown={handleCanvasMouseDown}
       onClick={handleCanvasClick}
       onKeyDown={handleKeyDown}
-      tabIndex={0}
+      tabIndex={-1}
       style={{ outline: 'none' }}
     >
       {/* Contenedor interno grande para scrollear y capturar */}
@@ -486,7 +534,6 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
               <div
                 key={rod.id}
                 data-rod-id={rod.id}
-                onMouseDown={(e) => handleMouseDownOnRod(e, rod.id)}
                 onContextMenu={(e) => handleRodContextMenu(e, rod.id)}
                 style={{
                   position: 'absolute',
