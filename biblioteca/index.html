@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0B0B1A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="portadas/kubika-icon.svg" type="image/svg+xml">
+<title>Kubika — Biblioteca Virtual</title>
+<link rel="stylesheet" href="styles.css">
+<script src="https://cdn.jsdelivr.net/npm/epubjs@0.3/dist/epub.min.js"></script>
+</head>
+<body>
+
+<div id="auth-section">
+  <div class="login-container">
+    <div class="login-brand">
+      <img src="portadas/kubika-logo.svg" alt="Kubika" class="login-logo">
+      <h1>Kubika</h1>
+      <p class="login-subtitle">Biblioteca Virtual</p>
+    </div>
+    <form id="login-form">
+      <div class="input-group">
+        <input type="email" id="login-email" placeholder="Correo electrónico" required autocomplete="email">
+      </div>
+      <div class="input-group">
+        <input type="password" id="login-password" placeholder="Contraseña" required autocomplete="current-password">
+      </div>
+      <button type="submit" id="login-btn">Ingresar</button>
+      <div id="login-error" class="error-msg"></div>
+    </form>
+  </div>
+</div>
+
+<div id="catalog-section" class="hidden">
+  <header class="topbar">
+    <div class="topbar-brand">
+      <img src="portadas/kubika-logo.svg" alt="K" class="topbar-logo">
+      <span>Kubika</span>
+    </div>
+    <button id="logout-btn" class="btn-logout" title="Cerrar sesión">Salir</button>
+  </header>
+
+  <div class="search-bar">
+    <input type="text" id="search-input" placeholder="Buscar libros por título o autor..." autocomplete="off">
+  </div>
+
+  <main id="catalogo" class="catalogo">
+  </main>
+</div>
+
+<div id="epub-modal" class="modal hidden">
+  <div class="modal-overlay" id="modal-overlay"></div>
+  <div class="modal-body">
+    <div class="modal-header">
+      <h2 id="modal-titulo">Libro</h2>
+      <button id="modal-cerrar" class="btn-cerrar">&times;</button>
+    </div>
+    <div class="modal-viewer" id="epub-viewer-container">
+      <div id="epub-viewer"></div>
+    </div>
+    <div class="modal-footer">
+      <button id="btn-prev" class="btn-nav">&lsaquo;</button>
+      <span id="page-info">Progreso</span>
+      <button id="btn-next" class="btn-nav">&rsaquo;</button>
+      <a id="btn-download" class="btn-download" download>Descargar EPUB</a>
+    </div>
+  </div>
+</div>
+
+<script src="script.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+</script>
+</body>
+</html>
