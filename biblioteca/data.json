@@ -1,74 +1,11 @@
 [
   {
     "id": 1,
-    "titulo": "Cien Años de Soledad",
-    "autor": "Gabriel García Márquez",
-    "categoria": "Ficción",
-    "portada": "portadas/placeholder.svg",
-    "epub": "libros/ejemplo.epub",
-    "descripcion": "La historia de la familia Buendía en Macondo."
-  },
-  {
-    "id": 2,
-    "titulo": "1984",
-    "autor": "George Orwell",
-    "categoria": "Ficción",
-    "portada": "portadas/placeholder.svg",
-    "epub": "libros/ejemplo.epub",
-    "descripcion": "Una distopía sobre un régimen totalitario."
-  },
-  {
-    "id": 3,
-    "titulo": "Breve Historia del Tiempo",
-    "autor": "Stephen Hawking",
-    "categoria": "Ciencia",
-    "portada": "portadas/placeholder.svg",
-    "epub": "libros/ejemplo.epub",
-    "descripcion": "Los misterios del universo explicados."
-  },
-  {
-    "id": 4,
-    "titulo": "El Principito",
-    "autor": "Antoine de Saint-Exupéry",
+    "titulo": "Cuentos para quedarse en casa",
+    "autor": "Eloy Moreno",
     "categoria": "Infantil",
     "portada": "portadas/placeholder.svg",
-    "epub": "libros/ejemplo.epub",
-    "descripcion": "Un piloto perdido en el desierto conoce a un pequeño príncipe."
-  },
-  {
-    "id": 5,
-    "titulo": "Sapiens",
-    "autor": "Yuval Noah Harari",
-    "categoria": "Historia",
-    "portada": "portadas/placeholder.svg",
-    "epub": "libros/ejemplo.epub",
-    "descripcion": "Una breve historia de la humanidad."
-  },
-  {
-    "id": 6,
-    "titulo": "El Aleph",
-    "autor": "Jorge Luis Borges",
-    "categoria": "Ficción",
-    "portada": "portadas/placeholder.svg",
-    "epub": "libros/ejemplo.epub",
-    "descripcion": "Cuentos fantásticos sobre realidades paralelas."
-  },
-  {
-    "id": 7,
-    "titulo": "Cosmos",
-    "autor": "Carl Sagan",
-    "categoria": "Ciencia",
-    "portada": "portadas/placeholder.svg",
-    "epub": "libros/ejemplo.epub",
-    "descripcion": "Un viaje por el universo y la ciencia."
-  },
-  {
-    "id": 8,
-    "titulo": "Don Quijote de la Mancha",
-    "autor": "Miguel de Cervantes",
-    "categoria": "Clásicos",
-    "portada": "portadas/placeholder.svg",
-    "epub": "libros/ejemplo.epub",
-    "descripcion": "Las aventuras del ingenioso hidalgo."
+    "epub": "libros/Cuentos_para_quedarse_en_casa_Eloy_Moreno.epub",
+    "descripcion": "Cuentos infantiles para disfrutar en familia."
   }
 ]
