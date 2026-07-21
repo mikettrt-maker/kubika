@@ -8,6 +8,7 @@ import GeoplanoPanel from './components/GeoplanoPanel';
 import Antenna from './components/Antenna';
 import SaveLoadModal from './components/SaveLoadModal';
 import SplashScreen from './components/SplashScreen';
+import Biblioteca from './components/Biblioteca';
 import { generateMathId, generateAntennaId, createAntennaRows } from './utils/rods';
 import { generatePivotId, generateBandId, generateManualPivotId, getRectPivots, getCirclePivots, BAND_COLORS } from './utils/geoplano';
 import { exportToPdf } from './utils/exportPdf';
@@ -28,6 +29,7 @@ export default function App() {
   const canvasRef = useRef(null);
   const [splashDone, setSplashDone] = useState(false);
   const [showLoginSplash, setShowLoginSplash] = useState(false);
+  const [showBiblioteca, setShowBiblioteca] = useState(false);
 
   // Modo de herramienta: 'regletas' | 'geoplano'
   const [toolMode, setToolMode] = useState('regletas');
@@ -443,6 +445,17 @@ export default function App() {
             </svg>
           </button>
 
+          {/* Biblioteca */}
+          <button
+            onClick={() => setShowBiblioteca(true)}
+            className="btn-icon btn-ripple flex items-center justify-center w-9 h-9 rounded-xl hover:bg-indigo-50 transition-all duration-200 group"
+            title="Biblioteca virtual"
+          >
+            <svg className="w-6 h-6 text-indigo-500 group-hover:scale-125 group-hover:text-indigo-700 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </button>
+
           {/* Guardar */}
           <button
             onClick={() => handleSave()}
@@ -567,6 +580,11 @@ export default function App() {
           onDeleteManualPivot={handleDeleteManualPivot}
         />
       </div>
+
+      {/* ===== BIBLIOTECA ===== */}
+      {showBiblioteca && (
+        <Biblioteca onClose={() => setShowBiblioteca(false)} />
+      )}
 
       {/* ===== MODAL CARGAR (Solo para cargar ahora) ===== */}
       <SaveLoadModal
