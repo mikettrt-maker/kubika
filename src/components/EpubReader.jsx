@@ -34,7 +34,7 @@ export default function EpubReader({ libro, onBack }) {
 
     setError(null);
 
-    const book = window.ePub(epubUrl, { bookPath: epubUrl });
+    const book = window.ePub(epubUrl);
     bookRef.current = book;
 
     const rendition = book.renderTo(viewer, {
