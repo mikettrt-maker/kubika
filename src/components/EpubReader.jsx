@@ -123,8 +123,9 @@ export default function EpubReader({ libro, onBack }) {
       const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
       let bodyContent = bodyMatch ? bodyMatch[1] : html;
 
-      // Quitar todas las imágenes (solo texto)
+      // Quitar todas las imágenes y SVGs (solo texto)
       bodyContent = bodyContent.replace(/<img[^>]*>/gi, '');
+      bodyContent = bodyContent.replace(/<svg[^>]*>[\s\S]*?<\/svg>/gi, '');
 
       setContent(bodyContent);
       setCurrentIdx(index);
