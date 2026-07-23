@@ -8,6 +8,13 @@ export default function EpubReader({ libro, onBack }) {
   const renditionRef = useRef(null);
   const bookRef = useRef(null);
 
+  // URL absoluta del EPUB
+  const epubUrl = (() => {
+    if (libro.epub.startsWith('http')) return libro.epub;
+    const base = window.location.origin + window.location.pathname.replace(/\/$/, '');
+    return base + '/' + libro.epub.replace(/^\//, '');
+  })();
+
   useEffect(() => {
     const viewer = viewerRef.current;
     if (!viewer) return;
@@ -25,7 +32,8 @@ export default function EpubReader({ libro, onBack }) {
     const h = viewer.clientHeight || 600;
 
     try {
-      const book = window.ePub(libro.epub);
+      // Usar URL absoluta para evitar problemas de resolucion con epubjs
+      const book = window.ePub(epubUrl);
       bookRef.current = book;
 
       const rendition = book.renderTo(viewer, {
@@ -78,7 +86,7 @@ export default function EpubReader({ libro, onBack }) {
           <p className="text-xs text-slate-400">{libro.autor}</p>
         </div>
         <a
-          href={libro.epub}
+          href={epubUrl}
           download
           className="flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
         >
