@@ -4,6 +4,7 @@
     "titulo": "Cuentos para entender el mundo",
     "autor": "Eloy Moreno",
     "categoria": "Infantil",
+    "edad": "6-8 años",
     "portada": "biblioteca/portadas/Cuentos para entender el mundo.svg",
     "epub": "biblioteca/libros/Cuentos_para_entender_el_mundo_Eloy_Moreno.epub",
     "descripcion": "Cuentos que invitan a reflexionar sobre el mundo."
@@ -13,6 +14,7 @@
     "titulo": "Cuentos para entender el mundo 2",
     "autor": "Eloy Moreno",
     "categoria": "Infantil",
+    "edad": "6-8 años",
     "portada": "biblioteca/portadas/Cuentos para entender el mundo 2.svg",
     "epub": "biblioteca/libros/Cuentos_para_entender_el_mundo_2_Eloy_Moreno.epub",
     "descripcion": "Más cuentos para reflexionar sobre el mundo."
@@ -22,6 +24,7 @@
     "titulo": "Cuentos para entender el mundo 3",
     "autor": "Eloy Moreno",
     "categoria": "Infantil",
+    "edad": "6-8 años",
     "portada": "biblioteca/portadas/Cuentos para entender el mundo 3.svg",
     "epub": "biblioteca/libros/Cuentos_para_entender_el_mundo_3_Eloy_Moreno.epub",
     "descripcion": "Tercera parte de los cuentos para reflexionar."
@@ -31,6 +34,7 @@
     "titulo": "Diario de Greg: Un pringao total",
     "autor": "Jeff Kinney",
     "categoria": "Infantil",
+    "edad": "9-12 años",
     "portada": "biblioteca/portadas/Diario de Greg un pringao total.svg",
     "epub": "biblioteca/libros/Un_pringao_total_Jeff_Kinney.epub",
     "descripcion": "Las aventuras de Greg Heffley."
