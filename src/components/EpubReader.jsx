@@ -32,16 +32,19 @@ export default function EpubReader({ libro, onBack }) {
 
     const h = viewer.clientHeight || 600;
 
+    setError(null);
+
     fetch(epubUrl)
       .then(res => {
         if (destroyedRef.current) return null;
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        return res.arrayBuffer();
+        if (!res.ok) throw new Error('HTTP ' + res.status + ' al descargar EPUB');
+        return res.blob();
       })
-      .then(buffer => {
-        if (destroyedRef.current || !buffer) return;
+      .then(blob => {
+        if (destroyedRef.current || !blob) return;
 
-        const book = window.ePub(buffer);
+        const url = URL.createObjectURL(blob);
+        const book = window.ePub(url);
         bookRef.current = book;
 
         const rendition = book.renderTo(viewer, {
@@ -58,12 +61,15 @@ export default function EpubReader({ libro, onBack }) {
           }
         });
 
-        return rendition.display();
+        return rendition.display().then(() => {
+          URL.revokeObjectURL(url);
+        });
       })
       .then(() => {
         if (!destroyedRef.current) setLoading(false);
       })
       .catch((err) => {
+        console.error('EPUB error:', err);
         if (!destroyedRef.current) {
           setError('Error: ' + (err.message || 'desconocido'));
           setLoading(false);
