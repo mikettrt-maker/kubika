@@ -5,8 +5,11 @@ export default function Biblioteca({ onClose }) {
   const [libros, setLibros] = useState([]);
   const [search, setSearch] = useState('');
   const [selectedLibro, setSelectedLibro] = useState(null);
+  const [startPage, setStartPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const [savedProgress, setSavedProgress] = useState(null);
 
   useEffect(() => {
     fetch('biblioteca/data.json?t=' + Date.now())
@@ -14,9 +17,27 @@ export default function Biblioteca({ onClose }) {
         if (!r.ok) throw new Error('No se pudo cargar el catálogo');
         return r.json();
       })
-      .then(data => { setLibros(data); setLoading(false); })
+      .then(data => {
+        setLibros(data);
+        setLoading(false);
+        // Leer progreso guardado
+        try {
+          const prog = JSON.parse(localStorage.getItem('kubika_progress') || '{}');
+          const entries = Object.entries(prog);
+          if (entries.length > 0) {
+            const [id, info] = entries[entries.length - 1];
+            const libroData = data.find(l => l.id == id);
+            if (libroData) setSavedProgress({ ...libroData, page: info.page });
+          }
+        } catch {}
+      })
       .catch(e => { setError(e.message); setLoading(false); });
   }, []);
+
+  const openBook = (libro, page) => {
+    setStartPage(page || 0);
+    setSelectedLibro(libro);
+  };
 
   const filtered = search.trim()
     ? libros.filter(l =>
@@ -35,7 +56,7 @@ export default function Biblioteca({ onClose }) {
   if (selectedLibro) {
     return (
       <div className="fixed inset-0 z-[200] flex flex-col bg-white">
-        <EpubReader libro={selectedLibro} onBack={() => setSelectedLibro(null)} />
+        <EpubReader libro={selectedLibro} onBack={() => { setSelectedLibro(null); setStartPage(0); }} startPage={startPage} />
       </div>
     );
   }
@@ -61,6 +82,24 @@ export default function Biblioteca({ onClose }) {
         <div className="w-16" />
       </header>
 
+      {savedProgress && (
+        <div className="px-4 pt-3 shrink-0">
+          <button onClick={() => openBook(savedProgress, savedProgress.page)}
+            className="w-full flex items-center gap-3 p-3 bg-amber-50 border border-amber-200 rounded-xl hover:bg-amber-100 transition-colors text-left">
+            <div className="w-10 h-14 rounded-lg overflow-hidden bg-amber-100 shrink-0">
+              <img src={savedProgress.portada} alt="" className="w-full h-full object-cover" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-[11px] font-semibold text-amber-700 uppercase tracking-wider">Continuar leyendo</p>
+              <p className="text-sm font-semibold text-slate-800 truncate">{savedProgress.titulo}</p>
+              <p className="text-xs text-slate-500">Página {savedProgress.page}</p>
+            </div>
+            <svg className="w-5 h-5 text-amber-500 ml-auto shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      )}
       <div className="px-4 py-3 border-b border-slate-100 shrink-0">
         <div className="relative">
           <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -110,7 +149,7 @@ export default function Biblioteca({ onClose }) {
               {librosCat.map(libro => (
                 <div
                   key={libro.id}
-                  onClick={() => setSelectedLibro(libro)}
+                  onClick={() => openBook(libro)}
                   className="flex-shrink-0 w-[130px] cursor-pointer group"
                 >
                   <div className="w-[130px] h-[185px] rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shadow-sm group-hover:shadow-md transition-shadow">

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import JSZip from 'jszip';
 
-export default function EpubReader({ libro, onBack }) {
+export default function EpubReader({ libro, onBack, startPage }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [content, setContent] = useState('');
@@ -16,6 +16,17 @@ export default function EpubReader({ libro, onBack }) {
   const contentRef = useRef(null);
 
   useEffect(() => { contentRef.current?.scrollTo(0, 0); }, [currentIdx, showCover]);
+
+  // Guardar progreso
+  useEffect(() => {
+    if (!showCover && currentIdx > 0) {
+      try {
+        const data = JSON.parse(localStorage.getItem('kubika_progress') || '{}');
+        data[libro.id] = { page: currentIdx, titulo: libro.titulo, portada: libro.portada, epub: libro.epub, autor: libro.autor, categoria: libro.categoria, edad: libro.edad, descripcion: libro.descripcion };
+        localStorage.setItem('kubika_progress', JSON.stringify(data));
+      } catch {}
+    }
+  }, [currentIdx, showCover]);
 
   const epubUrl = (() => {
     if (libro.epub.startsWith('http')) return libro.epub;
@@ -96,10 +107,14 @@ export default function EpubReader({ libro, onBack }) {
 
         if (cancelled || destroyedRef.current) return;
 
-        // Mostrar portada del catálogo como primera página
-        setContent('<div class="flex items-center justify-center h-full min-h-[60vh]"><img src="' + portadaUrl + '" alt="' + libro.titulo + '" class="max-w-full max-h-[65vh] object-contain rounded-lg shadow-lg" /></div>');
-        setCurrentIdx(0);
-        setShowCover(true);
+        if (startPage > 0) {
+          await loadPage(startPage, zip, spine);
+        } else {
+          // Mostrar portada del catálogo como primera página
+          setContent('<div class="flex items-center justify-center h-full min-h-[60vh]"><img src="' + portadaUrl + '" alt="' + libro.titulo + '" class="max-w-full max-h-[65vh] object-contain rounded-lg shadow-lg" /></div>');
+          setCurrentIdx(0);
+          setShowCover(true);
+        }
         if (!cancelled && !destroyedRef.current) setLoading(false);
       } catch (err) {
         console.error('EPUB error:', err);
