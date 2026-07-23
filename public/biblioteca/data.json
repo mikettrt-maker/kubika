@@ -7,5 +7,14 @@
     "portada": "biblioteca/portadas/placeholder.svg",
     "epub": "biblioteca/libros/Cuentos_para_quedarse_en_casa_Eloy_Moreno.epub",
     "descripcion": "Cuentos infantiles para disfrutar en familia."
+  },
+  {
+    "id": 2,
+    "titulo": "Cuentos para entender el mundo",
+    "autor": "Eloy Moreno",
+    "categoria": "Infantil",
+    "portada": "biblioteca/portadas/Cuentos para entender el mundo.svg",
+    "epub": "biblioteca/libros/Cuentos_para_entender_el_mundo_Eloy_Moreno.epub",
+    "descripcion": "Cuentos que invitan a reflexionar sobre el mundo."
   }
 ]
