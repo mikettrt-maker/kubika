@@ -25,5 +25,14 @@
     "portada": "biblioteca/portadas/Cuentos para entender el mundo 3.svg",
     "epub": "biblioteca/libros/Cuentos_para_entender_el_mundo_3_Eloy_Moreno.epub",
     "descripcion": "Tercera parte de los cuentos para reflexionar."
+  },
+  {
+    "id": 5,
+    "titulo": "Diario de Greg: Un pringao total",
+    "autor": "Jeff Kinney",
+    "categoria": "Infantil",
+    "portada": "biblioteca/portadas/Diario de Greg un pringao total.svg",
+    "epub": "biblioteca/libros/Un_pringao_total_Jeff_Kinney.epub",
+    "descripcion": "Las aventuras de Greg Heffley."
   }
 ]
