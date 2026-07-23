@@ -1,53 +1,68 @@
 import { useEffect, useRef, useState } from 'react';
-import ePub from 'epubjs';
 
 export default function EpubReader({ libro, onBack }) {
   const viewerRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [progress, setProgress] = useState(0);
-  const [viewerHeight, setViewerHeight] = useState(600);
+  const [epubReady, setEpubReady] = useState(false);
   const renditionRef = useRef(null);
   const bookRef = useRef(null);
   const containerRef = useRef(null);
 
+  // Cargar epubjs desde CDN
   useEffect(() => {
-    if (!viewerRef.current) return;
+    if (window.ePub) { setEpubReady(true); return; }
+    const script = document.createElement('script');
+    script.src = 'https://cdn.jsdelivr.net/npm/epubjs@0.3/dist/epub.min.js';
+    script.onload = () => setEpubReady(true);
+    script.onerror = () => setError('No se pudo cargar el lector EPUB');
+    document.body.appendChild(script);
+    return () => { if (script.parentNode) script.parentNode.removeChild(script); };
+  }, []);
+
+  useEffect(() => {
+    if (!epubReady || !viewerRef.current) return;
     setLoading(true);
     setError(null);
     setProgress(0);
 
-    const book = ePub(libro.epub);
-    bookRef.current = book;
+    try {
+      const book = window.ePub(libro.epub);
+      bookRef.current = book;
 
-    const rendition = book.renderTo(viewerRef.current, {
-      width: '100%',
-      height: viewerHeight,
-      spread: 'none',
-      flow: 'paginated',
-    });
-    renditionRef.current = rendition;
+      const rendition = book.renderTo(viewerRef.current, {
+        width: '100%',
+        height: 600,
+        spread: 'none',
+        flow: 'paginated',
+      });
+      renditionRef.current = rendition;
 
-    rendition.display().then(() => {
+      rendition.display().then(() => {
+        setLoading(false);
+      }).catch((err) => {
+        setError('Error al cargar el libro: ' + (err.message || 'desconocido'));
+        setLoading(false);
+      });
+
+      rendition.on('relocated', (location) => {
+        if (location.start.percentage != null) {
+          setProgress(Math.round(location.start.percentage * 100));
+        }
+      });
+    } catch (err) {
+      setError('Error al iniciar el libro: ' + (err.message || 'desconocido'));
       setLoading(false);
-    }).catch(() => {
-      setError('Error al cargar el libro');
-      setLoading(false);
-    });
-
-    rendition.on('relocated', (location) => {
-      if (location.start.percentage != null) {
-        setProgress(Math.round(location.start.percentage * 100));
-      }
-    });
+    }
 
     return () => {
-      try { rendition.destroy(); } catch {}
-      try { book.destroy(); } catch {}
+      try { renditionRef.current?.destroy(); } catch {}
+      try { bookRef.current?.destroy(); } catch {}
       renditionRef.current = null;
       bookRef.current = null;
     };
-  }, [libro.epub, libro.id, viewerHeight]);
+  }, [libro.epub, libro.id, epubReady]);
 
   useEffect(() => {
     const el = containerRef.current;
