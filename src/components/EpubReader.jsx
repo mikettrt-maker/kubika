@@ -161,8 +161,31 @@ export default function EpubReader({ libro, onBack }) {
     }
   };
 
-  const goPrev = () => { if (currentIdx > 0) loadPage(currentIdx - 1); };
-  const goNext = () => { if (currentIdx < spineRef.current.length - 1) loadPage(currentIdx + 1); };
+  const goPrev = () => {
+    if (currentIdx <= 0) return;
+    // Buscar hacia atrás la primera página con texto
+    let i = currentIdx - 1;
+    const findPrev = (idx) => {
+      if (idx < 0) return;
+      const filePath = spineRef.current[idx];
+      const file = zipRef.current.file(filePath);
+      if (!file) { if (idx > 0) findPrev(idx - 1); return; }
+      file.async('string').then(html => {
+        const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+        let body = bodyMatch ? bodyMatch[1] : html;
+        body = body.replace(/<(img|svg|a)[^>]*>/gi, '').replace(/<\/(svg|a)>/gi, '').replace(/<[^>]+>/g, '').trim();
+        if (body) loadPage(idx);
+        else if (idx > 0) findPrev(idx - 1);
+        else loadPage(0);
+      });
+    };
+    findPrev(i);
+  };
+  const goNext = () => {
+    if (currentIdx >= spineRef.current.length - 1) return;
+    // loadPage ya salta páginas vacías hacia adelante
+    loadPage(currentIdx + 1);
+  };
 
   const pct = totalItems > 0 ? Math.round(((currentIdx + 1) / totalItems) * 100) : 0;
 
