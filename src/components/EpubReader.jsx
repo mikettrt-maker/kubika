@@ -7,8 +7,8 @@ export default function EpubReader({ libro, onBack }) {
   const [progress, setProgress] = useState(0);
   const renditionRef = useRef(null);
   const bookRef = useRef(null);
+  const destroyedRef = useRef(false);
 
-  // URL absoluta del EPUB
   const epubUrl = (() => {
     if (libro.epub.startsWith('http')) return libro.epub;
     const base = window.location.origin + window.location.pathname.replace(/\/$/, '');
@@ -25,43 +25,53 @@ export default function EpubReader({ libro, onBack }) {
       return;
     }
 
+    destroyedRef.current = false;
     setLoading(true);
     setError(null);
     setProgress(0);
 
     const h = viewer.clientHeight || 600;
 
-    try {
-      // Usar URL absoluta para evitar problemas de resolucion con epubjs
-      const book = window.ePub(epubUrl);
-      bookRef.current = book;
+    fetch(epubUrl)
+      .then(res => {
+        if (destroyedRef.current) return null;
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.arrayBuffer();
+      })
+      .then(buffer => {
+        if (destroyedRef.current || !buffer) return;
 
-      const rendition = book.renderTo(viewer, {
-        width: '100%',
-        height: h,
-        spread: 'none',
-        flow: 'paginated',
-      });
-      renditionRef.current = rendition;
+        const book = window.ePub(buffer);
+        bookRef.current = book;
 
-      rendition.display().then(() => {
-        setLoading(false);
-      }).catch((err) => {
-        setError('Error: ' + (err.message || 'no se pudo mostrar'));
-        setLoading(false);
-      });
+        const rendition = book.renderTo(viewer, {
+          width: '100%',
+          height: h,
+          spread: 'none',
+          flow: 'paginated',
+        });
+        renditionRef.current = rendition;
 
-      rendition.on('relocated', (location) => {
-        if (location.start.percentage != null) {
-          setProgress(Math.round(location.start.percentage * 100));
+        rendition.on('relocated', (location) => {
+          if (location.start.percentage != null) {
+            setProgress(Math.round(location.start.percentage * 100));
+          }
+        });
+
+        return rendition.display();
+      })
+      .then(() => {
+        if (!destroyedRef.current) setLoading(false);
+      })
+      .catch((err) => {
+        if (!destroyedRef.current) {
+          setError('Error: ' + (err.message || 'desconocido'));
+          setLoading(false);
         }
       });
-    } catch (err) {
-      setError('Error: ' + (err.message || 'desconocido'));
-      setLoading(false);
-    }
 
     return () => {
+      destroyedRef.current = true;
       try { renditionRef.current?.destroy(); } catch {}
       try { bookRef.current?.destroy(); } catch {}
       renditionRef.current = null;
