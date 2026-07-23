@@ -115,7 +115,12 @@ export default function EpubReader({ libro, onBack }) {
     try {
       const filePath = spine[index];
       const file = zip.file(filePath);
-      if (!file) throw new Error('Archivo no encontrado: ' + filePath);
+      if (!file) {
+        // Saltar páginas que no existen
+        const nextIdx = index < spine.length - 1 ? index + 1 : index - 1;
+        if (nextIdx !== index) loadPage(nextIdx, zip, spine);
+        return;
+      }
 
       let html = await file.async('string');
 
@@ -129,9 +134,15 @@ export default function EpubReader({ libro, onBack }) {
       bodyContent = bodyContent.replace(/<a[^>]*>/gi, '');
       bodyContent = bodyContent.replace(/<\/a>/gi, '');
 
-      // Si la página quedó vacía (solo etiquetas vacías), mostrar portada del catálogo
+      // Si la página quedó sin texto, saltar a la siguiente
       const textContent = bodyContent.replace(/<[^>]+>/g, '').trim();
-      if (!textContent) {
+      if (!textContent && index < spine.length - 1) {
+        loadPage(index + 1, zip, spine);
+        return;
+      }
+
+      // Si es la primera página con texto y no es la portada real, mostrar portada del catálogo
+      if (index === 0 && textContent) {
         const portadaUrl = (() => {
           if (libro.portada.startsWith('http')) return libro.portada;
           const base = window.location.origin + window.location.pathname.replace(/\/$/, '');
