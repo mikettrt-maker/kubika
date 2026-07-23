@@ -27,7 +27,7 @@ export default function Biblioteca({ onClose }) {
 
   const categorias = {};
   filtered.forEach(l => {
-    const cat = l.categoria || 'General';
+    const cat = l.edad || l.categoria || 'General';
     if (!categorias[cat]) categorias[cat] = [];
     categorias[cat].push(l);
   });
