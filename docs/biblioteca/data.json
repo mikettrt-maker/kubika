@@ -38,5 +38,15 @@
     "portada": "biblioteca/portadas/Diario de Greg un pringao total.svg",
     "epub": "biblioteca/libros/Un_pringao_total_Jeff_Kinney.epub",
     "descripcion": "Las aventuras de Greg Heffley."
+  },
+  {
+    "id": 6,
+    "titulo": "Diario de Greg: La ley de Rodrick",
+    "autor": "Jeff Kinney",
+    "categoria": "Infantil",
+    "edad": "9-12 años",
+    "portada": "biblioteca/portadas/Diario de Greg la ley de rodrick.svg",
+    "epub": "biblioteca/libros/La_ley_de_Rodrick_Jeff_Kinney.epub",
+    "descripcion": "Segunda entrega del Diario de Greg."
   }
 ]
