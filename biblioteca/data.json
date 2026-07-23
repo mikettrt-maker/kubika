@@ -68,5 +68,15 @@
     "portada": "biblioteca/portadas/Diario de Greg dias de perro.svg",
     "epub": "biblioteca/libros/Dias_de_perros_Jeff_Kinney.epub",
     "descripcion": "Cuarta entrega del Diario de Greg."
+  },
+  {
+    "id": 9,
+    "titulo": "Diario de Greg: La cruda realidad",
+    "autor": "Jeff Kinney",
+    "categoria": "Infantil",
+    "edad": "9-12 años",
+    "portada": "biblioteca/portadas/Diario de Greg La cruda realidad.svg",
+    "epub": "biblioteca/libros/La_cruda_realidad_Jeff_Kinney.epub",
+    "descripcion": "Quinta entrega del Diario de Greg."
   }
 ]
