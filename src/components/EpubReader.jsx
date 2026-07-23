@@ -62,16 +62,6 @@ export default function EpubReader({ libro, onBack }) {
           setLoading(false);
         }
       });
-      .then(() => {
-        if (!destroyedRef.current) setLoading(false);
-      })
-      .catch((err) => {
-        console.error('EPUB error:', err);
-        if (!destroyedRef.current) {
-          setError('Error: ' + (err.message || 'desconocido'));
-          setLoading(false);
-        }
-      });
 
     return () => {
       destroyedRef.current = true;
