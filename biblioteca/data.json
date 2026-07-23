@@ -7,5 +7,14 @@
     "portada": "biblioteca/portadas/Cuentos para entender el mundo.svg",
     "epub": "biblioteca/libros/Cuentos_para_entender_el_mundo_Eloy_Moreno.epub",
     "descripcion": "Cuentos que invitan a reflexionar sobre el mundo."
+  },
+  {
+    "id": 3,
+    "titulo": "Cuentos para entender el mundo 2",
+    "autor": "Eloy Moreno",
+    "categoria": "Infantil",
+    "portada": "biblioteca/portadas/Cuentos para entender el mundo 2.svg",
+    "epub": "biblioteca/libros/Cuentos_para_entender_el_mundo_2_Eloy_Moreno.epub",
+    "descripcion": "Más cuentos para reflexionar sobre el mundo."
   }
 ]
