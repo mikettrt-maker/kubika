@@ -9,7 +9,7 @@ export default function Biblioteca({ onClose }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('biblioteca/data.json')
+    fetch('biblioteca/data.json?t=' + Date.now())
       .then(r => {
         if (!r.ok) throw new Error('No se pudo cargar el catálogo');
         return r.json();
