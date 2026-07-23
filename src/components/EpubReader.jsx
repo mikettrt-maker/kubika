@@ -107,6 +107,16 @@ export default function EpubReader({ libro, onBack }) {
     return () => { cancelled = true; destroyedRef.current = true; zipRef.current = null; };
   }, [libro.epub, libro.id]);
 
+  function normalizePath(base, rel) {
+    const parts = (base + rel).split('/');
+    const result = [];
+    for (const p of parts) {
+      if (p === '..') result.pop();
+      else if (p !== '.' && p !== '') result.push(p);
+    }
+    return result.join('/');
+  }
+
   const loadPage = async (index, zip, spine) => {
     spine = spine || spineRef.current;
     zip = zip || zipRef.current;
@@ -121,17 +131,33 @@ export default function EpubReader({ libro, onBack }) {
 
       // Extraer contenido del body
       const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-      const bodyContent = bodyMatch ? bodyMatch[1] : html;
+      let bodyContent = bodyMatch ? bodyMatch[1] : html;
 
-      // Resolver rutas relativas de imágenes
+      // Resolver imágenes: extraer del ZIP y convertir a base64
       const basePath = filePath.substring(0, filePath.lastIndexOf('/') + 1);
-      const resolved = bodyContent.replace(/(src|href)\s*=\s*"([^"]+)"/gi, (m, attr, path) => {
-        if (path.startsWith('http') || path.startsWith('data:') || path.startsWith('#')) return m;
-        const fullPath = basePath + path;
-        return attr + '="' + fullPath + '"';
-      });
 
-      setContent(resolved);
+      const imgRegex = /<img[^>]+src\s*=\s*"([^"]+)"/gi;
+      let m;
+      const replacements = [];
+      while ((m = imgRegex.exec(bodyContent)) !== null) {
+        const originalSrc = m[1];
+        if (originalSrc.startsWith('http') || originalSrc.startsWith('data:')) continue;
+        const fullPath = normalizePath(basePath, originalSrc);
+        const imgFile = zip.file(fullPath);
+        if (imgFile) {
+          try {
+            const base64 = await imgFile.async('base64');
+            const ext = fullPath.split('.').pop().toLowerCase();
+            const mime = ext === 'png' ? 'image/png' : ext === 'gif' ? 'image/gif' : ext === 'svg' ? 'image/svg+xml' : ext === 'webp' ? 'image/webp' : 'image/jpeg';
+            replacements.push({ from: originalSrc, to: 'data:' + mime + ';base64,' + base64 });
+          } catch {}
+        }
+      }
+      for (const r of replacements) {
+        bodyContent = bodyContent.split('"' + r.from + '"').join('"' + r.to + '"');
+      }
+
+      setContent(bodyContent);
       setCurrentIdx(index);
     } catch (err) {
       setContent('<p style="color:red;padding:20px">Error al cargar esta página.</p>');
