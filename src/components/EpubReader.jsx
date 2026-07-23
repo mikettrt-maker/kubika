@@ -1,53 +1,36 @@
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export default function EpubReader({ libro, onBack }) {
   const viewerRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [progress, setProgress] = useState(0);
-  const [epubReady, setEpubReady] = useState(false);
-  const [viewerHeight, setViewerHeight] = useState(600);
   const renditionRef = useRef(null);
   const bookRef = useRef(null);
-  const containerRef = useRef(null);
 
-  // Cargar epubjs desde CDN
   useEffect(() => {
-    if (window.ePub) { setEpubReady(true); return; }
-    const script = document.createElement('script');
-    script.src = 'https://cdn.jsdelivr.net/npm/epubjs@0.3/dist/epub.min.js';
-    script.onload = () => setEpubReady(true);
-    script.onerror = () => setError('No se pudo cargar el lector EPUB');
-    document.body.appendChild(script);
-    return () => { if (script.parentNode) document.body.removeChild(script); };
-  }, []);
+    const viewer = viewerRef.current;
+    if (!viewer) return;
 
-  // Medir altura del contenedor
-  const measureHeight = useCallback(() => {
-    if (containerRef.current) {
-      setViewerHeight(containerRef.current.clientHeight - 8);
+    if (!window.ePub) {
+      setError('El lector EPUB no está disponible');
+      setLoading(false);
+      return;
     }
-  }, []);
 
-  useEffect(() => {
-    measureHeight();
-    window.addEventListener('resize', measureHeight);
-    return () => window.removeEventListener('resize', measureHeight);
-  }, [measureHeight]);
-
-  useEffect(() => {
-    if (!epubReady || !viewerRef.current || viewerHeight < 100) return;
     setLoading(true);
     setError(null);
     setProgress(0);
+
+    const h = viewer.clientHeight || 600;
 
     try {
       const book = window.ePub(libro.epub);
       bookRef.current = book;
 
-      const rendition = book.renderTo(viewerRef.current, {
+      const rendition = book.renderTo(viewer, {
         width: '100%',
-        height: viewerHeight,
+        height: h,
         spread: 'none',
         flow: 'paginated',
       });
@@ -56,7 +39,7 @@ export default function EpubReader({ libro, onBack }) {
       rendition.display().then(() => {
         setLoading(false);
       }).catch((err) => {
-        setError('Error al cargar el libro: ' + (err.message || 'desconocido'));
+        setError('Error: ' + (err.message || 'no se pudo mostrar'));
         setLoading(false);
       });
 
@@ -66,7 +49,7 @@ export default function EpubReader({ libro, onBack }) {
         }
       });
     } catch (err) {
-      setError('Error al iniciar el libro: ' + (err.message || 'desconocido'));
+      setError('Error: ' + (err.message || 'desconocido'));
       setLoading(false);
     }
 
@@ -76,24 +59,7 @@ export default function EpubReader({ libro, onBack }) {
       renditionRef.current = null;
       bookRef.current = null;
     };
-  }, [libro.epub, libro.id, epubReady, viewerHeight]);
-
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    const observer = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const h = entry.contentRect.height - 100;
-        if (h > 200) setViewerHeight(h);
-      }
-    });
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  const handlePrev = () => renditionRef.current?.prev();
-  const handleNext = () => renditionRef.current?.next();
+  }, [libro.epub, libro.id]);
 
   return (
     <div className="flex flex-col h-full bg-white">
@@ -123,8 +89,8 @@ export default function EpubReader({ libro, onBack }) {
         </a>
       </div>
 
-      <div ref={containerRef} className="flex-1 overflow-hidden bg-slate-100 relative min-h-0">
-        <div ref={viewerRef} className="absolute inset-0 flex items-center justify-center" />
+      <div className="flex-1 overflow-hidden bg-slate-100 relative min-h-0">
+        <div ref={viewerRef} className="absolute inset-0" />
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center gap-3 bg-slate-100 z-10">
             <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
@@ -132,10 +98,10 @@ export default function EpubReader({ libro, onBack }) {
           </div>
         )}
         {error && (
-          <div className="absolute inset-0 flex items-center justify-center z-10 bg-slate-100">
+          <div className="absolute inset-0 flex items-center justify-center bg-slate-100 z-10">
             <div className="text-center px-8 max-w-md">
               <p className="text-red-500 text-sm font-medium">{error}</p>
-              <p className="text-xs text-slate-400 mt-1">Verificá que el archivo EPUB exista en la ruta indicada</p>
+              <p className="text-xs text-slate-400 mt-2">URL: {libro.epub}</p>
             </div>
           </div>
         )}
@@ -143,14 +109,14 @@ export default function EpubReader({ libro, onBack }) {
 
       <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200 shrink-0">
         <button
-          onClick={handlePrev}
+          onClick={() => renditionRef.current?.prev()}
           className="px-4 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
         >
           &lsaquo; Anterior
         </button>
         <span className="text-xs font-medium text-slate-500">{progress}%</span>
         <button
-          onClick={handleNext}
+          onClick={() => renditionRef.current?.next()}
           className="px-4 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
         >
           Siguiente &rsaquo;
