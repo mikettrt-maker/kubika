@@ -12,6 +12,9 @@ export default function EpubReader({ libro, onBack }) {
   const spineRef = useRef([]);
   const zipRef = useRef(null);
   const destroyedRef = useRef(false);
+  const contentRef = useRef(null);
+
+  useEffect(() => { contentRef.current?.scrollTo(0, 0); }, [currentIdx]);
 
   const epubUrl = (() => {
     if (libro.epub.startsWith('http')) return libro.epub;
@@ -184,7 +187,7 @@ export default function EpubReader({ libro, onBack }) {
         </a>
       </div>
 
-      <div className="flex-1 overflow-y-auto bg-white px-6 py-8 leading-relaxed text-slate-800 text-base">
+      <div ref={contentRef} className="flex-1 overflow-y-auto bg-white px-6 py-8 leading-relaxed text-slate-800 text-base">
         {loading && (
           <div className="flex items-center justify-center gap-3 py-20">
             <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
