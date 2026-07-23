@@ -48,5 +48,15 @@
     "portada": "biblioteca/portadas/Diario de Greg la ley de rodrick.svg",
     "epub": "biblioteca/libros/La_ley_de_Rodrick_Jeff_Kinney.epub",
     "descripcion": "Segunda entrega del Diario de Greg."
+  },
+  {
+    "id": 7,
+    "titulo": "Diario de Greg: Esto es el colmo",
+    "autor": "Jeff Kinney",
+    "categoria": "Infantil",
+    "edad": "9-12 años",
+    "portada": "biblioteca/portadas/Diario de Greg Esto es el colmo.svg",
+    "epub": "biblioteca/libros/Esto_es_el_colmo_Jeff_Kinney.epub",
+    "descripcion": "Tercera entrega del Diario de Greg."
   }
 ]
