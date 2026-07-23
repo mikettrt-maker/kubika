@@ -9,17 +9,24 @@ export default function EpubReader({ libro, onBack }) {
   const [totalItems, setTotalItems] = useState(0);
   const [bookTitle, setBookTitle] = useState('');
   const [bookAuthor, setBookAuthor] = useState('');
+  const [showCover, setShowCover] = useState(true);
   const spineRef = useRef([]);
   const zipRef = useRef(null);
   const destroyedRef = useRef(false);
   const contentRef = useRef(null);
 
-  useEffect(() => { contentRef.current?.scrollTo(0, 0); }, [currentIdx]);
+  useEffect(() => { contentRef.current?.scrollTo(0, 0); }, [currentIdx, showCover]);
 
   const epubUrl = (() => {
     if (libro.epub.startsWith('http')) return libro.epub;
     const base = window.location.origin + window.location.pathname.replace(/\/$/, '');
     return base + '/' + libro.epub.replace(/^\//, '');
+  })();
+
+  const portadaUrl = (() => {
+    if (libro.portada.startsWith('http')) return libro.portada;
+    const base = window.location.origin + window.location.pathname.replace(/\/$/, '');
+    return base + '/' + libro.portada.replace(/^\//, '');
   })();
 
   useEffect(() => {
@@ -29,6 +36,7 @@ export default function EpubReader({ libro, onBack }) {
     setContent('');
     setCurrentIdx(0);
     setTotalItems(0);
+    setShowCover(true);
 
     let cancelled = false;
 
@@ -43,32 +51,26 @@ export default function EpubReader({ libro, onBack }) {
         if (cancelled || destroyedRef.current) return;
         zipRef.current = zip;
 
-        // Leer container.xml
         const containerFile = zip.file('META-INF/container.xml');
         if (!containerFile) throw new Error('No se encontró META-INF/container.xml');
         const containerXml = await containerFile.async('string');
         if (cancelled) return;
 
-        // Extraer ruta del OPF
         const opfMatch = containerXml.match(/rootfile\s+full-path\s*=\s*"([^"]+)"/i);
         if (!opfMatch) throw new Error('No se encontró rootfile en container.xml');
         const opfPath = opfMatch[1];
 
-        // Leer OPF
         const opfFile = zip.file(opfPath);
         if (!opfFile) throw new Error('No se encontró ' + opfPath);
         const opfXml = await opfFile.async('string');
         if (cancelled) return;
 
-        // Extraer título
         const titleMatch = opfXml.match(/<dc:title[^>]*>([^<]+)<\/dc:title>/i);
         if (titleMatch) setBookTitle(titleMatch[1].trim());
         
-        // Extraer autor
         const authorMatch = opfXml.match(/<dc:creator[^>]*>([^<]+)<\/dc:creator>/i);
         if (authorMatch) setBookAuthor(authorMatch[1].trim());
 
-        // Extraer manifest (id -> href)
         const manifest = {};
         const itemRegex = /<item\s[^>]*\/?>/gi;
         let m;
@@ -78,7 +80,6 @@ export default function EpubReader({ libro, onBack }) {
           if (idMatch && hrefMatch) manifest[idMatch[1]] = hrefMatch[1];
         }
 
-        // Extraer spine (orden de lectura)
         const opfDir = opfPath.substring(0, opfPath.lastIndexOf('/') + 1);
         const spine = [];
         const itemrefRegex = /<itemref\s[^>]*\/?>/gi;
@@ -95,8 +96,10 @@ export default function EpubReader({ libro, onBack }) {
 
         if (cancelled || destroyedRef.current) return;
 
-        // Mostrar primera página
-        await loadPage(0, zip, spine);
+        // Mostrar portada del catálogo como primera página
+        setContent('<div class="flex items-center justify-center h-full min-h-[60vh]"><img src="' + portadaUrl + '" alt="' + libro.titulo + '" class="max-w-full max-h-[65vh] object-contain rounded-lg shadow-lg" /></div>');
+        setCurrentIdx(0);
+        setShowCover(true);
         if (!cancelled && !destroyedRef.current) setLoading(false);
       } catch (err) {
         console.error('EPUB error:', err);
@@ -115,11 +118,12 @@ export default function EpubReader({ libro, onBack }) {
     zip = zip || zipRef.current;
     if (!zip || index < 0 || index >= spine.length) return;
 
+    setShowCover(false);
+
     try {
       const filePath = spine[index];
       const file = zip.file(filePath);
       if (!file) {
-        // Saltar páginas que no existen
         const nextIdx = index < spine.length - 1 ? index + 1 : index - 1;
         if (nextIdx !== index) loadPage(nextIdx, zip, spine);
         return;
@@ -127,31 +131,18 @@ export default function EpubReader({ libro, onBack }) {
 
       let html = await file.async('string');
 
-      // Extraer contenido del body
       const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
       let bodyContent = bodyMatch ? bodyMatch[1] : html;
 
-      // Quitar imágenes, SVGs y enlaces (solo texto)
       bodyContent = bodyContent.replace(/<img[^>]*>/gi, '');
       bodyContent = bodyContent.replace(/<svg[^>]*>[\s\S]*?<\/svg>/gi, '');
       bodyContent = bodyContent.replace(/<a[^>]*>/gi, '');
       bodyContent = bodyContent.replace(/<\/a>/gi, '');
 
-      // Si la página quedó sin texto, saltar a la siguiente
       const textContent = bodyContent.replace(/<[^>]+>/g, '').trim();
       if (!textContent && index < spine.length - 1) {
         loadPage(index + 1, zip, spine);
         return;
-      }
-
-      // Si es la primera página con texto y no es la portada real, mostrar portada del catálogo
-      if (index === 0 && textContent) {
-        const portadaUrl = (() => {
-          if (libro.portada.startsWith('http')) return libro.portada;
-          const base = window.location.origin + window.location.pathname.replace(/\/$/, '');
-          return base + '/' + libro.portada.replace(/^\//, '');
-        })();
-        bodyContent = '<div class="flex items-center justify-center h-full min-h-[300px]"><img src="' + portadaUrl + '" alt="' + libro.titulo + '" class="max-w-full max-h-[400px] object-contain rounded-lg shadow-md" /></div>';
       }
 
       setContent(bodyContent);
@@ -162,8 +153,7 @@ export default function EpubReader({ libro, onBack }) {
   };
 
   const goPrev = () => {
-    if (currentIdx <= 0) return;
-    // Buscar hacia atrás la primera página con texto
+    if (showCover || currentIdx <= 0) return;
     let i = currentIdx - 1;
     const findPrev = (idx) => {
       if (idx < 0) return;
@@ -182,8 +172,11 @@ export default function EpubReader({ libro, onBack }) {
     findPrev(i);
   };
   const goNext = () => {
+    if (showCover) {
+      loadPage(0);
+      return;
+    }
     if (currentIdx >= spineRef.current.length - 1) return;
-    // loadPage ya salta páginas vacías hacia adelante
     loadPage(currentIdx + 1);
   };
 
@@ -210,7 +203,7 @@ export default function EpubReader({ libro, onBack }) {
         </a>
       </div>
 
-      <div ref={contentRef} className="flex-1 overflow-y-auto bg-white px-6 py-8 leading-relaxed text-slate-800 text-base">
+      <div ref={contentRef} className="flex-1 overflow-y-auto bg-white px-6 py-8 leading-relaxed text-slate-800 text-xl font-handwriting">
         {loading && (
           <div className="flex items-center justify-center gap-3 py-20">
             <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
@@ -229,14 +222,14 @@ export default function EpubReader({ libro, onBack }) {
 
       {!loading && !error && (
         <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200 shrink-0">
-          <button onClick={goPrev} disabled={currentIdx === 0}
+          <button onClick={goPrev} disabled={!showCover && currentIdx <= 0}
             className="px-4 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 disabled:text-slate-300 disabled:cursor-default hover:bg-slate-100 rounded-lg transition-colors">
-            &lsaquo; Anterior
+            &lsaquo; {showCover ? '' : 'Anterior'}
           </button>
-          <span className="text-xs font-medium text-slate-500">{pct}% &middot; {currentIdx + 1}/{totalItems}</span>
-          <button onClick={goNext} disabled={currentIdx >= totalItems - 1}
-            className="px-4 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 disabled:text-slate-300 disabled:cursor-default hover:bg-slate-100 rounded-lg transition-colors">
-            Siguiente &rsaquo;
+          <span className="text-xs font-medium text-slate-500">{showCover ? 'Portada' : pct + '% · ' + (currentIdx + 1) + '/' + totalItems}</span>
+          <button onClick={goNext} disabled={!showCover && currentIdx >= totalItems - 1}
+            className="px-5 py-1.5 text-sm font-semibold text-white bg-indigo-500 hover:bg-indigo-600 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-default rounded-lg transition-colors">
+            {showCover ? 'Comenzar a leer' : 'Siguiente'} &rsaquo;
           </button>
         </div>
       )}
