@@ -127,6 +127,17 @@ export default function EpubReader({ libro, onBack }) {
       bodyContent = bodyContent.replace(/<img[^>]*>/gi, '');
       bodyContent = bodyContent.replace(/<svg[^>]*>[\s\S]*?<\/svg>/gi, '');
 
+      // Si la página quedó vacía (solo etiquetas vacías), mostrar portada del catálogo
+      const textContent = bodyContent.replace(/<[^>]+>/g, '').trim();
+      if (!textContent) {
+        const portadaUrl = (() => {
+          if (libro.portada.startsWith('http')) return libro.portada;
+          const base = window.location.origin + window.location.pathname.replace(/\/$/, '');
+          return base + '/' + libro.portada.replace(/^\//, '');
+        })();
+        bodyContent = '<div class="flex items-center justify-center h-full min-h-[300px]"><img src="' + portadaUrl + '" alt="' + libro.titulo + '" class="max-w-full max-h-[400px] object-contain rounded-lg shadow-md" /></div>';
+      }
+
       setContent(bodyContent);
       setCurrentIdx(index);
     } catch (err) {
