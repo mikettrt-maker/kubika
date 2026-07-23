@@ -58,5 +58,15 @@
     "portada": "biblioteca/portadas/Diario de Greg Esto es el colmo.svg",
     "epub": "biblioteca/libros/Esto_es_el_colmo_Jeff_Kinney.epub",
     "descripcion": "Tercera entrega del Diario de Greg."
+  },
+  {
+    "id": 8,
+    "titulo": "Diario de Greg: Días de perros",
+    "autor": "Jeff Kinney",
+    "categoria": "Infantil",
+    "edad": "9-12 años",
+    "portada": "biblioteca/portadas/Diario de Greg dias de perro.svg",
+    "epub": "biblioteca/libros/Dias_de_perros_Jeff_Kinney.epub",
+    "descripcion": "Cuarta entrega del Diario de Greg."
   }
 ]
