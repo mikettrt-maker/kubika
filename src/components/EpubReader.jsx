@@ -1,15 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import JSZip from 'jszip';
 
-function parseXml(xmlStr) {
-  const parser = new DOMParser();
-  return parser.parseFromString(xmlStr, 'text/xml');
-}
-
-function getTextContent(node) {
-  return node?.textContent?.trim() || '';
-}
-
 export default function EpubReader({ libro, onBack }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -19,7 +10,6 @@ export default function EpubReader({ libro, onBack }) {
   const [bookTitle, setBookTitle] = useState('');
   const [bookAuthor, setBookAuthor] = useState('');
   const spineRef = useRef([]);
-  const manifestRef = useRef({});
   const zipRef = useRef(null);
   const destroyedRef = useRef(false);
 
@@ -37,121 +27,121 @@ export default function EpubReader({ libro, onBack }) {
     setCurrentIdx(0);
     setTotalItems(0);
 
-    const loadEPUB = async () => {
+    let cancelled = false;
+
+    (async () => {
       try {
         const res = await fetch(epubUrl);
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-
+        if (!res.ok) throw new Error('HTTP ' + res.status + ' al descargar el libro');
         const buffer = await res.arrayBuffer();
-        if (destroyedRef.current) return;
+        if (cancelled || destroyedRef.current) return;
 
         const zip = await JSZip.loadAsync(buffer);
+        if (cancelled || destroyedRef.current) return;
         zipRef.current = zip;
 
-        // Encontrar OPF desde container.xml
-        const containerXml = await zip.file('META-INF/container.xml').async('string');
-        const containerDoc = parseXml(containerXml);
-        const rootfileEl = containerDoc.querySelector('rootfile');
-        if (!rootfileEl) throw new Error('No se encontró rootfile en container.xml');
-        const opfPath = rootfileEl.getAttribute('full-path');
+        // Leer container.xml
+        const containerFile = zip.file('META-INF/container.xml');
+        if (!containerFile) throw new Error('No se encontró META-INF/container.xml');
+        const containerXml = await containerFile.async('string');
+        if (cancelled) return;
 
-        // Cargar OPF
-        const opfXml = await zip.file(opfPath).async('string');
-        const opfDoc = parseXml(opfXml);
+        // Extraer ruta del OPF
+        const opfMatch = containerXml.match(/rootfile\s+full-path\s*=\s*"([^"]+)"/i);
+        if (!opfMatch) throw new Error('No se encontró rootfile en container.xml');
+        const opfPath = opfMatch[1];
 
-        // Obtener título
-        const titleEl = opfDoc.querySelector('title') || opfDoc.querySelector('dc\\:title');
-        if (titleEl) setBookTitle(getTextContent(titleEl));
+        // Leer OPF
+        const opfFile = zip.file(opfPath);
+        if (!opfFile) throw new Error('No se encontró ' + opfPath);
+        const opfXml = await opfFile.async('string');
+        if (cancelled) return;
 
-        // Obtener autor
-        const authorEl = opfDoc.querySelector('creator') || opfDoc.querySelector('dc\\:creator');
-        if (authorEl) setBookAuthor(getTextContent(authorEl));
+        // Extraer título
+        const titleMatch = opfXml.match(/<dc:title[^>]*>([^<]+)<\/dc:title>/i);
+        if (titleMatch) setBookTitle(titleMatch[1].trim());
+        
+        // Extraer autor
+        const authorMatch = opfXml.match(/<dc:creator[^>]*>([^<]+)<\/dc:creator>/i);
+        if (authorMatch) setBookAuthor(authorMatch[1].trim());
 
-        // Construir manifest
+        // Extraer manifest (id -> href)
         const manifest = {};
-        opfDoc.querySelectorAll('item').forEach(item => {
-          const id = item.getAttribute('id');
-          const href = item.getAttribute('href');
-          const mediaType = item.getAttribute('media-type');
-          if (id && href) manifest[id] = { href, mediaType };
-        });
-        manifestRef.current = manifest;
+        const itemRegex = /<item\s[^>]*\/?>/gi;
+        let m;
+        while ((m = itemRegex.exec(opfXml)) !== null) {
+          const idMatch = m[0].match(/id\s*=\s*"([^"]+)"/i);
+          const hrefMatch = m[0].match(/href\s*=\s*"([^"]+)"/i);
+          if (idMatch && hrefMatch) manifest[idMatch[1]] = hrefMatch[1];
+        }
 
-        // Construir spine (orden de lectura)
+        // Extraer spine (orden de lectura)
         const opfDir = opfPath.substring(0, opfPath.lastIndexOf('/') + 1);
         const spine = [];
-        opfDoc.querySelectorAll('itemref').forEach(ref => {
-          const idref = ref.getAttribute('idref');
-          if (idref && manifest[idref]) {
-            spine.push(opfDir + manifest[idref].href);
+        const itemrefRegex = /<itemref\s[^>]*\/?>/gi;
+        while ((m = itemrefRegex.exec(opfXml)) !== null) {
+          const idrefMatch = m[0].match(/idref\s*=\s*"([^"]+)"/i);
+          if (idrefMatch && manifest[idrefMatch[1]]) {
+            spine.push(opfDir + manifest[idrefMatch[1]]);
           }
-        });
+        }
+
+        if (spine.length === 0) throw new Error('No se encontraron páginas en el libro');
         spineRef.current = spine;
         setTotalItems(spine.length);
 
-        if (destroyedRef.current) return;
+        if (cancelled || destroyedRef.current) return;
 
-        // Mostrar primer item
-        if (spine.length > 0) {
-          await showItem(0, zip, spine);
-        }
-        setLoading(false);
+        // Mostrar primera página
+        await loadPage(0, zip, spine);
+        if (!cancelled && !destroyedRef.current) setLoading(false);
       } catch (err) {
         console.error('EPUB error:', err);
-        if (!destroyedRef.current) {
-          setError('Error: ' + (err.message || 'desconocido'));
+        if (!cancelled && !destroyedRef.current) {
+          setError(err.message || 'Error desconocido');
           setLoading(false);
         }
       }
-    };
+    })();
 
-    loadEPUB();
-
-    return () => { destroyedRef.current = true; zipRef.current = null; };
+    return () => { cancelled = true; destroyedRef.current = true; zipRef.current = null; };
   }, [libro.epub, libro.id]);
 
-  const showItem = async (index, zip, spine) => {
+  const loadPage = async (index, zip, spine) => {
     spine = spine || spineRef.current;
-    if (!zip) zip = zipRef.current;
+    zip = zip || zipRef.current;
     if (!zip || index < 0 || index >= spine.length) return;
 
     try {
       const filePath = spine[index];
-      let html = await zip.file(filePath).async('string');
+      const file = zip.file(filePath);
+      if (!file) throw new Error('Archivo no encontrado: ' + filePath);
 
-      // Extraer solo el contenido del body (sin head/body tags)
-      const match = html.match(/<body[^>]*>([\s\S]*)<\/body>/i);
-      if (match) {
-        html = match[1];
-      } else {
-        // Si no hay body, usar todo el contenido
-        html = html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
-      }
+      let html = await file.async('string');
 
-      // Resolver rutas de imágenes y CSS dentro del EPUB
+      // Extraer contenido del body
+      const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+      const bodyContent = bodyMatch ? bodyMatch[1] : html;
+
+      // Resolver rutas relativas de imágenes
       const basePath = filePath.substring(0, filePath.lastIndexOf('/') + 1);
-      html = html.replace(/(src|href)="([^"]+)"/g, (m, attr, path) => {
-        if (path.startsWith('http') || path.startsWith('data:')) return m;
-        const resolved = basePath + path;
-        return attr + '="' + resolved + '"';
+      const resolved = bodyContent.replace(/(src|href)\s*=\s*"([^"]+)"/gi, (m, attr, path) => {
+        if (path.startsWith('http') || path.startsWith('data:') || path.startsWith('#')) return m;
+        const fullPath = basePath + path;
+        return attr + '="' + fullPath + '"';
       });
 
-      setContent(html);
+      setContent(resolved);
       setCurrentIdx(index);
     } catch (err) {
-      setContent('<p style="color:red">Error al cargar esta página.</p>');
+      setContent('<p style="color:red;padding:20px">Error al cargar esta página.</p>');
     }
   };
 
-  const goPrev = () => {
-    if (currentIdx > 0) showItem(currentIdx - 1);
-  };
+  const goPrev = () => { if (currentIdx > 0) loadPage(currentIdx - 1); };
+  const goNext = () => { if (currentIdx < spineRef.current.length - 1) loadPage(currentIdx + 1); };
 
-  const goNext = () => {
-    if (currentIdx < spineRef.current.length - 1) showItem(currentIdx + 1);
-  };
-
-  const progress = totalItems > 0 ? Math.round(((currentIdx + 1) / totalItems) * 100) : 0;
+  const pct = totalItems > 0 ? Math.round(((currentIdx + 1) / totalItems) * 100) : 0;
 
   return (
     <div className="flex flex-col h-full bg-white">
@@ -160,19 +150,17 @@ export default function EpubReader({ libro, onBack }) {
           className="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-          Volver
+          </svg> Volver
         </button>
         <div className="text-center min-w-0 mx-2">
           <h2 className="text-sm font-semibold text-slate-800 truncate max-w-[260px]">{bookTitle || libro.titulo}</h2>
           <p className="text-xs text-slate-400 truncate max-w-[260px]">{bookAuthor || libro.autor}</p>
         </div>
         <a href={epubUrl} download
-          className="flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors">
+          className="flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors shrink-0">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          EPUB
+          </svg> EPUB
         </a>
       </div>
 
@@ -199,7 +187,7 @@ export default function EpubReader({ libro, onBack }) {
             className="px-4 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 disabled:text-slate-300 disabled:cursor-default hover:bg-slate-100 rounded-lg transition-colors">
             &lsaquo; Anterior
           </button>
-          <span className="text-xs font-medium text-slate-500">{progress}% &middot; Pág {currentIdx + 1}/{totalItems}</span>
+          <span className="text-xs font-medium text-slate-500">{pct}% &middot; {currentIdx + 1}/{totalItems}</span>
           <button onClick={goNext} disabled={currentIdx >= totalItems - 1}
             className="px-4 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 disabled:text-slate-300 disabled:cursor-default hover:bg-slate-100 rounded-lg transition-colors">
             Siguiente &rsaquo;
