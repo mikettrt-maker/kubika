@@ -34,37 +34,34 @@ export default function EpubReader({ libro, onBack }) {
 
     setError(null);
 
-    fetch(epubUrl)
-      .then(res => {
-        if (destroyedRef.current) return null;
-        if (!res.ok) throw new Error('HTTP ' + res.status + ' al descargar EPUB');
-        return res.blob();
+    const book = window.ePub(epubUrl, { bookPath: epubUrl });
+    bookRef.current = book;
+
+    const rendition = book.renderTo(viewer, {
+      width: '100%',
+      height: h,
+      spread: 'none',
+      flow: 'paginated',
+    });
+    renditionRef.current = rendition;
+
+    rendition.on('relocated', (location) => {
+      if (location.start.percentage != null) {
+        setProgress(Math.round(location.start.percentage * 100));
+      }
+    });
+
+    rendition.display()
+      .then(() => {
+        if (!destroyedRef.current) setLoading(false);
       })
-      .then(blob => {
-        if (destroyedRef.current || !blob) return;
-
-        const url = URL.createObjectURL(blob);
-        const book = window.ePub(url);
-        bookRef.current = book;
-
-        const rendition = book.renderTo(viewer, {
-          width: '100%',
-          height: h,
-          spread: 'none',
-          flow: 'paginated',
-        });
-        renditionRef.current = rendition;
-
-        rendition.on('relocated', (location) => {
-          if (location.start.percentage != null) {
-            setProgress(Math.round(location.start.percentage * 100));
-          }
-        });
-
-        return rendition.display().then(() => {
-          URL.revokeObjectURL(url);
-        });
-      })
+      .catch((err) => {
+        console.error('EPUB error:', err);
+        if (!destroyedRef.current) {
+          setError('Error: ' + (err.message || 'no se pudo mostrar'));
+          setLoading(false);
+        }
+      });
       .then(() => {
         if (!destroyedRef.current) setLoading(false);
       })
