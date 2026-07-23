@@ -123,9 +123,11 @@ export default function EpubReader({ libro, onBack }) {
       const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
       let bodyContent = bodyMatch ? bodyMatch[1] : html;
 
-      // Quitar todas las imágenes y SVGs (solo texto)
+      // Quitar imágenes, SVGs y enlaces (solo texto)
       bodyContent = bodyContent.replace(/<img[^>]*>/gi, '');
       bodyContent = bodyContent.replace(/<svg[^>]*>[\s\S]*?<\/svg>/gi, '');
+      bodyContent = bodyContent.replace(/<a[^>]*>/gi, '');
+      bodyContent = bodyContent.replace(/<\/a>/gi, '');
 
       // Si la página quedó vacía (solo etiquetas vacías), mostrar portada del catálogo
       const textContent = bodyContent.replace(/<[^>]+>/g, '').trim();
