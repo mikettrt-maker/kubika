@@ -203,7 +203,7 @@ export default function EpubReader({ libro, onBack }) {
         </a>
       </div>
 
-      <div ref={contentRef} className="flex-1 overflow-y-auto bg-white px-6 py-8 leading-relaxed text-slate-800 text-xl font-handwriting">
+      <div ref={contentRef} className="flex-1 overflow-y-auto bg-white px-6 py-8 leading-relaxed text-slate-800 text-2xl font-handwriting">
         {loading && (
           <div className="flex items-center justify-center gap-3 py-20">
             <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
