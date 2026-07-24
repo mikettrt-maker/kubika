@@ -187,8 +187,8 @@ export default function Biblioteca({ onClose }) {
                     />
                   </div>
                   <div className="mt-1.5 px-0.5">
-                    <p className="text-xs font-semibold text-slate-700 truncate group-hover:text-indigo-600 transition-colors">{libro.titulo}</p>
-                    <p className="text-[11px] text-slate-400 truncate">{libro.autor}</p>
+                    <p className="text-xs font-semibold text-slate-700 leading-tight group-hover:text-indigo-600 transition-colors line-clamp-3">{libro.titulo}</p>
+                    <p className="text-[11px] text-slate-400 truncate mt-0.5">{libro.autor}</p>
                   </div>
                 </div>
               ))}
