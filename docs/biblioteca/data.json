@@ -128,5 +128,35 @@
     "portada": "biblioteca/portadas/Diario de Greg carreta y manta.svg",
     "epub": "biblioteca/libros/Carretera_y_manta_Jeff_Kinney.epub",
     "descripcion": "Décima entrega del Diario de Greg."
+  },
+  {
+    "id": 15,
+    "titulo": "Cuentos de buenas noches para niñas rebeldes",
+    "autor": "Elena Favilli",
+    "categoria": "Infantil",
+    "edad": "9-12 años",
+    "portada": "biblioteca/portadas/Cuentos de buenas noches para niñas rebeldes.svg",
+    "epub": "biblioteca/libros/Cuentos_de_buenas_noches_para_ninas_rebeldes_Elena_Favilli.epub",
+    "descripcion": "100 historias de mujeres extraordinarias."
+  },
+  {
+    "id": 16,
+    "titulo": "Cuentos de buenas noches para niñas rebeldes 2",
+    "autor": "Elena Favilli",
+    "categoria": "Infantil",
+    "edad": "9-12 años",
+    "portada": "biblioteca/portadas/Cuentos de buenas noches para niñas rebeldes 2.svg",
+    "epub": "biblioteca/libros/Cuentos_de_buenas_noches_para_ninas_rebeldes_2_Elena_Favilli.epub",
+    "descripcion": "Más historias de mujeres extraordinarias."
+  },
+  {
+    "id": 17,
+    "titulo": "Cuentos de buenas noches para niñas rebeldes 3",
+    "autor": "Elena Favilli",
+    "categoria": "Infantil",
+    "edad": "9-12 años",
+    "portada": "biblioteca/portadas/Cuentos de buenas noches para niñas rebeldes 3.svg",
+    "epub": "biblioteca/libros/Cuentos_de_buenas_noches_para_ninas_rebeldes_3_Elena_Favilli.epub",
+    "descripcion": "Tercera parte de historias de mujeres extraordinarias."
   }
 ]
