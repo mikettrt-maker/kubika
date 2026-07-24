@@ -342,7 +342,7 @@ export default function App() {
     <div className="h-screen flex flex-col bg-slate-50 overflow-hidden">
       {/* ===== BARRA SUPERIOR ===== */}
       <header className="no-print animate-header-slide flex items-center justify-between px-2 py-1.5 bg-white/70 backdrop-blur-xl border-b border-slate-200/50 shadow-sm z-50">
-        {/* Grupo izquierdo: Logo + Título + Usuario */}
+         {/* Grupo izquierdo: Logo + Título + Usuario */}
         <div className="flex items-center gap-1 flex-shrink-0">
           <div className="flex items-center flex-shrink-0" style={{ width: '140px' }}>
             <img 
@@ -374,7 +374,7 @@ export default function App() {
                     handleSave();
                   }
                 }}
-                className="px-2 py-1 text-sm font-bold text-slate-800 bg-white border-2 border-kubika-400 rounded-lg outline-none w-full shadow-sm"
+                className="workspace-input-anim px-2 py-1 text-sm font-bold text-slate-800 bg-white border-2 border-kubika-400 rounded-lg outline-none w-full shadow-sm"
                 autoFocus
                 placeholder="Nombre del diseño"
               />
@@ -398,128 +398,148 @@ export default function App() {
               <p className="text-sm font-semibold text-slate-700 truncate" title={displayName}>{displayName}</p>
               <p className="text-[11px] text-slate-400">Alumno</p>
             </div>
-            <button
-              onClick={signOut}
-              className="btn-ripple flex items-center justify-center w-10 h-10 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all active:scale-90"
-              title="Cerrar sesión"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-              </svg>
-            </button>
+            <div className="kubika-tooltip-wrapper">
+              <button
+                onClick={signOut}
+                className="btn-ripple flex items-center justify-center w-10 h-10 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all active:scale-90"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+              </button>
+              <span className="kubika-tooltip">Cerrar sesión</span>
+            </div>
           </div>
         </div>
 
         {/* Herramientas (centro) */}
         <div className="flex items-center justify-center gap-0.5 flex-1 min-w-0">
-          {/* Agregar texto libre */}
-          <button
-            onClick={addFreeText}
-            className="btn-icon btn-ripple flex items-center justify-center w-9 h-9 rounded-xl hover:bg-kubika-50 transition-all duration-200 group"
-            title="Agregar texto con estilo manuscrito"
-          >
-            <svg className="w-6 h-6 text-kubika-500 group-hover:scale-125 group-hover:text-kubika-700 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-          </button>
 
-          {/* Agregar texto matemático */}
-          <button
-            onClick={addMathText}
-            className="btn-icon btn-ripple flex items-center justify-center w-9 h-9 rounded-xl hover:bg-purple-50 transition-all duration-200 group"
-            title="Agregar texto matemático"
-          >
-            <svg className="w-6 h-6 text-purple-500 group-hover:scale-125 group-hover:text-purple-700 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-            </svg>
-          </button>
-
-          {/* Antena */}
-          <button
-            onClick={addAntenna}
-            className="btn-icon btn-ripple flex items-center justify-center w-9 h-9 rounded-xl hover:bg-orange-50 transition-all duration-200 group"
-            title="Agregar antena para cálculo mental"
-          >
-            <svg className="w-6 h-6 text-orange-500 group-hover:scale-125 group-hover:text-orange-700 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 4h18M3 12h18M3 20h12M3 12l4-4m-4 4l4 4" />
-            </svg>
-          </button>
-
-          {/* Guardar */}
-          <button
-            onClick={() => handleSave()}
-            className="btn-icon btn-ripple flex items-center justify-center w-9 h-9 rounded-xl hover:bg-emerald-50 transition-all duration-200 group"
-            title="Guardar trabajo"
-          >
-            <svg className="w-6 h-6 text-emerald-500 group-hover:scale-125 group-hover:text-emerald-700 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-            </svg>
-          </button>
-
-          {/* Cargar */}
-          <button
-            onClick={openLoadModal}
-            className="btn-icon btn-ripple flex items-center justify-center w-9 h-9 rounded-xl hover:bg-amber-50 transition-all duration-200 group"
-            title="Cargar trabajo guardado"
-          >
-            <svg className="w-6 h-6 text-amber-500 group-hover:scale-125 group-hover:text-amber-700 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
-            </svg>
-          </button>
-
-          {/* Exportar PDF */}
-          <button
-            onClick={handleExportPdf}
-            disabled={pdfLoading}
-            className="btn-icon btn-ripple flex items-center justify-center w-9 h-9 rounded-xl hover:bg-rose-50 transition-all duration-200 group disabled:opacity-50"
-            title="Descargar como PDF"
-          >
-            {pdfLoading ? (
-              <svg className="animate-spin w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+          {/* Grupo 1: Texto */}
+          <div className="kubika-tooltip-wrapper">
+            <button
+              onClick={addFreeText}
+              className="btn-icon btn-ripple flex items-center justify-center w-9 h-9 rounded-xl hover:bg-kubika-50 transition-all duration-200 group"
+            >
+              <svg className="w-6 h-6 text-kubika-500 group-hover:scale-125 group-hover:text-kubika-700 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>
-            ) : (
-              <svg className="w-6 h-6 text-rose-500 group-hover:scale-125 group-hover:text-rose-700 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-              </svg>
-            )}
-          </button>
+            </button>
+            <span className="kubika-tooltip">Texto libre</span>
+          </div>
 
-          {/* Toggle: Regletas / Geoplano */}
-          <button
-            onClick={() => setToolMode(m => m === 'regletas' ? 'geoplano' : 'regletas')}
-            className="flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-200 active:scale-90 hover:bg-slate-100"
-            style={{
-              background: toolMode === 'geoplano'
-                ? 'linear-gradient(135deg, #f59e0b, #ea580c)'
-                : '#f1f5f9',
-              color: toolMode === 'geoplano' ? '#fff' : '#64748b',
-              boxShadow: toolMode === 'geoplano'
-                ? '0 4px 12px rgba(245, 158, 11, 0.3)'
-                : 'none',
-            }}
-            title={toolMode === 'regletas' ? 'Cambiar a Geoplano' : 'Cambiar a Regletas'}
-          >
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              {toolMode === 'geoplano' ? (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+          <div className="kubika-tooltip-wrapper">
+            <button
+              onClick={addMathText}
+              className="btn-icon btn-ripple flex items-center justify-center w-9 h-9 rounded-xl hover:bg-purple-50 transition-all duration-200 group"
+            >
+              <svg className="w-6 h-6 text-purple-500 group-hover:scale-125 group-hover:text-purple-700 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+            </button>
+            <span className="kubika-tooltip">Fórmula matemática</span>
+          </div>
+
+          <div className="kubika-tooltip-wrapper">
+            <button
+              onClick={addAntenna}
+              className="btn-icon btn-ripple flex items-center justify-center w-9 h-9 rounded-xl hover:bg-orange-50 transition-all duration-200 group"
+            >
+              <svg className="w-6 h-6 text-orange-500 group-hover:scale-125 group-hover:text-orange-700 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 4h18M3 12h18M3 20h12M3 12l4-4m-4 4l4 4" />
+              </svg>
+            </button>
+            <span className="kubika-tooltip">Antena mental</span>
+          </div>
+
+          {/* Separador */}
+          <div className="header-divider" />
+
+          {/* Grupo 2: Guardar / Cargar / PDF */}
+          <div className="kubika-tooltip-wrapper">
+            <button
+              onClick={() => handleSave()}
+              className="btn-icon btn-ripple flex items-center justify-center w-9 h-9 rounded-xl hover:bg-emerald-50 transition-all duration-200 group"
+            >
+              <svg className="w-6 h-6 text-emerald-500 group-hover:scale-125 group-hover:text-emerald-700 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+              </svg>
+            </button>
+            <span className="kubika-tooltip">Guardar trabajo</span>
+          </div>
+
+          <div className="kubika-tooltip-wrapper">
+            <button
+              onClick={openLoadModal}
+              className="btn-icon btn-ripple flex items-center justify-center w-9 h-9 rounded-xl hover:bg-amber-50 transition-all duration-200 group"
+            >
+              <svg className="w-6 h-6 text-amber-500 group-hover:scale-125 group-hover:text-amber-700 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+              </svg>
+            </button>
+            <span className="kubika-tooltip">Cargar trabajo</span>
+          </div>
+
+          <div className="kubika-tooltip-wrapper">
+            <button
+              onClick={handleExportPdf}
+              disabled={pdfLoading}
+              className="btn-icon btn-ripple flex items-center justify-center w-9 h-9 rounded-xl hover:bg-rose-50 transition-all duration-200 group disabled:opacity-50"
+            >
+              {pdfLoading ? (
+                <svg className="animate-spin w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
               ) : (
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                <svg className="w-6 h-6 text-rose-500 group-hover:scale-125 group-hover:text-rose-700 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                </svg>
               )}
-            </svg>
-          </button>
+            </button>
+            <span className="kubika-tooltip">Descargar PDF</span>
+          </div>
 
-          {/* Limpiar */}
-          <button
-            onClick={handleClear}
-            className="btn-icon btn-ripple flex items-center justify-center w-9 h-9 rounded-xl hover:bg-red-50 transition-all duration-200 group"
-            title="Limpiar lienzo"
-          >
-            <svg className="w-6 h-6 text-red-400 group-hover:scale-125 group-hover:text-red-600 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-          </button>
+          {/* Separador */}
+          <div className="header-divider" />
+
+          {/* Grupo 3: Modo herramienta + limpiar */}
+          <div className="kubika-tooltip-wrapper">
+            <button
+              onClick={() => setToolMode(m => m === 'regletas' ? 'geoplano' : 'regletas')}
+              className="flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-200 active:scale-90 hover:bg-slate-100"
+              style={{
+                background: toolMode === 'geoplano'
+                  ? 'linear-gradient(135deg, #f59e0b, #ea580c)'
+                  : '#f1f5f9',
+                color: toolMode === 'geoplano' ? '#fff' : '#64748b',
+                boxShadow: toolMode === 'geoplano'
+                  ? '0 4px 12px rgba(245, 158, 11, 0.3)'
+                  : 'none',
+              }}
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                {toolMode === 'geoplano' ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                )}
+              </svg>
+            </button>
+            <span className="kubika-tooltip">{toolMode === 'regletas' ? 'Modo Geoplano' : 'Modo Regletas'}</span>
+          </div>
+
+          <div className="kubika-tooltip-wrapper">
+            <button
+              onClick={handleClear}
+              className="btn-icon btn-ripple flex items-center justify-center w-9 h-9 rounded-xl hover:bg-red-50 transition-all duration-200 group"
+            >
+              <svg className="w-6 h-6 text-red-400 group-hover:scale-125 group-hover:text-red-600 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+            <span className="kubika-tooltip">Limpiar lienzo</span>
+          </div>
         </div>
 
         {/* Botón independiente de Biblioteca */}
@@ -541,22 +561,24 @@ export default function App() {
 
       {/* ===== CONTENIDO PRINCIPAL ===== */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Panel lateral condicional */}
-        <aside className="no-print">
-          {toolMode === 'regletas' ? (
-            <RodPanel />
-          ) : (
-            <GeoplanoPanel
-              geoMode={geoMode}
-              onModeChange={handleGeoModeChange}
-              activeColor={activeBandColor}
-              onColorChange={setActiveBandColor}
-              bands={geoBands}
-              onClearBands={clearBands}
-              isInsertingPivot={isInsertingPivot}
-              onInsertingPivotChange={setIsInsertingPivot}
-            />
-          )}
+        {/* Panel lateral condicional con crossfade */}
+        <aside className="no-print" key={toolMode}>
+          <div className="panel-fade-enter h-full">
+            {toolMode === 'regletas' ? (
+              <RodPanel />
+            ) : (
+              <GeoplanoPanel
+                geoMode={geoMode}
+                onModeChange={handleGeoModeChange}
+                activeColor={activeBandColor}
+                onColorChange={setActiveBandColor}
+                bands={geoBands}
+                onClearBands={clearBands}
+                isInsertingPivot={isInsertingPivot}
+                onInsertingPivotChange={setIsInsertingPivot}
+              />
+            )}
+          </div>
         </aside>
 
         {/* Lienzo */}
@@ -612,13 +634,29 @@ export default function App() {
           }`}
         >
           {notification.type !== 'error' && (
-            <span className="w-5 h-5 rounded-full bg-kubika-100 flex items-center justify-center flex-shrink-0">
-              <svg className="w-3 h-3 text-kubika-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+            <span className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+              <svg className="w-3 h-3 text-emerald-600 check-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </span>
+          )}
+          {notification.type === 'error' && (
+            <span className="w-5 h-5 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+              <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
               </svg>
             </span>
           )}
           {notification.message}
+          {/* Barra de progreso de desaparición */}
+          <div
+            className="toast-progress"
+            style={{
+              background: notification.type === 'error'
+                ? 'rgba(255,255,255,0.4)'
+                : 'linear-gradient(90deg, #4c6ef5, #7c3aed)',
+            }}
+          />
         </div>
       )}
     </div>

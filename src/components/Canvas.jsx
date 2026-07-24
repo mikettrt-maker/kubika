@@ -511,7 +511,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
 
   return (
     <div
-      className="relative flex-1 overflow-auto bg-slate-100"
+      className="relative flex-1 overflow-auto bg-slate-100 canvas-inset-shadow"
       onDragOver={handleDragOver}
       onDrop={handleDrop}
       onMouseDown={handleCanvasMouseDown}

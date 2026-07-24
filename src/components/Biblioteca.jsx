@@ -164,14 +164,14 @@ export default function Biblioteca({ onClose }) {
               <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wider">{categoria}</h2>
               <span className="text-[11px] font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{librosCat.length}</span>
             </div>
-            <div className="flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-none" style={{ scrollbarWidth: 'none' }}>
+            <div className="grid grid-cols-2 gap-3 px-4 pb-2">
               {librosCat.map(libro => (
                 <div
                   key={libro.id}
                   onClick={() => openBook(libro)}
-                  className="flex-shrink-0 w-[130px] cursor-pointer group"
+                  className="cursor-pointer group"
                 >
-                  <div className="w-[130px] h-[185px] rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shadow-sm group-hover:shadow-md transition-shadow">
+                  <div className="aspect-[130/185] rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shadow-sm group-hover:shadow-md transition-shadow">
                     <img
                       src={libro.portada}
                       alt={libro.titulo}

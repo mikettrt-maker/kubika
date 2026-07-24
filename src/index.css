@@ -27,12 +27,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ========== Cuadrícula del Lienzo (Estilo Cuaderno) ========== */
+/* ========== Cuadrícula del Lienzo (Estilo puntos — más limpio) ========== */
 .canvas-grid {
   background-color: var(--canvas-bg);
-  background-image:
-    linear-gradient(rgba(148, 163, 184, 0.4) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.4) 1px, transparent 1px);
+  background-image: radial-gradient(circle, rgba(148, 163, 184, 0.55) 1.2px, transparent 1.2px);
   background-size: var(--grid-size) var(--grid-size);
   background-position: 0 0;
 }
@@ -402,7 +400,8 @@ body {
 .floating-rod {
   position: absolute;
   border-radius: 8px;
-  opacity: 0.15;
+  opacity: 0.28;
+  filter: blur(0.5px);
   animation: floatRod 6s ease-in-out infinite;
 }
 
@@ -440,6 +439,8 @@ body {
 /* ========== Notificación animada ========== */
 .notification-toast {
   animation: notificationIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  position: relative;
+  overflow: hidden;
 }
 
 @keyframes notificationIn {
@@ -451,6 +452,32 @@ body {
     transform: translateX(0) scale(1);
     opacity: 1;
   }
+}
+
+/* Barra de progreso de la toast */
+.toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  border-radius: 0 0 0 12px;
+  animation: toastProgress 3s linear forwards;
+}
+
+@keyframes toastProgress {
+  0%   { width: 100%; }
+  100% { width: 0%; }
+}
+
+/* Check animado con stroke-dasharray */
+.check-icon {
+  stroke-dasharray: 30;
+  stroke-dashoffset: 30;
+  animation: drawCheck 0.5s ease-out 0.2s forwards;
+}
+
+@keyframes drawCheck {
+  to { stroke-dashoffset: 0; }
 }
 
 /* ========== Animación de entrada del Login ========== */
@@ -474,6 +501,175 @@ body {
   background-color: rgba(99, 102, 241, 0.05);
   outline: 2px dashed rgba(99, 102, 241, 0.3);
   outline-offset: -2px;
+}
+
+/* ========== Tooltip personalizado Kubika ========== */
+.kubika-tooltip-wrapper {
+  position: relative;
+  display: inline-flex;
+}
+
+.kubika-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: #1e293b;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  padding: 5px 10px;
+  border-radius: 8px;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  letter-spacing: 0.02em;
+  z-index: 9999;
+}
+
+.kubika-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #1e293b;
+}
+
+.kubika-tooltip-wrapper:hover .kubika-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* ========== Separador visual del header ========== */
+.header-divider {
+  width: 1px;
+  height: 28px;
+  background: linear-gradient(to bottom, transparent, rgba(148,163,184,0.4), transparent);
+  flex-shrink: 0;
+  margin: 0 2px;
+}
+
+/* ========== Hover tintado de regleta en panel ========== */
+.rod-panel-item {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 12px;
+  padding: 6px 8px;
+  margin: 0 -8px;
+  cursor: grab;
+}
+
+/* ========== Badge número de regleta ========== */
+.rod-value-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 800;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.rod-panel-item:hover .rod-value-badge {
+  transform: scale(1.15);
+}
+
+/* ========== Transición de panel lateral (crossfade) ========== */
+.panel-fade-enter {
+  animation: panelFadeIn 0.25s ease-out;
+}
+
+@keyframes panelFadeIn {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ========== Borde aurora para la card de login ========== */
+.aurora-border {
+  position: relative;
+}
+
+.aurora-border::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    rgba(76, 110, 245, 0.6),
+    rgba(124, 58, 237, 0.6),
+    rgba(236, 72, 153, 0.4),
+    rgba(76, 110, 245, 0.6)
+  );
+  background-size: 300% 300%;
+  animation: auroraShift 4s linear infinite;
+  border-radius: 26px;
+  z-index: -1;
+  opacity: 0.7;
+  filter: blur(4px);
+}
+
+@keyframes auroraShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ========== Input con foco dramático ========== */
+.input-glow:focus {
+  outline: none;
+  border-color: transparent;
+  box-shadow:
+    0 0 0 2px rgba(76, 110, 245, 0.25),
+    0 0 0 4px rgba(76, 110, 245, 0.08),
+    0 4px 16px rgba(76, 110, 245, 0.15);
+}
+
+/* ========== Punto pulsante (unsaved changes) ========== */
+.unsaved-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  animation: unsavedPulse 1.8s ease-in-out infinite;
+  box-shadow: 0 0 0 0 rgba(34,197,94,0.5);
+}
+
+@keyframes unsavedPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(34,197,94,0.5); }
+  70%  { box-shadow: 0 0 0 5px rgba(34,197,94,0); }
+  100% { box-shadow: 0 0 0 0 rgba(34,197,94,0); }
+}
+
+/* ========== Micro-animación del input de nombre ========== */
+@keyframes inputExpand {
+  from { opacity: 0; transform: scaleX(0.95); }
+  to   { opacity: 1; transform: scaleX(1); }
+}
+
+.workspace-input-anim {
+  animation: inputExpand 0.18s ease-out;
+  transform-origin: left center;
+}
+
+/* ========== Sombra inset en bordes del canvas ========== */
+.canvas-inset-shadow {
+  box-shadow:
+    inset 8px 0 16px -8px rgba(0,0,0,0.06),
+    inset -8px 0 16px -8px rgba(0,0,0,0.06),
+    inset 0 8px 16px -8px rgba(0,0,0,0.06),
+    inset 0 -8px 16px -8px rgba(0,0,0,0.04);
 }
 
 /* ========== Print/PDF styles ========== */

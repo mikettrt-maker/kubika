@@ -46,7 +46,14 @@ export default function AuthForm({ onLogin, onLoginStart, error: externalError, 
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-kubika-950 via-kubika-900 to-purple-900 p-4">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{
+      background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 30%, #2e1065 60%, #0f172a 100%)'
+    }}>
+      {/* Brillo ambiental decorativo */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(76,110,245,0.18) 0%, transparent 70%)' }} />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full" style={{ background: 'radial-gradient(circle, rgba(167,139,250,0.18) 0%, transparent 70%)' }} />
+      </div>
       {/* Fondo decorativo con regletas flotantes animadas */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="floating-rod top-[10%] left-[5%] w-32 h-8 bg-rod-red/20" style={{ animationDelay: '0s', animationDuration: '7s' }} />
@@ -60,6 +67,8 @@ export default function AuthForm({ onLogin, onLoginStart, error: externalError, 
       </div>
 
       <div className="login-card relative z-10 w-full max-w-md">
+        {/* Borde aurora animado */}
+        <div className="aurora-border rounded-3xl">
         {/* Logo y título */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-24 h-24 rounded-2xl bg-gradient-to-br from-kubika-400 to-purple-500 shadow-2xl shadow-kubika-500/20 mb-4 overflow-hidden relative">
@@ -86,7 +95,7 @@ export default function AuthForm({ onLogin, onLoginStart, error: externalError, 
         </div>
 
         {/* Card del formulario */}
-        <div className="glass rounded-3xl p-8 shadow-glass-lg">
+        <div className="glass rounded-3xl p-8 shadow-glass-lg relative z-10 bg-white/75">
           <h2 className="text-xl font-bold text-slate-700 mb-1">
             Bienvenido
           </h2>
@@ -112,7 +121,7 @@ export default function AuthForm({ onLogin, onLoginStart, error: externalError, 
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   placeholder="kubika.alumno01"
-                  className="input-field pl-10"
+                  className="input-field input-glow pl-10 w-full"
                   autoComplete="username"
                   autoFocus
                 />
@@ -136,7 +145,7 @@ export default function AuthForm({ onLogin, onLoginStart, error: externalError, 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••"
-                  className="input-field pl-10"
+                  className="input-field input-glow pl-10 w-full"
                   autoComplete="current-password"
                 />
               </div>
@@ -183,6 +192,7 @@ export default function AuthForm({ onLogin, onLoginStart, error: externalError, 
             </button>
           </form>
         </div>
+        </div>{/* cierra aurora-border */}
 
         {/* Footer */}
         <p className="text-center text-kubika-300/60 text-xs mt-6">
