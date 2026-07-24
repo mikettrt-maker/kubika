@@ -78,5 +78,25 @@
     "portada": "biblioteca/portadas/Diario de Greg La cruda realidad.svg",
     "epub": "biblioteca/libros/La_cruda_realidad_Jeff_Kinney.epub",
     "descripcion": "Quinta entrega del Diario de Greg."
+  },
+  {
+    "id": 10,
+    "titulo": "Diario de Greg: Sin salida",
+    "autor": "Jeff Kinney",
+    "categoria": "Infantil",
+    "edad": "9-12 años",
+    "portada": "biblioteca/portadas/Diario de Greg Sin salida.svg",
+    "epub": "biblioteca/libros/Sin_salida_Jeff_Kinney.epub",
+    "descripcion": "Sexta entrega del Diario de Greg."
+  },
+  {
+    "id": 11,
+    "titulo": "Diario de Greg: Buscando plan",
+    "autor": "Jeff Kinney",
+    "categoria": "Infantil",
+    "edad": "9-12 años",
+    "portada": "biblioteca/portadas/Diario de Greg buscando plan.svg",
+    "epub": "biblioteca/libros/Buscando_plan_Jeff_Kinney.epub",
+    "descripcion": "Séptima entrega del Diario de Greg."
   }
 ]
