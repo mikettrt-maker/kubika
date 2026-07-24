@@ -22,12 +22,14 @@ export default function Biblioteca({ onClose }) {
         setLoading(false);
         // Leer progreso guardado
         try {
-          const prog = JSON.parse(localStorage.getItem('kubika_progress') || '{}');
-          const entries = Object.entries(prog);
-          if (entries.length > 0) {
-            const [id, info] = entries[entries.length - 1];
-            const libroData = data.find(l => l.id == id);
-            if (libroData) setSavedProgress({ ...libroData, page: info.page });
+          const lastId = localStorage.getItem('kubika_last_book');
+          if (lastId) {
+            const prog = JSON.parse(localStorage.getItem('kubika_progress') || '{}');
+            const info = prog[lastId];
+            if (info) {
+              const libroData = data.find(l => l.id == lastId);
+              if (libroData) setSavedProgress({ ...libroData, page: info.page });
+            }
           }
         } catch {}
       })
@@ -38,15 +40,15 @@ export default function Biblioteca({ onClose }) {
   useEffect(() => {
     if (!selectedLibro) {
       try {
-        const prog = JSON.parse(localStorage.getItem('kubika_progress') || '{}');
-        const entries = Object.entries(prog);
-        if (entries.length > 0) {
-          const [id, info] = entries[entries.length - 1];
-          const libroData = libros.find(l => l.id == id);
-          if (libroData) setSavedProgress({ ...libroData, page: info.page });
-        } else {
-          setSavedProgress(null);
-        }
+        const lastId = localStorage.getItem('kubika_last_book');
+        if (lastId) {
+          const prog = JSON.parse(localStorage.getItem('kubika_progress') || '{}');
+          const info = prog[lastId];
+          if (info) {
+            const libroData = libros.find(l => l.id == lastId);
+            if (libroData) setSavedProgress({ ...libroData, page: info.page });
+          } else { setSavedProgress(null); }
+        } else { setSavedProgress(null); }
       } catch { setSavedProgress(null); }
     }
   }, [selectedLibro]);

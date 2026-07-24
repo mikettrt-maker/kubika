@@ -24,6 +24,7 @@ export default function EpubReader({ libro, onBack, startPage }) {
         const data = JSON.parse(localStorage.getItem('kubika_progress') || '{}');
         data[libro.id] = { page: currentIdx, titulo: libro.titulo, portada: libro.portada, epub: libro.epub, autor: libro.autor, categoria: libro.categoria, edad: libro.edad, descripcion: libro.descripcion };
         localStorage.setItem('kubika_progress', JSON.stringify(data));
+        localStorage.setItem('kubika_last_book', String(libro.id));
       } catch {}
     }
   }, [currentIdx, showCover]);
