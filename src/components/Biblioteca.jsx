@@ -34,6 +34,23 @@ export default function Biblioteca({ onClose }) {
       .catch(e => { setError(e.message); setLoading(false); });
   }, []);
 
+  // Refrescar progreso al volver del lector
+  useEffect(() => {
+    if (!selectedLibro) {
+      try {
+        const prog = JSON.parse(localStorage.getItem('kubika_progress') || '{}');
+        const entries = Object.entries(prog);
+        if (entries.length > 0) {
+          const [id, info] = entries[entries.length - 1];
+          const libroData = libros.find(l => l.id == id);
+          if (libroData) setSavedProgress({ ...libroData, page: info.page });
+        } else {
+          setSavedProgress(null);
+        }
+      } catch { setSavedProgress(null); }
+    }
+  }, [selectedLibro]);
+
   const openBook = (libro, page) => {
     setStartPage(page || 0);
     setSelectedLibro(libro);
