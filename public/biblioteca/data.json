@@ -98,5 +98,35 @@
     "portada": "biblioteca/portadas/Diario de Greg buscando plan.svg",
     "epub": "biblioteca/libros/Buscando_plan_Jeff_Kinney.epub",
     "descripcion": "Séptima entrega del Diario de Greg."
+  },
+  {
+    "id": 12,
+    "titulo": "Diario de Greg: Mala suerte",
+    "autor": "Jeff Kinney",
+    "categoria": "Infantil",
+    "edad": "9-12 años",
+    "portada": "biblioteca/portadas/Diario de Greg mala suerte.svg",
+    "epub": "biblioteca/libros/Mala_suerte_Jeff_Kinney.epub",
+    "descripcion": "Octava entrega del Diario de Greg."
+  },
+  {
+    "id": 13,
+    "titulo": "Diario de Greg: Vieja escuela",
+    "autor": "Jeff Kinney",
+    "categoria": "Infantil",
+    "edad": "9-12 años",
+    "portada": "biblioteca/portadas/Diario de Greg vieja escuela.svg",
+    "epub": "biblioteca/libros/Vieja_escuela_Jeff_Kinney.epub",
+    "descripcion": "Novena entrega del Diario de Greg."
+  },
+  {
+    "id": 14,
+    "titulo": "Diario de Greg: Carretera y manta",
+    "autor": "Jeff Kinney",
+    "categoria": "Infantil",
+    "edad": "9-12 años",
+    "portada": "biblioteca/portadas/Diario de Greg carreta y manta.svg",
+    "epub": "biblioteca/libros/Carretera_y_manta_Jeff_Kinney.epub",
+    "descripcion": "Décima entrega del Diario de Greg."
   }
 ]
