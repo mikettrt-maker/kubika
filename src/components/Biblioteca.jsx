@@ -164,7 +164,7 @@ export default function Biblioteca({ onClose }) {
               <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wider">{categoria}</h2>
               <span className="text-[11px] font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{librosCat.length}</span>
             </div>
-            <div className="grid grid-cols-5 gap-2 px-4 pb-2">
+            <div className="grid grid-cols-8 gap-2 px-4 pb-2">
               {librosCat.map(libro => (
                 <div
                   key={libro.id}
