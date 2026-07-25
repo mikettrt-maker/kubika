@@ -158,5 +158,35 @@
     "portada": "biblioteca/portadas/Cuentos de buenas noches para niñas rebeldes 3.svg",
     "epub": "biblioteca/libros/Cuentos_de_buenas_noches_para_ninas_rebeldes_3_Elena_Favilli.epub",
     "descripcion": "Tercera parte de historias de mujeres extraordinarias."
+  },
+  {
+    "id": 18,
+    "titulo": "La ciudad de las bestias",
+    "autor": "Isabel Allende",
+    "categoria": "Infantil",
+    "edad": "12+ años",
+    "portada": "biblioteca/portadas/La ciudad de las bestias.svg",
+    "epub": "biblioteca/libros/La_ciudad_de_las_bestias_Isabel_Allende.epub",
+    "descripcion": "Primera parte de las Memorias del Águila y del Jaguar."
+  },
+  {
+    "id": 19,
+    "titulo": "El reino del dragón de oro",
+    "autor": "Isabel Allende",
+    "categoria": "Infantil",
+    "edad": "12+ años",
+    "portada": "biblioteca/portadas/El reino del dragon de oro.svg",
+    "epub": "biblioteca/libros/El_reino_del_Dragon_de_Oro_Isabel_Allende.epub",
+    "descripcion": "Segunda parte de las Memorias del Águila y del Jaguar."
+  },
+  {
+    "id": 20,
+    "titulo": "El bosque de los pigmeos",
+    "autor": "Isabel Allende",
+    "categoria": "Infantil",
+    "edad": "12+ años",
+    "portada": "biblioteca/portadas/el bosque de los pigmeos.svg",
+    "epub": "biblioteca/libros/El_bosque_de_los_pigmeos_Isabel_Allende.epub",
+    "descripcion": "Tercera parte de las Memorias del Águila y del Jaguar."
   }
 ]
