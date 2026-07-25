@@ -361,5 +361,49 @@
     "epub": "biblioteca/libros/El_misterio_del_portero_fantasma_Roberto_Santiago.epub",
     "descripcion": "Un portero fantasma aparece en el campo de fútbol y detiene todos los penaltis de forma imposible. ¿Es real o es un truco? Los Futbolísimos se lanzan a investigar este misterio sobrenatural mientras se preparan para el partido más importante de la temporada.",
     "pregunta": "¿Crees en los fantasmas o siempre hay una explicación lógica para todo?"
+  },
+  {
+    "id": 35,
+    "titulo": "Charlie y la fábrica de chocolate",
+    "autor": "Roald Dahl",
+    "categoria": "Infantil",
+    "edad": "6-8 años",
+    "portada": "biblioteca/portadas/charlie y la fábrica de chocolates.svg",
+    "epub": "biblioteca/libros/Charlie_y_la_fabrica_de_chocolate_Roald_Dahl.epub",
+    "descripcion": "Charlie Bucket encuentra un billete dorado para visitar la misteriosa fábrica de chocolate de Willy Wonka. Un mundo de golosinas increíbles, inventos alocados y lecciones inolvidables espera a Charlie y a los otros afortunados ganadores.",
+    "pregunta": "Si ganaras un pase especial para un lugar único, ¿qué te gustaría que hubiera dentro?"
+  },
+  {
+    "id": 36,
+    "titulo": "Charlie y el gran ascensor de cristal",
+    "autor": "Roald Dahl",
+    "categoria": "Infantil",
+    "edad": "6-8 años",
+    "portada": "biblioteca/portadas/Charlie y el gran ascensor de cristal.svg",
+    "epub": "biblioteca/libros/Charlie_y_el_gran_ascensor_de_cristal_Roald_Dahl.epub",
+    "descripcion": "Charlie y Willy Wonka viajan en un ascensor de cristal hacia el espacio exterior. Una aventura alocada llena de criaturas extrañas, peligros galácticos y el ingenio inagotable de Wonka. La secuela de Charlie y la fábrica de chocolate.",
+    "pregunta": "Si viajaras al espacio en un ascensor, ¿qué te gustaría encontrar allí?"
+  },
+  {
+    "id": 37,
+    "titulo": "Momo",
+    "autor": "Michael Ende",
+    "categoria": "Infantil",
+    "edad": "9-12 años",
+    "portada": "biblioteca/portadas/momo.svg",
+    "epub": "biblioteca/libros/Momo_Michael_Ende.epub",
+    "descripcion": "Momo es una niña con un don especial: sabe escuchar como nadie. Pero un día llegan los hombres grises, que roban el tiempo a las personas. Momo deberá enfrentarse a ellos para devolver el tiempo robado y salvar a sus amigos.",
+    "pregunta": "¿Crees que a veces perdemos el tiempo en cosas que no son importantes?"
+  },
+  {
+    "id": 38,
+    "titulo": "El asesinato del profesor de matemáticas",
+    "autor": "Jordi Sierra i Fabra",
+    "categoria": "Infantil",
+    "edad": "12+ años",
+    "portada": "biblioteca/portadas/El asesinato del profesor de matemáticas.svg",
+    "epub": "biblioteca/libros/El_asesinato_del_profesor_de_matematicas_Jordi_Sierra_i_Fabra.epub",
+    "descripcion": "Un profesor de matemáticas aparece asesinado y deja un misterioso mensaje: sus tres alumnos deberán resolver una serie de enigmas matemáticos para descubrir al culpable. Una emocionante aventura que demuestra que las matemáticas pueden salvar vidas.",
+    "pregunta": "¿Crees que las matemáticas pueden ser divertidas o solo son útiles para resolver problemas como este?"
   }
 ]
