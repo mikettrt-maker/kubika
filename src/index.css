@@ -27,10 +27,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* ========== Cuadrícula del Lienzo (Estilo puntos — más limpio) ========== */
+/* ========== Cuadrícula del Lienzo (Estilo cuaderno) ========== */
 .canvas-grid {
   background-color: var(--canvas-bg);
-  background-image: radial-gradient(circle, rgba(148, 163, 184, 0.55) 1.2px, transparent 1.2px);
+  background-image:
+    linear-gradient(rgba(148, 163, 184, 0.4) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148, 163, 184, 0.4) 1px, transparent 1px);
   background-size: var(--grid-size) var(--grid-size);
   background-position: 0 0;
 }

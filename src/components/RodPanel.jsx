@@ -42,12 +42,9 @@ export default function RodPanel({ onDragStart }) {
           return (
             <div key={rod.value} className="group relative">
               {/* Etiqueta del nombre */}
-              <div className="flex items-center justify-between mb-2 px-1">
+              <div className="flex items-center mb-2 px-1">
                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest group-hover:text-slate-600 transition-colors">
                   {rod.name}
-                </span>
-                <span className="text-[9px] font-bold text-slate-400 bg-slate-200/50 px-1.5 py-0.5 rounded-md">
-                  {rod.value}
                 </span>
               </div>
 
