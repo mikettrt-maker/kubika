@@ -10,6 +10,7 @@ export default function Biblioteca({ onClose }) {
   const [error, setError] = useState(null);
 
   const [savedProgress, setSavedProgress] = useState(null);
+  const [previewLibro, setPreviewLibro] = useState(null);
 
   useEffect(() => {
     fetch('biblioteca/data.json?t=' + Date.now())
@@ -168,7 +169,7 @@ export default function Biblioteca({ onClose }) {
               {librosCat.map(libro => (
                 <div
                   key={libro.id}
-                  onClick={() => openBook(libro)}
+                  onClick={() => setPreviewLibro(libro)}
                   className="cursor-pointer group"
                 >
                   <div className="aspect-[130/185] rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shadow-sm group-hover:shadow-md transition-shadow">
@@ -195,6 +196,37 @@ export default function Biblioteca({ onClose }) {
             </div>
           </section>
         ))}
+
+        {/* Modal de previsualización */}
+        {previewLibro && (
+          <div className="fixed inset-0 z-[300] flex items-center justify-center bg-black/40 p-6" onClick={() => setPreviewLibro(null)}>
+            <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 relative" onClick={e => e.stopPropagation()}>
+              <button onClick={() => setPreviewLibro(null)} className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 transition-colors">
+                <svg className="w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+
+              <div className="flex gap-4 mb-4">
+                <div className="w-20 h-28 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shrink-0">
+                  <img src={previewLibro.portada} alt={previewLibro.titulo} className="w-full h-full object-cover" />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="text-sm font-bold text-slate-800 leading-tight">{previewLibro.titulo}</h3>
+                  <p className="text-xs text-slate-500 mt-1">{previewLibro.autor}</p>
+                  <span className="inline-block mt-1.5 text-[10px] font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">{previewLibro.edad}</span>
+                </div>
+              </div>
+
+              <p className="text-sm text-slate-600 leading-relaxed mb-5">{previewLibro.descripcion}</p>
+
+              <button onClick={() => openBook(previewLibro)}
+                className="w-full py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700 transition-colors active:scale-[0.98]">
+                Leer
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
