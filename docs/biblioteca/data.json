@@ -328,5 +328,38 @@
     "epub": "biblioteca/libros/Un_monstruo_viene_a_verme_Patrick_Ness.epub",
     "descripcion": "Conor, un niño de trece años, recibe la visita de un monstruo ancestral que viene a contarle tres historias. Pero Conor necesita que el monstruo le cuente la cuarta: la verdad sobre la pesadilla que le atormenta desde que su madre enfermó.",
     "pregunta": "¿A veces la verdad duele más que una mentira piadosa?"
+  },
+  {
+    "id": 32,
+    "titulo": "Los Futbolísimos: El misterio de los siete goles en propia puerta",
+    "autor": "Roberto Santiago",
+    "categoria": "Infantil",
+    "edad": "9-12 años",
+    "portada": "biblioteca/portadas/El misterio de los siete goles en propia puerta.svg",
+    "epub": "biblioteca/libros/El_misterio_de_los_siete_goles_en_propia_puerta_Roberto_Santiago.epub",
+    "descripcion": "Los Futbolísimos se enfrentan al misterio más goloso: alguien está metiendo goles en propia puerta durante los partidos más importantes. Entre el fútbol y las pistas, el equipo deberá descubrir al culpable antes de que arruinen el campeonato.",
+    "pregunta": "¿Crees que a veces las personas hacen cosas sin querer o siempre hay una razón detrás?"
+  },
+  {
+    "id": 33,
+    "titulo": "Los Futbolísimos: El misterio de los árbitros dormidos",
+    "autor": "Roberto Santiago",
+    "categoria": "Infantil",
+    "edad": "9-12 años",
+    "portada": "biblioteca/portadas/el misterio de los arbitros dormidos..svg",
+    "epub": "biblioteca/libros/El_misterio_de_los_arbitros_dormidos_Roberto_Santiago.epub",
+    "descripcion": "Los árbitros de los partidos de fútbol se quedan dormidos en mitad del campo. ¿Es un hechizo, una enfermedad rara o alguien los está saboteando? Los Futbolísimos tendrán que resolver este enigma antes de que el torneo se suspenda.",
+    "pregunta": "Si vieras algo muy extraño, ¿preferirías investigarlo tú mismo o pedir ayuda a un adulto?"
+  },
+  {
+    "id": 34,
+    "titulo": "Los Futbolísimos: El misterio del portero fantasma",
+    "autor": "Roberto Santiago",
+    "categoria": "Infantil",
+    "edad": "9-12 años",
+    "portada": "biblioteca/portadas/El misterio del portero fantasma.svg",
+    "epub": "biblioteca/libros/El_misterio_del_portero_fantasma_Roberto_Santiago.epub",
+    "descripcion": "Un portero fantasma aparece en el campo de fútbol y detiene todos los penaltis de forma imposible. ¿Es real o es un truco? Los Futbolísimos se lanzan a investigar este misterio sobrenatural mientras se preparan para el partido más importante de la temporada.",
+    "pregunta": "¿Crees en los fantasmas o siempre hay una explicación lógica para todo?"
   }
 ]
