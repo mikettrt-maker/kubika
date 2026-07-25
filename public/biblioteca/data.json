@@ -238,5 +238,35 @@
     "portada": "biblioteca/portadas/Anna Kadabra.svg",
     "epub": "biblioteca/libros/El_Club_de_la_Luna_Llena_Pedro_Manas.epub",
     "descripcion": "Quinta aventura de Anna Kadabra."
+  },
+  {
+    "id": 26,
+    "titulo": "El enigma del Estrella Fugaz",
+    "autor": "J.I. Wagner",
+    "categoria": "Infantil",
+    "edad": "9-12 años",
+    "portada": "biblioteca/portadas/El enigma del Estrella Fugaz.svg",
+    "epub": "biblioteca/libros/El_enigma_del_Estrella_Fugaz_J_I_Wagner.epub",
+    "descripcion": "Las aventuras de Tom y Tim."
+  },
+  {
+    "id": 27,
+    "titulo": "El secreto del inventor",
+    "autor": "J.I. Wagner",
+    "categoria": "Infantil",
+    "edad": "9-12 años",
+    "portada": "biblioteca/portadas/El secreto del inventor.svg",
+    "epub": "biblioteca/libros/El_secreto_del_inventor_J_I_Wagner.epub",
+    "descripcion": "Segunda aventura de Tom y Tim."
+  },
+  {
+    "id": 28,
+    "titulo": "El secreto del último pirata",
+    "autor": "J.I. Wagner",
+    "categoria": "Infantil",
+    "edad": "9-12 años",
+    "portada": "biblioteca/portadas/El secreto del último pirata.svg",
+    "epub": "biblioteca/libros/El_secreto_del_ultimo_pirata_J_I_Wagner.epub",
+    "descripcion": "Tercera aventura de Tom y Tim."
   }
 ]
