@@ -295,5 +295,38 @@
     "epub": "biblioteca/libros/El_secreto_del_ultimo_pirata_J_I_Wagner.epub",
     "descripcion": "Tom y Tim se embarcan en una nueva aventura para encontrar el legendario tesoro del último pirata. Entre mapas antiguos, cuevas secretas y pistas ocultas, vivirán la aventura más emocionante de sus vidas.",
     "pregunta": "¿Qué crees que es más valioso: el tesoro al final del camino o las aventuras vividas para encontrarlo?"
+  },
+  {
+    "id": 29,
+    "titulo": "Coraline",
+    "autor": "Neil Gaiman",
+    "categoria": "Infantil",
+    "edad": "9-12 años",
+    "portada": "biblioteca/portadas/Coraline.svg",
+    "epub": "biblioteca/libros/Coraline_Neil_Gaiman.epub",
+    "descripcion": "Coraline descubre una puerta secreta que la lleva a una versión paralela de su vida, donde todo parece perfecto. Pero pronto descubre que esta «otra madre» esconde oscuros secretos. Una historia de valentía y misterio que atrapa desde la primera página.",
+    "pregunta": "Si encontraras un mundo donde todo parece perfecto, ¿confiarías en él o desconfiarías?"
+  },
+  {
+    "id": 30,
+    "titulo": "Escarlatina, la cocinera cadáver",
+    "autor": "Ledicia Costas",
+    "categoria": "Infantil",
+    "edad": "9-12 años",
+    "portada": "biblioteca/portadas/Escarlatina, la cocinera cadáver.svg",
+    "epub": "biblioteca/libros/Escarlatina_la_cocinera_cadaver_Ledicia_Costas.epub",
+    "descripcion": "A Román le encanta cocinar, pero sus padres no lo apoyan. Todo cambia cuando recibe una misteriosa lección de cocina impartida por Escarlatina, una cocinera… ¡que está muerta! Entre recetas, risas y fantasmas, Román aprenderá a luchar por sus sueños.",
+    "pregunta": "¿Crees que debes seguir tu pasión aunque los demás no la entiendan?"
+  },
+  {
+    "id": 31,
+    "titulo": "Un monstruo viene a verme",
+    "autor": "Patrick Ness",
+    "categoria": "Infantil",
+    "edad": "12+ años",
+    "portada": "biblioteca/portadas/Un monstruo viene a verme.svg",
+    "epub": "biblioteca/libros/Un_monstruo_viene_a_verme_Patrick_Ness.epub",
+    "descripcion": "Conor, un niño de trece años, recibe la visita de un monstruo ancestral que viene a contarle tres historias. Pero Conor necesita que el monstruo le cuente la cuarta: la verdad sobre la pesadilla que le atormenta desde que su madre enfermó.",
+    "pregunta": "¿A veces la verdad duele más que una mentira piadosa?"
   }
 ]
