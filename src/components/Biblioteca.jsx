@@ -218,7 +218,14 @@ export default function Biblioteca({ onClose }) {
                 </div>
               </div>
 
-              <p className="text-sm text-slate-600 leading-relaxed mb-5">{previewLibro.descripcion}</p>
+              <p className="text-sm text-slate-600 leading-relaxed mb-3">{previewLibro.descripcion}</p>
+
+              {previewLibro.pregunta && (
+                <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                  <p className="text-[11px] font-semibold text-amber-700 uppercase tracking-wider mb-1">Para pensar</p>
+                  <p className="text-sm text-amber-900 leading-relaxed">{previewLibro.pregunta}</p>
+                </div>
+              )}
 
               <button onClick={() => openBook(previewLibro)}
                 className="w-full py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700 transition-colors active:scale-[0.98]">

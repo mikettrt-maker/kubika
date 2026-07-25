@@ -7,7 +7,8 @@
     "edad": "6-8 años",
     "portada": "biblioteca/portadas/Cuentos para entender el mundo.svg",
     "epub": "biblioteca/libros/Cuentos_para_entender_el_mundo_Eloy_Moreno.epub",
-    "descripcion": "Cuentos que invitan a reflexionar sobre el mundo."
+    "descripcion": "Una colección de cuentos llenos de magia y enseñanzas que ayudan a los niños a comprender mejor el mundo que los rodea, con historias sobre la amistad, la empatía y los valores.",
+    "pregunta": "¿Qué crees que pasaría si todos tratáramos a los demás con más amabilidad?"
   },
   {
     "id": 3,
@@ -17,7 +18,8 @@
     "edad": "6-8 años",
     "portada": "biblioteca/portadas/Cuentos para entender el mundo 2.svg",
     "epub": "biblioteca/libros/Cuentos_para_entender_el_mundo_2_Eloy_Moreno.epub",
-    "descripcion": "Más cuentos para reflexionar sobre el mundo."
+    "descripcion": "Nuevas historias que invitan a reflexionar sobre la naturaleza, las emociones y las relaciones humanas. Cada cuento es una pequeña aventura que deja una gran enseñanza.",
+    "pregunta": "Si pudieras cambiar una cosa del mundo para hacerlo mejor, ¿qué sería?"
   },
   {
     "id": 4,
@@ -27,7 +29,8 @@
     "edad": "6-8 años",
     "portada": "biblioteca/portadas/Cuentos para entender el mundo 3.svg",
     "epub": "biblioteca/libros/Cuentos_para_entender_el_mundo_3_Eloy_Moreno.epub",
-    "descripcion": "Tercera parte de los cuentos para reflexionar."
+    "descripcion": "Tercera entrega de esta maravillosa serie de cuentos. Historias llenas de imaginación que invitan a los más pequeños a cuestionarse el mundo y descubrir su propio lugar en él.",
+    "pregunta": "¿Qué historia te gustaría contar tú para ayudar a alguien?"
   },
   {
     "id": 5,
@@ -37,7 +40,8 @@
     "edad": "9-12 años",
     "portada": "biblioteca/portadas/Diario de Greg un pringao total.svg",
     "epub": "biblioteca/libros/Un_pringao_total_Jeff_Kinney.epub",
-    "descripcion": "Las aventuras de Greg Heffley."
+    "descripcion": "Greg Heffley comienza su primer año de secundaria y descubre que no es tan popular como creía. Entre su mejor amigo Rowley, su hermano Rodrick y sus padres, Greg intenta sobrevivir al curso más difícil de su vida.",
+    "pregunta": "¿Qué harías tú para hacer nuevos amigos en un cole nuevo?"
   },
   {
     "id": 6,
@@ -47,7 +51,8 @@
     "edad": "9-12 años",
     "portada": "biblioteca/portadas/Diario de Greg la ley de rodrick.svg",
     "epub": "biblioteca/libros/La_ley_de_Rodrick_Jeff_Kinney.epub",
-    "descripcion": "Segunda entrega del Diario de Greg."
+    "descripcion": "Greg sigue sobreviviendo a la secundaria mientras lidia con su hermano mayor Rodrick, que tiene su propia ley: todo lo que pasa en casa, se queda en casa. Entre fiestas, sustos y castigos, Greg aprenderá que los secretos siempre salen a la luz.",
+    "pregunta": "¿Crees que es mejor contar siempre la verdad aunque te metas en problemas?"
   },
   {
     "id": 7,
@@ -57,7 +62,8 @@
     "edad": "9-12 años",
     "portada": "biblioteca/portadas/Diario de Greg Esto es el colmo.svg",
     "epub": "biblioteca/libros/Esto_es_el_colmo_Jeff_Kinney.epub",
-    "descripcion": "Tercera entrega del Diario de Greg."
+    "descripcion": "Greg está convencido de que su vida es una injusticia total. Su madre quiere convertir la Navidad en una experiencia familiar perfecta, pero Greg tiene otros planes. Entre regalos, nieve y líos familiares, descubrirá que las cosas no siempre salen como uno espera.",
+    "pregunta": "¿Qué es lo mejor de pasar tiempo en familia, incluso cuando todo sale mal?"
   },
   {
     "id": 8,
@@ -67,7 +73,8 @@
     "edad": "9-12 años",
     "portada": "biblioteca/portadas/Diario de Greg dias de perro.svg",
     "epub": "biblioteca/libros/Dias_de_perros_Jeff_Kinney.epub",
-    "descripcion": "Cuarta entrega del Diario de Greg."
+    "descripcion": "Greg esperaba pasar unas vacaciones de verano épicas, pero sus planes se desmoronan cuando su padre lo obliga a pasar tiempo al aire libre y su madre organiza actividades familiares. Un verano lleno de momentos incómodos y situaciones hilarantes.",
+    "pregunta": "¿Qué prefieres: vaciones en casa sin hacer nada o aventuras al aire libre?"
   },
   {
     "id": 9,
@@ -77,7 +84,8 @@
     "edad": "9-12 años",
     "portada": "biblioteca/portadas/Diario de Greg La cruda realidad.svg",
     "epub": "biblioteca/libros/La_cruda_realidad_Jeff_Kinney.epub",
-    "descripcion": "Quinta entrega del Diario de Greg."
+    "descripcion": "Greg se enfrenta a la cruda realidad de crecer: fiestas de chicos y chicas, bailes escolares y la temida educación sexual. Mientras intenta navegar por este complicado mundo, Greg descubre que hacerse mayor no es tan fácil como parece.",
+    "pregunta": "¿Crees que es mejor crecer despacio o tener prisa por ser mayor?"
   },
   {
     "id": 10,
@@ -87,7 +95,8 @@
     "edad": "9-12 años",
     "portada": "biblioteca/portadas/Diario de Greg Sin salida.svg",
     "epub": "biblioteca/libros/Sin_salida_Jeff_Kinney.epub",
-    "descripcion": "Sexta entrega del Diario de Greg."
+    "descripcion": "Las nevadas han dejado a Greg atrapado en casa con su familia. Sin cole, sin amigos y sin escapatoria, Greg tendrá que ingeniárselas para sobrevivir al encierro invernal. Una tormenta de risas y caos familiar asegurada.",
+    "pregunta": "¿Qué harías tú si te quedaras atrapado en casa sin poder salir?"
   },
   {
     "id": 11,
@@ -97,7 +106,8 @@
     "edad": "9-12 años",
     "portada": "biblioteca/portadas/Diario de Greg buscando plan.svg",
     "epub": "biblioteca/libros/Buscando_plan_Jeff_Kinney.epub",
-    "descripcion": "Séptima entrega del Diario de Greg."
+    "descripcion": "El baile de fin de curso se acerca y Greg no tiene pareja. Entre presiones sociales, consejos de sus amigos y situaciones embarazosas, Greg se embarca en una misión: conseguir una cita para el baile. ¿Lo conseguirá o terminará siendo el único sin plan?",
+    "pregunta": "¿Es importante tener pareja para divertirse en una fiesta o se puede disfrutar igual?"
   },
   {
     "id": 12,
@@ -107,7 +117,8 @@
     "edad": "9-12 años",
     "portada": "biblioteca/portadas/Diario de Greg mala suerte.svg",
     "epub": "biblioteca/libros/Mala_suerte_Jeff_Kinney.epub",
-    "descripcion": "Octava entrega del Diario de Greg."
+    "descripcion": "Greg está convencido de que tiene la peor suerte del mundo. Todo le sale mal: los amigos se alejan, los planes fracasan y hasta la suerte parece estar en su contra. Pero quizás lo que Greg necesita es cambiar su forma de ver las cosas.",
+    "pregunta": "¿Crees que la suerte existe o todo depende de cómo afrontamos las cosas?"
   },
   {
     "id": 13,
@@ -117,7 +128,8 @@
     "edad": "9-12 años",
     "portada": "biblioteca/portadas/Diario de Greg vieja escuela.svg",
     "epub": "biblioteca/libros/Vieja_escuela_Jeff_Kinney.epub",
-    "descripcion": "Novena entrega del Diario de Greg."
+    "descripcion": "El pueblo de Greg decide hacer un «apagón tecnológico voluntario» y todos deben vivir sin pantallas ni dispositivos. Greg tendrá que adaptarse a la «vieja escuela»: juegos al aire libre, libros de papel y conversaciones cara a cara. Una aventura retro llena de humor.",
+    "pregunta": "¿Podrías vivir un día entero sin móvil, tablets ni videojuegos?"
   },
   {
     "id": 14,
@@ -127,7 +139,8 @@
     "edad": "9-12 años",
     "portada": "biblioteca/portadas/Diario de Greg carreta y manta.svg",
     "epub": "biblioteca/libros/Carretera_y_manta_Jeff_Kinney.epub",
-    "descripcion": "Décima entrega del Diario de Greg."
+    "descripcion": "La familia Heffley se embarca en unas vacaciones por carretera. Lo que prometía ser una aventura emocionante se convierte en un viaje lleno de desastres, paradas inesperadas y momentos hilarantes. Greg descubrirá que el viaje importa más que el destino.",
+    "pregunta": "¿Te gustan los viajes largos en coche o prefieres quedarte en casa?"
   },
   {
     "id": 15,
@@ -137,7 +150,8 @@
     "edad": "9-12 años",
     "portada": "biblioteca/portadas/Cuentos de buenas noches para niñas rebeldes.svg",
     "epub": "biblioteca/libros/Cuentos_de_buenas_noches_para_ninas_rebeldes_Elena_Favilli.epub",
-    "descripcion": "100 historias de mujeres extraordinarias."
+    "descripcion": "Cien historias de mujeres extraordinarias que cambiaron el mundo. Desde Frida Kahlo hasta Marie Curie, cada página celebra el valor, la creatividad y la determinación de mujeres que rompieron barreras y siguieron sus sueños.",
+    "pregunta": "¿Qué mujer conoces que haya hecho algo increíble y te inspire?"
   },
   {
     "id": 16,
@@ -147,7 +161,8 @@
     "edad": "9-12 años",
     "portada": "biblioteca/portadas/Cuentos de buenas noches para niñas rebeldes 2.svg",
     "epub": "biblioteca/libros/Cuentos_de_buenas_noches_para_ninas_rebeldes_2_Elena_Favilli.epub",
-    "descripcion": "Más historias de mujeres extraordinarias."
+    "descripcion": "Cien nuevas historias de mujeres valientes que desafiaron las expectativas y construyeron su propio camino. Científicas, artistas, deportistas y activistas que demuestran que no hay límites para lo que una persona puede lograr.",
+    "pregunta": "Si pudieras conocer a cualquier mujer de la historia, ¿a quién elegirías y qué le preguntarías?"
   },
   {
     "id": 17,
@@ -157,7 +172,8 @@
     "edad": "9-12 años",
     "portada": "biblioteca/portadas/Cuentos de buenas noches para niñas rebeldes 3.svg",
     "epub": "biblioteca/libros/Cuentos_de_buenas_noches_para_ninas_rebeldes_3_Elena_Favilli.epub",
-    "descripcion": "Tercera parte de historias de mujeres extraordinarias."
+    "descripcion": "La tercera entrega de esta exitosa serie presenta cien biografías de mujeres excepcionales de todos los rincones del mundo. Cada historia inspira a perseguir los sueños, sin importar los obstáculos.",
+    "pregunta": "¿Qué sueño te gustaría cumplir y qué crees que necesitas para lograrlo?"
   },
   {
     "id": 18,
@@ -167,7 +183,8 @@
     "edad": "12+ años",
     "portada": "biblioteca/portadas/La ciudad de las bestias.svg",
     "epub": "biblioteca/libros/La_ciudad_de_las_bestias_Isabel_Allende.epub",
-    "descripcion": "Primera parte de las Memorias del Águila y del Jaguar."
+    "descripcion": "Alexander Cold, un chico de quince años, viaja con su abuela periodista al Amazonas en busca de una misteriosa bestia gigante. Allí descubrirá una civilización oculta y vivirá una aventura que cambiará su vida para siempre.",
+    "pregunta": "¿Te atreverías a explorar una selva desconocida llena de peligros y secretos?"
   },
   {
     "id": 19,
@@ -177,7 +194,8 @@
     "edad": "12+ años",
     "portada": "biblioteca/portadas/El reino del dragon de oro.svg",
     "epub": "biblioteca/libros/El_reino_del_Dragon_de_Oro_Isabel_Allende.epub",
-    "descripcion": "Segunda parte de las Memorias del Águila y del Jaguar."
+    "descripcion": "Alexander y su abuela viajan al remoto Reino del Dragón de Oro, un lugar escondido en el Himalaya. Una estatua sagrada ha sido robada y deberán ayudar a recuperarla antes de que caiga en manos equivocadas.",
+    "pregunta": "¿Crees que un objeto puede tener tanto poder como para cambiar el destino de un pueblo?"
   },
   {
     "id": 20,
@@ -187,7 +205,8 @@
     "edad": "12+ años",
     "portada": "biblioteca/portadas/el bosque de los pigmeos.svg",
     "epub": "biblioteca/libros/El_bosque_de_los_pigmeos_Isabel_Allende.epub",
-    "descripcion": "Tercera parte de las Memorias del Águila y del Jaguar."
+    "descripcion": "La aventura final de la trilogía. Alexander viaja a África, donde una tribu de pigmeos guarda un secreto ancestral. Entre peligros, magia y criaturas extraordinarias, Alexander deberá enfrentar su mayor desafío.",
+    "pregunta": "¿Qué crees que es más importante: el progreso o preservar las tradiciones de un pueblo?"
   },
   {
     "id": 21,
@@ -197,7 +216,8 @@
     "edad": "6-8 años",
     "portada": "biblioteca/portadas/Anna Kadabra un problema con alas.svg",
     "epub": "biblioteca/libros/Un_problema_con_alas_Pedro_Manas.epub",
-    "descripcion": "Primera aventura de Anna Kadabra."
+    "descripcion": "Anna se muda a Moonville, un pueblo lleno de misterios. Allí descubre que tiene un don especial: ¡es una bruja! Junto a sus nuevos amigos mágicos, vivirá aventuras increíbles mientras aprende a controlar sus poderes.",
+    "pregunta": "Si tuvieras un poder mágico, ¿cuál sería y para qué lo usarías?"
   },
   {
     "id": 22,
@@ -207,7 +227,8 @@
     "edad": "6-8 años",
     "portada": "biblioteca/portadas/Anna Kadabra un moustro en la bañera.svg",
     "epub": "biblioteca/libros/Un_monstruo_en_la_banera_Pedro_Manas.epub",
-    "descripcion": "Segunda aventura de Anna Kadabra."
+    "descripcion": "Un misterioso monstruo aparece en las tuberías de Moonville y solo Anna y su club de amigos mágicos pueden resolver el enigma. Una aventura llena de burbujas, risas y magia por descubrir.",
+    "pregunta": "¿Crees que las cosas que parecen monstruos a veces no son tan malas como parecen?"
   },
   {
     "id": 23,
@@ -217,7 +238,8 @@
     "edad": "6-8 años",
     "portada": "biblioteca/portadas/Anna Kadabra pasteles peligrosos.svg",
     "epub": "biblioteca/libros/Pasteles_peligrosos_Pedro_Manas.epub",
-    "descripcion": "Tercera aventura de Anna Kadabra."
+    "descripcion": "Alguien está saboteando la pastelería de Moonville y todos culpan a las mascotas mágicas. Anna y su equipo deberán descubrir al verdadero culpable antes de que arruine la gran fiesta del pueblo.",
+    "pregunta": "¿Es justo juzgar a alguien sin tener todas las pruebas?"
   },
   {
     "id": 24,
@@ -227,7 +249,8 @@
     "edad": "6-8 años",
     "portada": "biblioteca/portadas/Anna Kadabra fiesta a medianoche.svg",
     "epub": "biblioteca/libros/Fiesta_a_medianoche_Pedro_Manas.epub",
-    "descripcion": "Cuarta aventura de Anna Kadabra."
+    "descripcion": "Es noche de luna llena en Moonville y todos los seres mágicos se preparan para la gran fiesta. Pero algo sale mal y la magia comienza a desaparecer. Anna deberá encontrar la manera de salvar la noche más especial del año.",
+    "pregunta": "¿Qué es más divertido: una fiesta planeada al detalle o una aventura improvisada?"
   },
   {
     "id": 25,
@@ -237,7 +260,8 @@
     "edad": "6-8 años",
     "portada": "biblioteca/portadas/Anna Kadabra.svg",
     "epub": "biblioteca/libros/El_Club_de_la_Luna_Llena_Pedro_Manas.epub",
-    "descripcion": "Quinta aventura de Anna Kadabra."
+    "descripcion": "Anna y sus amigos deciden formar el Club de la Luna Llena, un grupo secreto para proteger la magia de Moonville. Pero un nuevo misterio amenaza el pueblo y solo trabajando en equipo podrán resolverlo.",
+    "pregunta": "¿Por qué crees que es importante tener amigos en quienes confiar?"
   },
   {
     "id": 26,
@@ -247,7 +271,8 @@
     "edad": "9-12 años",
     "portada": "biblioteca/portadas/El enigma del Estrella Fugaz.svg",
     "epub": "biblioteca/libros/El_enigma_del_Estrella_Fugaz_J_I_Wagner.epub",
-    "descripcion": "Las aventuras de Tom y Tim."
+    "descripcion": "Tom y Tim, dos hermanos aventureros, encuentran un antiguo mapa que los lleva a buscar un tesoro escondido. Pistas, acertijos y misterios los esperan en esta emocionante búsqueda que pondrá a prueba su ingenio y valentía.",
+    "pregunta": "Si encontraras un mapa del tesoro, ¿a quién llevarías contigo a la aventura?"
   },
   {
     "id": 27,
@@ -257,7 +282,8 @@
     "edad": "9-12 años",
     "portada": "biblioteca/portadas/El secreto del inventor.svg",
     "epub": "biblioteca/libros/El_secreto_del_inventor_J_I_Wagner.epub",
-    "descripcion": "Segunda aventura de Tom y Tim."
+    "descripcion": "Los hermanos Tom y Tim descubren el taller secreto de un inventor genial. Entre inventos asombrosos y dispositivos misteriosos, deberán descifrar los secretos que esconde antes de que caigan en malas manos.",
+    "pregunta": "Si pudieras inventar algo que ayudara a muchas personas, ¿qué crearías?"
   },
   {
     "id": 28,
@@ -267,6 +293,7 @@
     "edad": "9-12 años",
     "portada": "biblioteca/portadas/El secreto del último pirata.svg",
     "epub": "biblioteca/libros/El_secreto_del_ultimo_pirata_J_I_Wagner.epub",
-    "descripcion": "Tercera aventura de Tom y Tim."
+    "descripcion": "Tom y Tim se embarcan en una nueva aventura para encontrar el legendario tesoro del último pirata. Entre mapas antiguos, cuevas secretas y pistas ocultas, vivirán la aventura más emocionante de sus vidas.",
+    "pregunta": "¿Qué crees que es más valioso: el tesoro al final del camino o las aventuras vividas para encontrarlo?"
   }
 ]
