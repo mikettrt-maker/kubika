@@ -188,5 +188,55 @@
     "portada": "biblioteca/portadas/el bosque de los pigmeos.svg",
     "epub": "biblioteca/libros/El_bosque_de_los_pigmeos_Isabel_Allende.epub",
     "descripcion": "Tercera parte de las Memorias del Águila y del Jaguar."
+  },
+  {
+    "id": 21,
+    "titulo": "Anna Kadabra: Un problema con alas",
+    "autor": "Pedro Mañas",
+    "categoria": "Infantil",
+    "edad": "6-8 años",
+    "portada": "biblioteca/portadas/Anna Kadabra un problema con alas.svg",
+    "epub": "biblioteca/libros/Un_problema_con_alas_Pedro_Manas.epub",
+    "descripcion": "Primera aventura de Anna Kadabra."
+  },
+  {
+    "id": 22,
+    "titulo": "Anna Kadabra: Un monstruo en la bañera",
+    "autor": "Pedro Mañas",
+    "categoria": "Infantil",
+    "edad": "6-8 años",
+    "portada": "biblioteca/portadas/Anna Kadabra un moustro en la bañera.svg",
+    "epub": "biblioteca/libros/Un_monstruo_en_la_banera_Pedro_Manas.epub",
+    "descripcion": "Segunda aventura de Anna Kadabra."
+  },
+  {
+    "id": 23,
+    "titulo": "Anna Kadabra: Pasteles peligrosos",
+    "autor": "Pedro Mañas",
+    "categoria": "Infantil",
+    "edad": "6-8 años",
+    "portada": "biblioteca/portadas/Anna Kadabra pasteles peligrosos.svg",
+    "epub": "biblioteca/libros/Pasteles_peligrosos_Pedro_Manas.epub",
+    "descripcion": "Tercera aventura de Anna Kadabra."
+  },
+  {
+    "id": 24,
+    "titulo": "Anna Kadabra: Fiesta a medianoche",
+    "autor": "Pedro Mañas",
+    "categoria": "Infantil",
+    "edad": "6-8 años",
+    "portada": "biblioteca/portadas/Anna Kadabra fiesta a medianoche.svg",
+    "epub": "biblioteca/libros/Fiesta_a_medianoche_Pedro_Manas.epub",
+    "descripcion": "Cuarta aventura de Anna Kadabra."
+  },
+  {
+    "id": 25,
+    "titulo": "Anna Kadabra: El Club de la Luna Llena",
+    "autor": "Pedro Mañas",
+    "categoria": "Infantil",
+    "edad": "6-8 años",
+    "portada": "biblioteca/portadas/Anna Kadabra.svg",
+    "epub": "biblioteca/libros/El_Club_de_la_Luna_Llena_Pedro_Manas.epub",
+    "descripcion": "Quinta aventura de Anna Kadabra."
   }
 ]
