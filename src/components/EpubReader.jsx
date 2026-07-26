@@ -211,12 +211,7 @@ export default function EpubReader({ libro, onBack, startPage }) {
           <h2 className="text-sm font-semibold text-slate-800 truncate max-w-[260px]">{bookTitle || libro.titulo}</h2>
           <p className="text-xs text-slate-400 truncate max-w-[260px]">{bookAuthor || libro.autor}</p>
         </div>
-        <a href={epubUrl} download
-          className="flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors shrink-0">
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg> EPUB
-        </a>
+        <div className="w-16" />
       </div>
 
       <div ref={contentRef} className="flex-1 overflow-y-auto bg-white px-6 py-8 leading-relaxed text-slate-800 text-2xl font-handwriting">
