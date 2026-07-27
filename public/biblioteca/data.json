@@ -427,5 +427,27 @@
     "epub": "biblioteca/libros/La_Trilogia_de_la_Niebla_Carlos_Ruiz_Zafon.epub",
     "descripcion": "Tres novelas de misterio y fantasía que transcurren en escenarios envueltos en niebla: un faro maldito, un palacio de medianoche y un príncipe perdido. Carlos Ruiz Zafón teje historias inolvidables llenas de magia, secreto y emociones.",
     "pregunta": "¿Qué crees que esconde la niebla: misterios por descubrir o peligros que evitar?"
+  },
+  {
+    "id": 41,
+    "titulo": "El Grúfalo",
+    "autor": "Julia Donaldson",
+    "categoria": "Infantil",
+    "edad": "6-8 años",
+    "portada": "biblioteca/portadas/El grufalo.svg",
+    "epub": "biblioteca/libros/El_Grufalo_Trad_Segovia_Julia_Donaldson.epub",
+    "descripcion": "Un ratón pasea por el bosque y se encuentra con un zorro, un búho y una serpiente que quieren comérselo. Pero el ratón inventa un monstruo terrorífico: el Grúfalo. ¿Y si el Grúfalo existiera de verdad? Una historia ingeniosa sobre el poder de la imaginación.",
+    "pregunta": "¿Crees que el ratón es valiente o solo listo? ¿Se puede ser las dos cosas a la vez?"
+  },
+  {
+    "id": 42,
+    "titulo": "Las aventuras del Capitán Calzoncillos",
+    "autor": "Dav Pilkey",
+    "categoria": "Infantil",
+    "edad": "6-8 años",
+    "portada": "biblioteca/portadas/Las aventuras del capitan calzoncillos.svg",
+    "epub": "biblioteca/libros/Las_aventuras_del_Capitan_Calzoncillos_Dav_Pikey.epub",
+    "descripcion": "Jorge y Berto son dos niños traviesos que, sin querer, hipnotizan a su estricto director para convertirlo en el superhéroe más ridículo y divertido: el Capitán Calzoncillos. Juntos vivirán aventuras alocadas llenas de humor, cómic y mucha imaginación.",
+    "pregunta": "Si pudieras crear un superhéroe, ¿qué poder tendría y cómo lo usarías para ayudar a los demás?"
   }
 ]

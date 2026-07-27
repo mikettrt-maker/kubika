@@ -73,7 +73,7 @@ export default function AuthForm({ onLogin, onLoginStart, error: externalError, 
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-24 h-24 rounded-2xl bg-gradient-to-br from-kubika-400 to-purple-500 shadow-2xl shadow-kubika-500/20 mb-4 overflow-hidden relative">
             <img
-              src="logo.png"
+              src={import.meta.env.DEV ? '/logo.png' : '/kubika/logo.png'}
               alt="Kubika"
               className="w-full h-full object-contain p-1.5"
               onError={(e) => {

@@ -6,7 +6,8 @@ let cachedUsers = null;
 async function loadUsers() {
   if (cachedUsers) return cachedUsers;
   try {
-    const res = await fetch('/kubika/kubika-usuarios.csv');
+    const base = import.meta.env.DEV ? '' : '/kubika';
+    const res = await fetch(base + '/kubika-usuarios.csv');
     const text = await res.text();
     const lines = text.split('\n').slice(1);
     cachedUsers = lines.map(line => {
