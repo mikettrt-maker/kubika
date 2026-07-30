@@ -89,6 +89,10 @@ async function mostrarCatalogo() {
 
   const res = await fetch('data.json');
   libros = await res.json();
+  libros.forEach(libro => {
+    libro.epub = libro.epub.replace(/^biblioteca\//, '');
+    libro.portada = libro.portada.replace(/^biblioteca\//, '');
+  });
   renderizarCatalogo(libros);
 }
 
