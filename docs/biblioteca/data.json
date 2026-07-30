@@ -449,5 +449,38 @@
     "epub": "biblioteca/libros/Las_aventuras_del_Capitan_Calzoncillos_Dav_Pikey.epub",
     "descripcion": "Jorge y Berto son dos niños traviesos que, sin querer, hipnotizan a su estricto director para convertirlo en el superhéroe más ridículo y divertido: el Capitán Calzoncillos. Juntos vivirán aventuras alocadas llenas de humor, cómic y mucha imaginación.",
     "pregunta": "Si pudieras crear un superhéroe, ¿qué poder tendría y cómo lo usarías para ayudar a los demás?"
+  },
+  {
+    "id": 43,
+    "titulo": "El hombre que plantaba árboles",
+    "autor": "Jean Giono",
+    "categoria": "Infantil",
+    "edad": "9-11 años",
+    "portada": "biblioteca/portadas/El hombre que plantaba arboles.svg",
+    "epub": "biblioteca/libros/El_hombre_que_plantaba_arboles_Jean_Giono.epub",
+    "descripcion": "Un pastor solitario transforma un paisaje árido en un frondoso bosque plantando árboles día tras día. Una historia inspiradora sobre cómo una sola persona puede cambiar el mundo con paciencia, esperanza y dedicación.",
+    "pregunta": "¿Crees que una sola persona puede marcar una diferencia en el mundo?"
+  },
+  {
+    "id": 44,
+    "titulo": "Historia de una gaviota y del gato que le enseñó a volar",
+    "autor": "Luis Sepúlveda",
+    "categoria": "Infantil",
+    "edad": "9-11 años",
+    "portada": "biblioteca/portadas/Historia de una gaviota y del gato que le enseno a volar.svg",
+    "epub": "biblioteca/libros/Historia_de_una_gaviota_y_del_gato_que_le_enseno_a_volar_Luis_Sepulveda.epub",
+    "descripcion": "Zorbas, un gato grande y negro, promete a una gaviota moribunda que cuidará de su huevo y enseñará a volar a la cría. Con la ayuda de sus amigos del puerto, emprenderá una misión imposible llena de ternura, amistad y solidaridad.",
+    "pregunta": "¿Crees que se puede aprender algo imposible si cuentas con buenos amigos que te apoyen?"
+  },
+  {
+    "id": 45,
+    "titulo": "Un puente hacia Terabithia",
+    "autor": "Katherine Paterson",
+    "categoria": "Infantil",
+    "edad": "11+ años",
+    "portada": "biblioteca/portadas/Un puente hacia Terabithia.svg",
+    "epub": "biblioteca/libros/Un_puente_hacia_Terabithia_Katherine_Paterson.epub",
+    "descripcion": "Jess y Leslie crean un reino imaginario en el bosque llamado Terabithia, donde escapan de sus problemas y se convierten en reyes. Allí son valientes y poderosos, pero el mundo real les espera con una lección inolvidable sobre la amistad, la pérdida y el poder de la imaginación.",
+    "pregunta": "¿Crees que la imaginación puede ayudarnos a enfrentar los momentos más difíciles de la vida?"
   }
 ]

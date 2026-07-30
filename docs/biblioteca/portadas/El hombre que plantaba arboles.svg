@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 400">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2D5016"/><stop offset="1" stop-color="#1A300D"/></linearGradient></defs>
+  <rect width="280" height="400" fill="url(#bg)" rx="8"/>
+  <text x="140" y="120" font-family="Arial, sans-serif" font-size="50" fill="#A8D676" text-anchor="middle">&#x1F333;</text>
+  <text x="140" y="200" font-family="Arial, sans-serif" font-size="20" fill="#E8F0D8" text-anchor="middle" font-weight="bold">El hombre que</text>
+  <text x="140" y="230" font-family="Arial, sans-serif" font-size="20" fill="#E8F0D8" text-anchor="middle" font-weight="bold">plantaba árboles</text>
+  <text x="140" y="270" font-family="Arial, sans-serif" font-size="14" fill="#A8D676" text-anchor="middle">Jean Giono</text>
+</svg>

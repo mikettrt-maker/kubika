@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 400">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1A4A6B"/><stop offset="1" stop-color="#0D2B40"/></linearGradient></defs>
+  <rect width="280" height="400" fill="url(#bg)" rx="8"/>
+  <text x="140" y="120" font-family="Arial, sans-serif" font-size="50" fill="#76C8E8" text-anchor="middle">&#x1F425;</text>
+  <text x="140" y="190" font-family="Arial, sans-serif" font-size="18" fill="#D0EAF5" text-anchor="middle" font-weight="bold">Historia de una gaviota</text>
+  <text x="140" y="215" font-family="Arial, sans-serif" font-size="18" fill="#D0EAF5" text-anchor="middle" font-weight="bold">y del gato que le</text>
+  <text x="140" y="240" font-family="Arial, sans-serif" font-size="18" fill="#D0EAF5" text-anchor="middle" font-weight="bold">enseñó a volar</text>
+  <text x="140" y="280" font-family="Arial, sans-serif" font-size="14" fill="#76C8E8" text-anchor="middle">Luis Sepúlveda</text>
+</svg>
