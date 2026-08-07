@@ -6,7 +6,7 @@ let cachedUsers = null;
 async function loadUsers() {
   if (cachedUsers) return cachedUsers;
   try {
-    const base = import.meta.env.DEV ? '' : '/kubika';
+    const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     const res = await fetch(base + '/kubika-usuarios.csv');
     const text = await res.text();
     const lines = text.split('\n').slice(1);

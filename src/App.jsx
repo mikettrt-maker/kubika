@@ -346,7 +346,7 @@ export default function App() {
         <div className="flex items-center gap-1 flex-shrink-0">
           <div className="flex items-center flex-shrink-0" style={{ width: '140px' }}>
             <img 
-              src={import.meta.env.DEV ? '/logo.png' : '/kubika/logo.png'} 
+              src={`${import.meta.env.BASE_URL}logo.png`} 
               alt="Logo" 
               style={{ height: '95px', width: 'auto', maxWidth: '220px' }}
               className="object-contain"

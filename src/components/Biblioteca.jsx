@@ -13,7 +13,7 @@ export default function Biblioteca({ onClose }) {
   const [previewLibro, setPreviewLibro] = useState(null);
 
   useEffect(() => {
-    const base = import.meta.env.DEV ? '' : '/kubika';
+    const base = import.meta.env.BASE_URL.replace(/\/$/, '');
     fetch(base + '/biblioteca/data.json?t=' + Date.now())
       .then(r => {
         if (!r.ok) throw new Error('No se pudo cargar el catálogo');
