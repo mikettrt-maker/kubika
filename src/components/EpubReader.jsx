@@ -16,7 +16,7 @@ export default function EpubReader({ libro, onBack, startPage }) {
   // Construir URL absoluta del EPUB
   const epubUrl = (() => {
     if (libro.epub.startsWith('http')) return libro.epub;
-    const base = window.location.origin + window.location.pathname.replace(/\/$/, '');
+    const base = window.location.origin + import.meta.env.BASE_URL.replace(/\/$/, '');
     return base + '/' + libro.epub.replace(/^\//, '');
   })();
 
