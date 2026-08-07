@@ -51,6 +51,7 @@ export default function EpubReader({ libro, onBack, startPage }) {
     let cancelled = false;
     let book = null;
     let rendition = null;
+    let blobUrl = null;
 
     setLoading(true);
     setError(null);
@@ -59,15 +60,20 @@ export default function EpubReader({ libro, onBack, startPage }) {
 
     (async () => {
       try {
-        // 1) Descargamos el EPUB como ArrayBuffer (clave para que las imágenes
-        //    funcionen: así epub.js sabe que es un ZIP y convierte src a blob:/base64:)
+        // 1) Descargamos el EPUB y lo convertimos a Blob URL.
+        //    Pasar un ArrayBuffer directamente a epub.js hace que resuelva
+        //    rutas internas como "[object ArrayBuffer]/..." → 404.
+        //    Con un Blob URL epub.js tiene una URL real como base.
         const res = await fetch(epubUrl);
         if (!res.ok) throw new Error('HTTP ' + res.status + ' al descargar el libro');
         const buffer = await res.arrayBuffer();
         if (cancelled) return;
 
-        // 2) Abrimos el libro forzando el tipo 'epub' y reemplazos en base64.
-        book = ePub(buffer, { openAs: 'epub', replacements: 'base64' });
+        const blob = new Blob([buffer], { type: 'application/epub+zip' });
+        blobUrl = URL.createObjectURL(blob);
+
+        // 2) Abrimos el libro desde el Blob URL con reemplazos en base64 para imágenes.
+        book = ePub(blobUrl, { openAs: 'epub', replacements: 'base64' });
         bookRef.current = book;
 
         rendition = book.renderTo(viewerRef.current, {
@@ -154,6 +160,7 @@ export default function EpubReader({ libro, onBack, startPage }) {
       try {
         book?.destroy();
       } catch (e) {}
+      if (blobUrl) URL.revokeObjectURL(blobUrl);
       bookRef.current = null;
       renditionRef.current = null;
     };
