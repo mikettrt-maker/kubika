@@ -30,7 +30,7 @@ export default function Biblioteca({ onClose }) {
             const info = prog[lastId];
             if (info) {
               const libroData = data.find(l => l.id == lastId);
-              if (libroData) setSavedProgress({ ...libroData, page: info.page });
+              if (libroData) setSavedProgress({ ...libroData, cfi: info.cfi, pct: info.pct });
             }
           }
         } catch {}
@@ -48,7 +48,7 @@ export default function Biblioteca({ onClose }) {
           const info = prog[lastId];
           if (info) {
             const libroData = libros.find(l => l.id == lastId);
-            if (libroData) setSavedProgress({ ...libroData, page: info.page });
+            if (libroData) setSavedProgress({ ...libroData, cfi: info.cfi, pct: info.pct });
           } else { setSavedProgress(null); }
         } else { setSavedProgress(null); }
       } catch { setSavedProgress(null); }
@@ -103,9 +103,9 @@ export default function Biblioteca({ onClose }) {
         <div className="w-16" />
       </header>
 
-      {savedProgress && (
+      {savedProgress && savedProgress.cfi && (
         <div className="px-4 pt-3 shrink-0">
-          <button onClick={() => openBook(savedProgress, savedProgress.page)}
+          <button onClick={() => openBook(savedProgress, 1)}
             className="w-full flex items-center gap-3 p-3 bg-amber-50 border border-amber-200 rounded-xl hover:bg-amber-100 transition-colors text-left">
             <div className="w-10 h-14 rounded-lg overflow-hidden bg-amber-100 shrink-0">
               <img src={savedProgress.portada} alt="" className="w-full h-full object-cover" />
@@ -113,7 +113,7 @@ export default function Biblioteca({ onClose }) {
             <div className="min-w-0">
               <p className="text-[11px] font-semibold text-amber-700 uppercase tracking-wider">Continuar leyendo</p>
               <p className="text-sm font-semibold text-slate-800 truncate">{savedProgress.titulo}</p>
-              <p className="text-xs text-slate-500">Página {savedProgress.page}</p>
+              <p className="text-xs text-slate-500">{savedProgress.pct ? 'Has leído el ' + savedProgress.pct + '%' : 'Seguí desde donde lo dejaste'}</p>
             </div>
             <svg className="w-5 h-5 text-amber-500 ml-auto shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

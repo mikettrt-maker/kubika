@@ -1,246 +1,239 @@
 import { useEffect, useRef, useState } from 'react';
-import JSZip from 'jszip';
+import ePub from 'epubjs';
 
 export default function EpubReader({ libro, onBack, startPage }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [content, setContent] = useState('');
-  const [currentIdx, setCurrentIdx] = useState(0);
-  const [totalItems, setTotalItems] = useState(0);
   const [bookTitle, setBookTitle] = useState('');
   const [bookAuthor, setBookAuthor] = useState('');
-  const [showCover, setShowCover] = useState(true);
-  const spineRef = useRef([]);
-  const zipRef = useRef(null);
-  const destroyedRef = useRef(false);
-  const contentRef = useRef(null);
+  const [percentage, setPercentage] = useState(0);
+  const [currentCfi, setCurrentCfi] = useState(null);
 
-  useEffect(() => { contentRef.current?.scrollTo(0, 0); }, [currentIdx, showCover]);
+  const viewerRef = useRef(null);
+  const bookRef = useRef(null);
+  const renditionRef = useRef(null);
 
-  // Guardar progreso
-  useEffect(() => {
-    if (!showCover && currentIdx > 0) {
-      try {
-        const data = JSON.parse(localStorage.getItem('kubika_progress') || '{}');
-        data[libro.id] = { page: currentIdx, titulo: libro.titulo, portada: libro.portada, epub: libro.epub, autor: libro.autor, categoria: libro.categoria, edad: libro.edad, descripcion: libro.descripcion };
-        localStorage.setItem('kubika_progress', JSON.stringify(data));
-        localStorage.setItem('kubika_last_book', String(libro.id));
-      } catch {}
-    }
-  }, [currentIdx, showCover]);
-
+  // Construir URL absoluta del EPUB
   const epubUrl = (() => {
     if (libro.epub.startsWith('http')) return libro.epub;
     const base = window.location.origin + window.location.pathname.replace(/\/$/, '');
     return base + '/' + libro.epub.replace(/^\//, '');
   })();
 
-  const portadaUrl = (() => {
-    if (libro.portada.startsWith('http')) return libro.portada;
-    const base = window.location.origin + window.location.pathname.replace(/\/$/, '');
-    return base + '/' + libro.portada.replace(/^\//, '');
-  })();
-
+  // Guardar progreso en localStorage (usando CFI, más preciso que índice)
   useEffect(() => {
-    destroyedRef.current = false;
-    setLoading(true);
-    setError(null);
-    setContent('');
-    setCurrentIdx(0);
-    setTotalItems(0);
-    setShowCover(true);
+    if (currentCfi && libro?.id) {
+      try {
+        const data = JSON.parse(localStorage.getItem('kubika_progress') || '{}');
+        data[libro.id] = {
+          cfi: currentCfi,
+          pct: percentage,
+          titulo: libro.titulo,
+          portada: libro.portada,
+          epub: libro.epub,
+          autor: libro.autor,
+          categoria: libro.categoria,
+          edad: libro.edad,
+          descripcion: libro.descripcion,
+        };
+        localStorage.setItem('kubika_progress', JSON.stringify(data));
+        localStorage.setItem('kubika_last_book', String(libro.id));
+      } catch (e) {
+        // silencioso
+      }
+    }
+  }, [currentCfi, percentage, libro?.id]);
+
+  // Cargar y renderizar el libro con epub.js
+  useEffect(() => {
+    if (!viewerRef.current) return;
 
     let cancelled = false;
+    let book = null;
+    let rendition = null;
+
+    setLoading(true);
+    setError(null);
+    setPercentage(0);
+    setCurrentCfi(null);
 
     (async () => {
       try {
+        // 1) Descargamos el EPUB como ArrayBuffer (clave para que las imágenes
+        //    funcionen: así epub.js sabe que es un ZIP y convierte src a blob:/base64:)
         const res = await fetch(epubUrl);
         if (!res.ok) throw new Error('HTTP ' + res.status + ' al descargar el libro');
         const buffer = await res.arrayBuffer();
-        if (cancelled || destroyedRef.current) return;
-
-        const zip = await JSZip.loadAsync(buffer);
-        if (cancelled || destroyedRef.current) return;
-        zipRef.current = zip;
-
-        const containerFile = zip.file('META-INF/container.xml');
-        if (!containerFile) throw new Error('No se encontró META-INF/container.xml');
-        const containerXml = await containerFile.async('string');
         if (cancelled) return;
 
-        const opfMatch = containerXml.match(/rootfile\s+full-path\s*=\s*"([^"]+)"/i);
-        if (!opfMatch) throw new Error('No se encontró rootfile en container.xml');
-        const opfPath = opfMatch[1];
+        // 2) Abrimos el libro forzando el tipo 'epub' y reemplazos en base64.
+        book = ePub(buffer, { openAs: 'epub', replacements: 'base64' });
+        bookRef.current = book;
 
-        const opfFile = zip.file(opfPath);
-        if (!opfFile) throw new Error('No se encontró ' + opfPath);
-        const opfXml = await opfFile.async('string');
-        if (cancelled) return;
+        rendition = book.renderTo(viewerRef.current, {
+          width: '100%',
+          height: '100%',
+          flow: 'paginated',
+          spread: 'none',
+        });
+        renditionRef.current = rendition;
 
-        const titleMatch = opfXml.match(/<dc:title[^>]*>([^<]+)<\/dc:title>/i);
-        if (titleMatch) setBookTitle(titleMatch[1].trim());
-        
-        const authorMatch = opfXml.match(/<dc:creator[^>]*>([^<]+)<\/dc:creator>/i);
-        if (authorMatch) setBookAuthor(authorMatch[1].trim());
+        // Estilos globales para que las imágenes no desborden el ancho
+        rendition.themes.default({
+          body: {
+            'font-size': '1rem',
+            'line-height': '1.7',
+          },
+          img: {
+            'max-width': '100% !important',
+            height: 'auto',
+          },
+        });
 
-        const manifest = {};
-        const itemRegex = /<item\s[^>]*\/?>/gi;
-        let m;
-        while ((m = itemRegex.exec(opfXml)) !== null) {
-          const idMatch = m[0].match(/id\s*=\s*"([^"]+)"/i);
-          const hrefMatch = m[0].match(/href\s*=\s*"([^"]+)"/i);
-          if (idMatch && hrefMatch) manifest[idMatch[1]] = hrefMatch[1];
-        }
-
-        const opfDir = opfPath.substring(0, opfPath.lastIndexOf('/') + 1);
-        const spine = [];
-        const itemrefRegex = /<itemref\s[^>]*\/?>/gi;
-        while ((m = itemrefRegex.exec(opfXml)) !== null) {
-          const idrefMatch = m[0].match(/idref\s*=\s*"([^"]+)"/i);
-          if (idrefMatch && manifest[idrefMatch[1]]) {
-            spine.push(opfDir + manifest[idrefMatch[1]]);
+        // 3) Recuperar progreso guardado si hay startPage > 0
+        let startCfi;
+        if (startPage > 0) {
+          try {
+            const data = JSON.parse(localStorage.getItem('kubika_progress') || '{}');
+            startCfi = data[libro.id]?.cfi;
+          } catch (e) {
+            startCfi = null;
           }
         }
 
-        if (spine.length === 0) throw new Error('No se encontraron páginas en el libro');
-        spineRef.current = spine;
-        setTotalItems(spine.length);
+        await book.ready;
+        if (cancelled) return;
 
-        if (cancelled || destroyedRef.current) return;
+        setBookTitle(book.packaging.metadata.title || libro.titulo);
+        setBookAuthor(book.packaging.metadata.creator || libro.autor);
 
-        if (startPage > 0) {
-          await loadPage(startPage, zip, spine);
-        } else {
-          // Mostrar portada del catálogo como primera página
-          setContent('<div class="flex items-center justify-center h-full min-h-[60vh]"><img src="' + portadaUrl + '" alt="' + libro.titulo + '" class="max-w-full max-h-[65vh] object-contain rounded-lg shadow-lg" /></div>');
-          setCurrentIdx(0);
-          setShowCover(true);
-        }
-        if (!cancelled && !destroyedRef.current) setLoading(false);
+        // Evento: ubicación actual cambia (usado para progreso y %)
+        rendition.on('relocated', (loc) => {
+          setCurrentCfi(loc.start.cfi);
+          try {
+            if (book.locations && book.locations.length() > 0) {
+              const pct = book.locations.percentageFromCfi(loc.start.cfi);
+              setPercentage(Math.round((pct || 0) * 100));
+            }
+          } catch (e) {
+            // locations aún no generadas
+          }
+        });
+
+        // Evento: capítulo renderizado
+        rendition.on('rendered', () => {
+          if (!cancelled) setLoading(false);
+        });
+
+        // Navegación con teclado (flechas izquierda/derecha)
+        rendition.on('keydown', (e) => {
+          if (e.key === 'ArrowLeft') rendition.prev();
+          if (e.key === 'ArrowRight') rendition.next();
+        });
+
+        // Mostrar el libro (desde el progreso guardado o desde el inicio)
+        rendition.display(startCfi || undefined);
+
+        // Generar ubicaciones en segundo plano (para calcular porcentaje)
+        book.locations.generate(1600).catch(() => {});
       } catch (err) {
         console.error('EPUB error:', err);
-        if (!cancelled && !destroyedRef.current) {
-          setError(err.message || 'Error desconocido');
+        if (!cancelled) {
+          setError(err.message || 'Error al cargar el libro');
           setLoading(false);
         }
       }
     })();
 
-    return () => { cancelled = true; destroyedRef.current = true; zipRef.current = null; };
-  }, [libro.epub, libro.id]);
-
-  const loadPage = async (index, zip, spine) => {
-    spine = spine || spineRef.current;
-    zip = zip || zipRef.current;
-    if (!zip || index < 0 || index >= spine.length) return;
-
-    setShowCover(false);
-
-    try {
-      const filePath = spine[index];
-      const file = zip.file(filePath);
-      if (!file) {
-        const nextIdx = index < spine.length - 1 ? index + 1 : index - 1;
-        if (nextIdx !== index) loadPage(nextIdx, zip, spine);
-        return;
-      }
-
-      let html = await file.async('string');
-
-      const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-      let bodyContent = bodyMatch ? bodyMatch[1] : html;
-
-      bodyContent = bodyContent.replace(/<img[^>]*>/gi, '');
-      bodyContent = bodyContent.replace(/<svg[^>]*>[\s\S]*?<\/svg>/gi, '');
-      bodyContent = bodyContent.replace(/<a[^>]*>/gi, '');
-      bodyContent = bodyContent.replace(/<\/a>/gi, '');
-
-      const textContent = bodyContent.replace(/<[^>]+>/g, '').trim();
-      if (!textContent && index < spine.length - 1) {
-        loadPage(index + 1, zip, spine);
-        return;
-      }
-
-      setContent(bodyContent);
-      setCurrentIdx(index);
-    } catch (err) {
-      setContent('<p style="color:red;padding:20px">Error al cargar esta página.</p>');
-    }
-  };
+    // Cleanup al desmontar o cambiar de libro
+    return () => {
+      cancelled = true;
+      try {
+        rendition?.destroy();
+      } catch (e) {}
+      try {
+        book?.destroy();
+      } catch (e) {}
+      bookRef.current = null;
+      renditionRef.current = null;
+    };
+  }, [libro?.epub, libro?.id, startPage]);
 
   const goPrev = () => {
-    if (showCover || currentIdx <= 0) return;
-    let i = currentIdx - 1;
-    const findPrev = (idx) => {
-      if (idx < 0) return;
-      const filePath = spineRef.current[idx];
-      const file = zipRef.current.file(filePath);
-      if (!file) { if (idx > 0) findPrev(idx - 1); return; }
-      file.async('string').then(html => {
-        const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-        let body = bodyMatch ? bodyMatch[1] : html;
-        body = body.replace(/<(img|svg|a)[^>]*>/gi, '').replace(/<\/(svg|a)>/gi, '').replace(/<[^>]+>/g, '').trim();
-        if (body) loadPage(idx);
-        else if (idx > 0) findPrev(idx - 1);
-        else loadPage(0);
-      });
-    };
-    findPrev(i);
-  };
-  const goNext = () => {
-    if (showCover) {
-      loadPage(0);
-      return;
-    }
-    if (currentIdx >= spineRef.current.length - 1) return;
-    loadPage(currentIdx + 1);
+    renditionRef.current?.prev();
   };
 
-  const pct = totalItems > 0 ? Math.round(((currentIdx + 1) / totalItems) * 100) : 0;
+  const goNext = () => {
+    renditionRef.current?.next();
+  };
 
   return (
     <div className="flex flex-col h-full bg-white">
+      {/* Barra superior */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 shrink-0">
-        <button onClick={onBack}
-          className="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
+        <button
+          onClick={onBack}
+          className="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+        >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg> Volver
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+          Volver
         </button>
         <div className="text-center min-w-0 mx-2">
-          <h2 className="text-sm font-semibold text-slate-800 truncate max-w-[260px]">{bookTitle || libro.titulo}</h2>
-          <p className="text-xs text-slate-400 truncate max-w-[260px]">{bookAuthor || libro.autor}</p>
+          <h2 className="text-sm font-semibold text-slate-800 truncate max-w-[260px]">
+            {bookTitle || libro.titulo}
+          </h2>
+          <p className="text-xs text-slate-400 truncate max-w-[260px]">
+            {bookAuthor || libro.autor}
+          </p>
         </div>
         <div className="w-16" />
       </div>
 
-      <div ref={contentRef} className="flex-1 overflow-y-auto bg-white px-6 py-8 leading-relaxed text-slate-800 text-2xl font-handwriting">
+      {/* Visor del libro */}
+      <div className="flex-1 overflow-hidden bg-white relative min-h-0">
+        <div ref={viewerRef} className="w-full h-full" />
+
         {loading && (
-          <div className="flex items-center justify-center gap-3 py-20">
+          <div className="absolute inset-0 flex items-center justify-center gap-3 bg-white/80 z-10">
             <div className="w-8 h-8 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" />
             <p className="text-sm text-slate-500">Cargando libro...</p>
           </div>
         )}
+
         {error && (
-          <div className="text-center py-20">
-            <p className="text-red-500 text-sm font-medium">{error}</p>
+          <div className="absolute inset-0 flex items-center justify-center bg-white z-10">
+            <div className="text-center px-6">
+              <p className="text-red-500 text-sm font-medium mb-2">Error al cargar el libro</p>
+              <p className="text-slate-500 text-xs">{error}</p>
+            </div>
           </div>
-        )}
-        {!loading && !error && (
-          <div className="max-w-2xl mx-auto" dangerouslySetInnerHTML={{ __html: content }} />
         )}
       </div>
 
+      {/* Barra inferior */}
       {!loading && !error && (
         <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200 shrink-0">
-          <button onClick={goPrev} disabled={!showCover && currentIdx <= 0}
-            className="px-4 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 disabled:text-slate-300 disabled:cursor-default hover:bg-slate-100 rounded-lg transition-colors">
-            &lsaquo; {showCover ? '' : 'Anterior'}
+          <button
+            onClick={goPrev}
+            className="px-4 py-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+          >
+            &lsaquo; Anterior
           </button>
-          <span className="text-xs font-medium text-slate-500">{showCover ? 'Portada' : pct + '% · ' + (currentIdx + 1) + '/' + totalItems}</span>
-          <button onClick={goNext} disabled={!showCover && currentIdx >= totalItems - 1}
-            className="px-5 py-1.5 text-sm font-semibold text-white bg-indigo-500 hover:bg-indigo-600 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-default rounded-lg transition-colors">
-            {showCover ? 'Comenzar a leer' : 'Siguiente'} &rsaquo;
+          <span className="text-xs font-medium text-slate-500 tabular-nums">
+            {percentage}%
+          </span>
+          <button
+            onClick={goNext}
+            className="px-5 py-1.5 text-sm font-semibold text-white bg-indigo-500 hover:bg-indigo-600 rounded-lg transition-colors"
+          >
+            Siguiente &rsaquo;
           </button>
         </div>
       )}
