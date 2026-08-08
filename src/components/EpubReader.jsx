@@ -98,6 +98,10 @@ export default function EpubReader({ libro, onBack, startPage }) {
         }
 
         await book.ready;
+        // book.opened se resuelve DESPUÉS de que epub.js genera los
+        // reemplazos base64 de imágenes/CSS desde el zip. Sin esperarlo,
+        // el texto se muestra pero las imágenes quedan con rutas 404.
+        await book.opened;
         if (cancelled) return;
 
         setBookTitle(book.packaging.metadata.title || libro.titulo);
