@@ -129,7 +129,9 @@ export default function EpubReader({ libro, onBack, startPage }) {
       } catch (err) {
         console.error('EPUB error:', err);
         if (!cancelled) {
-          setError(err.message || 'Error al cargar el libro');
+          // err.message puede ser un ArrayBuffer (404 page) → convertir a string
+          const msg = err && err.message ? String(err.message) : 'Error al cargar el libro';
+          setError(msg);
           setLoading(false);
         }
       }
