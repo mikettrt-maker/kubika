@@ -16,18 +16,17 @@ export default function EpubReader({ libro, onBack, startPage }) {
   // Construir URL absoluta del EPUB
   const epubUrl = (() => {
     if (libro.epub.startsWith('http')) return libro.epub;
-    const base = window.location.origin + import.meta.env.BASE_URL.replace(/\/$/, '');
+    const base = window.location.origin + window.location.pathname.replace(/\/$/, '');
     return base + '/' + libro.epub.replace(/^\//, '');
   })();
 
-  // Guardar progreso en localStorage (usando CFI, más preciso que índice)
+  // Guardar progreso en localStorage
   useEffect(() => {
     if (currentCfi && libro?.id) {
       try {
         const data = JSON.parse(localStorage.getItem('kubika_progress') || '{}');
         data[libro.id] = {
           cfi: currentCfi,
-          pct: percentage,
           titulo: libro.titulo,
           portada: libro.portada,
           epub: libro.epub,
@@ -38,20 +37,17 @@ export default function EpubReader({ libro, onBack, startPage }) {
         };
         localStorage.setItem('kubika_progress', JSON.stringify(data));
         localStorage.setItem('kubika_last_book', String(libro.id));
-      } catch (e) {
-        // silencioso
-      }
+      } catch (e) {}
     }
-  }, [currentCfi, percentage, libro?.id]);
+  }, [currentCfi, libro?.id]);
 
-  // Cargar y renderizar el libro con epub.js
+  // Cargar y renderizar el libro
   useEffect(() => {
     if (!viewerRef.current) return;
 
     let cancelled = false;
     let book = null;
     let rendition = null;
-    let blobUrl = null;
 
     setLoading(true);
     setError(null);
@@ -60,22 +56,21 @@ export default function EpubReader({ libro, onBack, startPage }) {
 
     (async () => {
       try {
-        // 1) Descargamos el EPUB y lo convertimos a Blob URL.
-        //    Pasar un ArrayBuffer directamente a epub.js hace que resuelva
-        //    rutas internas como "[object ArrayBuffer]/..." → 404.
-        //    Con un Blob URL epub.js tiene una URL real como base.
+        // 1) Descargar el EPUB como ArrayBuffer
         const res = await fetch(epubUrl);
         if (!res.ok) throw new Error('HTTP ' + res.status + ' al descargar el libro');
         const buffer = await res.arrayBuffer();
         if (cancelled) return;
 
-        const blob = new Blob([buffer], { type: 'application/epub+zip' });
-        blobUrl = URL.createObjectURL(blob);
-
-        // 2) Abrimos el libro desde el Blob URL con reemplazos en base64 para imágenes.
-        book = ePub(blobUrl, { openAs: 'epub', replacements: 'base64' });
+        // 2) IMPORTANTE: crear el libro vacío y abrirlo con .open()
+        //    Si haces ePub(buffer), epub.js a veces lo trata como string
+        //    y produce la URL "[object ArrayBuffer]" -> 404
+        book = ePub();
+        book.replacements = 'base64';
+        await book.open(buffer, 'epub');
         bookRef.current = book;
 
+        // 3) Crear el rendition (la vista del libro)
         rendition = book.renderTo(viewerRef.current, {
           width: '100%',
           height: '100%',
@@ -84,7 +79,7 @@ export default function EpubReader({ libro, onBack, startPage }) {
         });
         renditionRef.current = rendition;
 
-        // Estilos globales para que las imágenes no desborden el ancho
+        // Estilos globales para que las imágenes no desborden
         rendition.themes.default({
           body: {
             'font-size': '1rem',
@@ -96,7 +91,7 @@ export default function EpubReader({ libro, onBack, startPage }) {
           },
         });
 
-        // 3) Recuperar progreso guardado si hay startPage > 0
+        // 4) Recuperar progreso guardado
         let startCfi;
         if (startPage > 0) {
           try {
@@ -113,16 +108,12 @@ export default function EpubReader({ libro, onBack, startPage }) {
         setBookTitle(book.packaging.metadata.title || libro.titulo);
         setBookAuthor(book.packaging.metadata.creator || libro.autor);
 
-        // Evento: ubicación actual cambia (usado para progreso y %)
+        // Evento: ubicación actual cambia
         rendition.on('relocated', (loc) => {
           setCurrentCfi(loc.start.cfi);
-          try {
-            if (book.locations && book.locations.length() > 0) {
-              const pct = book.locations.percentageFromCfi(loc.start.cfi);
-              setPercentage(Math.round((pct || 0) * 100));
-            }
-          } catch (e) {
-            // locations aún no generadas
+          if (book.locations.length() > 0) {
+            const pct = book.locations.percentageFromCfi(loc.start.cfi);
+            setPercentage(Math.round((pct || 0) * 100));
           }
         });
 
@@ -131,16 +122,16 @@ export default function EpubReader({ libro, onBack, startPage }) {
           if (!cancelled) setLoading(false);
         });
 
-        // Navegación con teclado (flechas izquierda/derecha)
+        // Navegación con teclado
         rendition.on('keydown', (e) => {
           if (e.key === 'ArrowLeft') rendition.prev();
           if (e.key === 'ArrowRight') rendition.next();
         });
 
-        // Mostrar el libro (desde el progreso guardado o desde el inicio)
+        // Mostrar el libro
         rendition.display(startCfi || undefined);
 
-        // Generar ubicaciones en segundo plano (para calcular porcentaje)
+        // Generar ubicaciones en segundo plano (para el porcentaje)
         book.locations.generate(1600).catch(() => {});
       } catch (err) {
         console.error('EPUB error:', err);
@@ -151,7 +142,6 @@ export default function EpubReader({ libro, onBack, startPage }) {
       }
     })();
 
-    // Cleanup al desmontar o cambiar de libro
     return () => {
       cancelled = true;
       try {
@@ -160,19 +150,13 @@ export default function EpubReader({ libro, onBack, startPage }) {
       try {
         book?.destroy();
       } catch (e) {}
-      if (blobUrl) URL.revokeObjectURL(blobUrl);
       bookRef.current = null;
       renditionRef.current = null;
     };
   }, [libro?.epub, libro?.id, startPage]);
 
-  const goPrev = () => {
-    renditionRef.current?.prev();
-  };
-
-  const goNext = () => {
-    renditionRef.current?.next();
-  };
+  const goPrev = () => renditionRef.current?.prev();
+  const goNext = () => renditionRef.current?.next();
 
   return (
     <div className="flex flex-col h-full bg-white">
