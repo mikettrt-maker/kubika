@@ -111,7 +111,7 @@ export default function EpubReader({ libro, onBack, startPage }) {
             'font-family': "'Caveat', cursive",
             'font-size': '1.2rem',
             'line-height': '1.65',
-            'background': '#fdfaf3',
+            'background': '#ffffff',
             'color': '#33322e',
             'padding': '1.5rem 2.2rem',
           },
@@ -221,7 +221,7 @@ export default function EpubReader({ libro, onBack, startPage }) {
           <div
             ref={viewerRef}
             className="w-full h-full max-w-[860px] rounded-lg shadow-2xl border border-slate-300"
-            style={{ backgroundColor: '#fdfaf3' }}
+            style={{ backgroundColor: '#ffffff' }}
           />
         </div>
 
