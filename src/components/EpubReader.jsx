@@ -13,14 +13,12 @@ export default function EpubReader({ libro, onBack, startPage }) {
   const bookRef = useRef(null);
   const renditionRef = useRef(null);
 
-  // Construir URL absoluta del EPUB
   const epubUrl = (() => {
     if (libro.epub.startsWith('http')) return libro.epub;
     const base = window.location.origin + window.location.pathname.replace(/\/$/, '');
     return base + '/' + libro.epub.replace(/^\//, '');
   })();
 
-  // Guardar progreso en localStorage
   useEffect(() => {
     if (currentCfi && libro?.id) {
       try {
@@ -41,7 +39,6 @@ export default function EpubReader({ libro, onBack, startPage }) {
     }
   }, [currentCfi, libro?.id]);
 
-  // Cargar y renderizar el libro
   useEffect(() => {
     if (!viewerRef.current) return;
 
@@ -51,55 +48,66 @@ export default function EpubReader({ libro, onBack, startPage }) {
 
     setLoading(true);
     setError(null);
-    setPercentage(0);
-    setCurrentCfi(null);
 
     (async () => {
       try {
-        // 1) Descargar el EPUB como ArrayBuffer
+        console.log('=== EPUB DEBUG START ===');
+        console.log('epubUrl:', epubUrl);
+
         const res = await fetch(epubUrl);
-        if (!res.ok) throw new Error('HTTP ' + res.status + ' al descargar el libro');
+        console.log('Fetch response status:', res.status);
+        
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        
         const buffer = await res.arrayBuffer();
+        console.log('Buffer type:', buffer.constructor.name);
+        console.log('Buffer is ArrayBuffer:', buffer instanceof ArrayBuffer);
+        console.log('Buffer byteLength:', buffer.byteLength);
+        
         if (cancelled) return;
 
-        // 2) IMPORTANTE: crear el libro vacío y abrirlo con .open()
-        //    Si haces ePub(buffer), epub.js a veces lo trata como string
-        //    y produce la URL "[object ArrayBuffer]" -> 404
+        // DEBUG: Verificar que ePub existe
+        console.log('ePub function:', typeof ePub);
+        console.log('ePub:', ePub);
+
+        // Crear libro vacío
         book = ePub();
+        console.log('Book created:', book);
+        
+        // Configurar replacements
         book.replacements = 'base64';
+        console.log('Replacements set to:', book.replacements);
+
+        // Abrir el libro con el buffer
+        console.log('Calling book.open() with buffer...');
         await book.open(buffer, 'epub');
+        console.log('Book opened successfully');
+        
         bookRef.current = book;
 
-        // 3) Crear el rendition (la vista del libro)
+        // Crear rendition
+        console.log('Creating rendition...');
         rendition = book.renderTo(viewerRef.current, {
           width: '100%',
           height: '100%',
           flow: 'paginated',
           spread: 'none',
         });
+        console.log('Rendition created:', rendition);
+        
         renditionRef.current = rendition;
 
-        // Estilos globales para que las imágenes no desborden
         rendition.themes.default({
-          body: {
-            'font-size': '1rem',
-            'line-height': '1.7',
-          },
-          img: {
-            'max-width': '100% !important',
-            height: 'auto',
-          },
+          body: { 'font-size': '1rem', 'line-height': '1.7' },
+          img: { 'max-width': '100% !important', height: 'auto' },
         });
 
-        // 4) Recuperar progreso guardado
         let startCfi;
         if (startPage > 0) {
           try {
             const data = JSON.parse(localStorage.getItem('kubika_progress') || '{}');
             startCfi = data[libro.id]?.cfi;
-          } catch (e) {
-            startCfi = null;
-          }
+          } catch (e) {}
         }
 
         await book.ready;
@@ -108,7 +116,6 @@ export default function EpubReader({ libro, onBack, startPage }) {
         setBookTitle(book.packaging.metadata.title || libro.titulo);
         setBookAuthor(book.packaging.metadata.creator || libro.autor);
 
-        // Evento: ubicación actual cambia
         rendition.on('relocated', (loc) => {
           setCurrentCfi(loc.start.cfi);
           if (book.locations.length() > 0) {
@@ -117,24 +124,23 @@ export default function EpubReader({ libro, onBack, startPage }) {
           }
         });
 
-        // Evento: capítulo renderizado
         rendition.on('rendered', () => {
           if (!cancelled) setLoading(false);
         });
 
-        // Navegación con teclado
         rendition.on('keydown', (e) => {
           if (e.key === 'ArrowLeft') rendition.prev();
           if (e.key === 'ArrowRight') rendition.next();
         });
 
-        // Mostrar el libro
+        console.log('Displaying book...');
         rendition.display(startCfi || undefined);
+        console.log('=== EPUB DEBUG END ===');
 
-        // Generar ubicaciones en segundo plano (para el porcentaje)
         book.locations.generate(1600).catch(() => {});
       } catch (err) {
         console.error('EPUB error:', err);
+        console.error('Error stack:', err.stack);
         if (!cancelled) {
           setError(err.message || 'Error al cargar el libro');
           setLoading(false);
@@ -160,19 +166,13 @@ export default function EpubReader({ libro, onBack, startPage }) {
 
   return (
     <div className="flex flex-col h-full bg-white">
-      {/* Barra superior */}
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 shrink-0">
         <button
           onClick={onBack}
           className="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M15 19l-7-7 7-7"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
           Volver
         </button>
@@ -187,7 +187,6 @@ export default function EpubReader({ libro, onBack, startPage }) {
         <div className="w-16" />
       </div>
 
-      {/* Visor del libro */}
       <div className="flex-1 overflow-hidden bg-white relative min-h-0">
         <div ref={viewerRef} className="w-full h-full" />
 
@@ -208,7 +207,6 @@ export default function EpubReader({ libro, onBack, startPage }) {
         )}
       </div>
 
-      {/* Barra inferior */}
       {!loading && !error && (
         <div className="flex items-center justify-between px-4 py-3 border-t border-slate-200 shrink-0">
           <button
