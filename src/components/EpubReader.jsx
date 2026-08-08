@@ -51,57 +51,44 @@ export default function EpubReader({ libro, onBack, startPage }) {
 
     (async () => {
       try {
-        console.log('=== EPUB DEBUG START ===');
-        console.log('epubUrl:', epubUrl);
-
+        // Descargar el EPUB
         const res = await fetch(epubUrl);
-        console.log('Fetch response status:', res.status);
-        
         if (!res.ok) throw new Error('HTTP ' + res.status);
         
         const buffer = await res.arrayBuffer();
-        console.log('Buffer type:', buffer.constructor.name);
-        console.log('Buffer is ArrayBuffer:', buffer instanceof ArrayBuffer);
-        console.log('Buffer byteLength:', buffer.byteLength);
-        
         if (cancelled) return;
 
-        // DEBUG: Verificar que ePub existe
-        console.log('ePub function:', typeof ePub);
-        console.log('ePub:', ePub);
+        // SOLUCIÓN: Crear un nuevo ArrayBuffer "limpio" desde un Blob
+        // Esto evita problemas con bundlers que transforman ArrayBuffers
+        const blob = new Blob([buffer]);
+        const cleanBuffer = await blob.arrayBuffer();
 
-        // Crear libro vacío
-        book = ePub();
-        console.log('Book created:', book);
-        
-        // Configurar replacements
-        book.replacements = 'base64';
-        console.log('Replacements set to:', book.replacements);
-
-        // Abrir el libro con el buffer
-        console.log('Calling book.open() with buffer...');
-        await book.open(buffer, 'epub');
-        console.log('Book opened successfully');
+        // Crear el libro directamente con el buffer (sin .open())
+        // epub.js detecta automáticamente que es un ArrayBuffer y lo trata como ZIP
+        book = ePub(cleanBuffer, {
+          replacements: 'base64',
+        });
         
         bookRef.current = book;
 
-        // Crear rendition
-        console.log('Creating rendition...');
+        // Crear el rendition
         rendition = book.renderTo(viewerRef.current, {
           width: '100%',
           height: '100%',
           flow: 'paginated',
           spread: 'none',
+          allowScriptedContent: true,
         });
-        console.log('Rendition created:', rendition);
         
         renditionRef.current = rendition;
 
+        // Estilos para que las imágenes no desborden
         rendition.themes.default({
           body: { 'font-size': '1rem', 'line-height': '1.7' },
           img: { 'max-width': '100% !important', height: 'auto' },
         });
 
+        // Recuperar progreso guardado
         let startCfi;
         if (startPage > 0) {
           try {
@@ -116,6 +103,7 @@ export default function EpubReader({ libro, onBack, startPage }) {
         setBookTitle(book.packaging.metadata.title || libro.titulo);
         setBookAuthor(book.packaging.metadata.creator || libro.autor);
 
+        // Eventos
         rendition.on('relocated', (loc) => {
           setCurrentCfi(loc.start.cfi);
           if (book.locations.length() > 0) {
@@ -133,14 +121,13 @@ export default function EpubReader({ libro, onBack, startPage }) {
           if (e.key === 'ArrowRight') rendition.next();
         });
 
-        console.log('Displaying book...');
+        // Mostrar el libro
         rendition.display(startCfi || undefined);
-        console.log('=== EPUB DEBUG END ===');
 
+        // Generar ubicaciones para el porcentaje
         book.locations.generate(1600).catch(() => {});
       } catch (err) {
         console.error('EPUB error:', err);
-        console.error('Error stack:', err.stack);
         if (!cancelled) {
           setError(err.message || 'Error al cargar el libro');
           setLoading(false);
