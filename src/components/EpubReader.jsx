@@ -71,6 +71,27 @@ export default function EpubReader({ libro, onBack, startPage }) {
         
         bookRef.current = book;
 
+        // Fix rutas con %20: muchos EPUB (ej. Capitán Calzoncillos) guardan
+        // src como "../images/las%20aventuras....jpg" pero epubjs sustituye
+        // comparando cadenas con espacios literales del manifest, así que no
+        // reemplaza las imágenes y quedan en 404. Este hook decodifica los
+        // atributos src antes de la serialización/sustitución.
+        try {
+          book.spine.hooks.content.register((doc) => {
+            try {
+              doc.querySelectorAll('img, image, source, audio, video').forEach(el => {
+                const attr = el.tagName.toLowerCase() === 'image' ? 'xlink:href' : 'src';
+                const val = el.getAttribute(attr);
+                if (val && val.indexOf('%') > -1) {
+                  try {
+                    el.setAttribute(attr, decodeURIComponent(val));
+                  } catch (e) {}
+                }
+              });
+            } catch (e) {}
+          });
+        } catch (e) {}
+
         // Crear el rendition
         rendition = book.renderTo(viewerRef.current, {
           width: '100%',
