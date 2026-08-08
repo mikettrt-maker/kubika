@@ -103,14 +103,23 @@ export default function EpubReader({ libro, onBack, startPage }) {
         
         renditionRef.current = rendition;
 
-        // Tipografía homogénea: fuente manuscrita (Caveat) y un mismo tamaño en todo el libro
+        // Tipografía homogénea: fuente manuscrita (Caveat), un mismo tamaño en todo el libro
+        // y fondo papel para dar forma de libro a la página
         rendition.themes.registerUrl('default', 'https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap');
         rendition.themes.default({
-          body: { 'font-family': "'Caveat', cursive", 'font-size': '1.55rem', 'line-height': '1.7' },
+          body: {
+            'font-family': "'Caveat', cursive",
+            'font-size': '1.2rem',
+            'line-height': '1.65',
+            'background': '#fdfaf3',
+            'color': '#33322e',
+            'padding': '1.5rem 2.2rem',
+          },
           '*': {
             'font-family': "'Caveat', cursive !important",
-            'font-size': '1.55rem !important',
-            'line-height': '1.7 !important',
+            'font-size': '1.2rem !important',
+            'line-height': '1.65 !important',
+            'color': '#33322e !important',
           },
           img: { 'max-width': '100% !important', height: 'auto' },
         });
@@ -207,8 +216,14 @@ export default function EpubReader({ libro, onBack, startPage }) {
         <div className="w-16" />
       </div>
 
-      <div className="flex-1 overflow-hidden bg-white relative min-h-0">
-        <div ref={viewerRef} className="w-full h-full" />
+      <div className="flex-1 overflow-hidden relative min-h-0 bg-slate-200">
+        <div className="absolute inset-0 flex items-center justify-center p-4 md:p-8">
+          <div
+            ref={viewerRef}
+            className="w-full h-full max-w-[860px] rounded-lg shadow-2xl border border-slate-300"
+            style={{ backgroundColor: '#fdfaf3' }}
+          />
+        </div>
 
         {loading && (
           <div className="absolute inset-0 flex items-center justify-center gap-3 bg-white/80 z-10">
