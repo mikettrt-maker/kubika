@@ -103,9 +103,15 @@ export default function EpubReader({ libro, onBack, startPage }) {
         
         renditionRef.current = rendition;
 
-        // Estilos para que las imágenes no desborden
+        // Tipografía homogénea: fuente manuscrita (Caveat) y un mismo tamaño en todo el libro
+        rendition.themes.registerUrl('default', 'https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&display=swap');
         rendition.themes.default({
-          body: { 'font-size': '1rem', 'line-height': '1.7' },
+          body: { 'font-family': "'Caveat', cursive", 'font-size': '1.55rem', 'line-height': '1.7' },
+          '*': {
+            'font-family': "'Caveat', cursive !important",
+            'font-size': '1.55rem !important',
+            'line-height': '1.7 !important',
+          },
           img: { 'max-width': '100% !important', height: 'auto' },
         });
 
