@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kubika-v2';
+const CACHE_NAME = 'kubika-v3';
 const ASSETS = [
   '.',
   'index.html',
