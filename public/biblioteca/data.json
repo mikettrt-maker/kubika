@@ -482,5 +482,16 @@
     "epub": "biblioteca/libros/Un_puente_hacia_Terabithia_Katherine_Paterson.epub",
     "descripcion": "Jess y Leslie crean un reino imaginario en el bosque llamado Terabithia, donde escapan de sus problemas y se convierten en reyes. Allí son valientes y poderosos, pero el mundo real les espera con una lección inolvidable sobre la amistad, la pérdida y el poder de la imaginación.",
     "pregunta": "¿Crees que la imaginación puede ayudarnos a enfrentar los momentos más difíciles de la vida?"
+  },
+  {
+    "id": 46,
+    "titulo": "Chaucha y Palito",
+    "autor": "María Elena Walsh",
+    "categoria": "Infantil",
+    "edad": "6-8 años",
+    "portada": "biblioteca/portadas/Chaucha y palito.svg",
+    "epub": "biblioteca/libros/Chaucha_y_Palito_Maria_Elena_Walsh.epub",
+    "descripcion": "Un clásico de María Elena Walsh, lleno de humor, rimas y ternura. Una historia perfecta para leer en voz alta, viajar por mundos imaginarios y descubrir la magia de las palabras.",
+    "pregunta": "¿Qué aventuras crees que viven Chaucha y Palito en su historia?"
   }
 ]
