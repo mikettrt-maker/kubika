@@ -493,5 +493,71 @@
     "epub": "biblioteca/libros/Chaucha_y_Palito_Maria_Elena_Walsh.epub",
     "descripcion": "Un clásico de María Elena Walsh, lleno de humor, rimas y ternura. Una historia perfecta para leer en voz alta, viajar por mundos imaginarios y descubrir la magia de las palabras.",
     "pregunta": "¿Qué aventuras crees que viven Chaucha y Palito en su historia?"
+  },
+  {
+    "id": 47,
+    "titulo": "El amuleto perdido",
+    "autor": "Bárbara Montes",
+    "categoria": "Infantil",
+    "edad": "9-11 años",
+    "portada": "biblioteca/portadas/El amuleto perdido.svg",
+    "epub": "biblioteca/libros/El_amuleto_perdido_Barbara_Montes.epub",
+    "descripcion": "Una aventura de misterio y amistad en la que un amuleto enigmático pondrá a prueba el ingenio de sus protagonistas. Una historia llena de intriga, sorpresas y valentía que engancha desde la primera página.",
+    "pregunta": "¿Qué harías si encontraras un objeto mágico que no sabes de quién es?"
+  },
+  {
+    "id": 48,
+    "titulo": "El curioso incidente del perro a medianoche",
+    "autor": "Mark Haddon",
+    "categoria": "Infantil",
+    "edad": "11+ años",
+    "portada": "biblioteca/portadas/El curioso incidente del perro a medianoche.svg",
+    "epub": "biblioteca/libros/El_curioso_incidente_del_perro_a_medianoche_Mark_Haddon.epub",
+    "descripcion": "Christopher Boone tiene quince años y una mente brillante y distinta: conoce todos los países del mundo, sus capitales y cada número primo hasta el 7.057. Cuando encuentra al perro de su vecina muerto en el jardín, decide investigar quién lo hizo. Una novela inolvidable sobre ser diferente, entender el mundo y descubrir la verdad.",
+    "pregunta": "¿Cómo crees que se ve el mundo cuando pensamos de maneras muy distintas a los demás?"
+  },
+  {
+    "id": 49,
+    "titulo": "El último minuto",
+    "autor": "Bárbara Montes",
+    "categoria": "Infantil",
+    "edad": "9-11 años",
+    "portada": "biblioteca/portadas/El ultimo minuto.svg",
+    "epub": "biblioteca/libros/El_ultimo_minuto_Barbara_Montes.epub",
+    "descripcion": "El tiempo se agota y cada minuto cuenta. Una aventura trepidante llena de retos, misterios y decisiones importantes, en la que los protagonistas tendrán que actuar en el momento exacto.",
+    "pregunta": "Si solo tuvieras un minuto para resolver un misterio, ¿por dónde empezarías?"
+  },
+  {
+    "id": 50,
+    "titulo": "La casa del reloj en la pared",
+    "autor": "John Bellairs",
+    "categoria": "Infantil",
+    "edad": "9-11 años",
+    "portada": "biblioteca/portadas/la casa del reloj en la pared.svg",
+    "epub": "biblioteca/libros/La_casa_del_reloj_en_la_pared_John_Bellairs.epub",
+    "descripcion": "Lewis Barnavelt, un niño huérfano, se va a vivir con su tío Jonathan a una casa vieja y curiosa: escondidos dentro de las paredes hay relojes que nadie puede explicar. Pronto descubre que su tío es mago y que un hechizo oscuro está a punto de despertar. Un clásico del misterio y la magia.",
+    "pregunta": "¿Te gustaría vivir en una casa donde los relojes esconden secretos mágicos?"
+  },
+  {
+    "id": 51,
+    "titulo": "La leyenda del bosque",
+    "autor": "Jara Santamaría",
+    "categoria": "Infantil",
+    "edad": "9-11 años",
+    "portada": "biblioteca/portadas/La leyenda del bosque.svg",
+    "epub": "biblioteca/libros/La_leyenda_del_bosque_Jara_Santamaria.epub",
+    "descripcion": "Un bosque, un secreto muy antiguo y una leyenda que se vuelve realidad. Los protagonistas se adentran en un mundo de magia y aventuras donde nada es lo que parece. Una historia perfecta para soñar y sorprenderse.",
+    "pregunta": "¿Qué misterio crees que puede esconder un bosque antiguo?"
+  },
+  {
+    "id": 52,
+    "titulo": "Una herencia peligrosa",
+    "autor": "Bárbara Montes",
+    "categoria": "Infantil",
+    "edad": "9-11 años",
+    "portada": "biblioteca/portadas/Una herencia peligrosa.svg",
+    "epub": "biblioteca/libros/Una_herencia_peligrosa_Barbara_Montes.epub",
+    "descripcion": "Recibir una herencia puede ser el comienzo de una gran aventura... o de un gran peligro. Los protagonistas descubren que algunos regalos esconden secretos que conviene resolver a tiempo. Misterio, amistad y muchas sorpresas.",
+    "pregunta": "Si heredaras un objeto misterioso, ¿qué harías con él?"
   }
 ]
