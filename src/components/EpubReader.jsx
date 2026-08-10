@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import ePub from 'epubjs';
+import { jsPDF } from 'jspdf';
 
 const COLORS = [
   { name: 'Amarillo', value: '#FFE066' },
@@ -13,6 +14,15 @@ function getUserId() {
     return JSON.parse(localStorage.getItem('kubika_local_user') || '{}')?.id || 'anon';
   } catch {
     return 'anon';
+  }
+}
+
+function getStudentName() {
+  try {
+    const u = JSON.parse(localStorage.getItem('kubika_local_user') || '{}');
+    return u?.user_metadata?.display_name || (u?.email || '').split('@')[0] || 'Alumno';
+  } catch {
+    return 'Alumno';
   }
 }
 
@@ -45,6 +55,7 @@ export default function EpubReader({ libro, onBack, startPage }) {
   const [notes, setNotes] = useState([]);
   const [showNotes, setShowNotes] = useState(false);
   const [draft, setDraft] = useState(null);
+  const [showFinish, setShowFinish] = useState(false);
 
   const viewerRef = useRef(null);
   const bookRef = useRef(null);
@@ -57,25 +68,24 @@ export default function EpubReader({ libro, onBack, startPage }) {
     return base + '/' + libro.epub.replace(/^\//, '');
   })();
 
-  useEffect(() => {
-    if (currentCfi && libro?.id) {
-      try {
-        const data = JSON.parse(localStorage.getItem('kubika_progress') || '{}');
-        data[libro.id] = {
-          cfi: currentCfi,
-          titulo: libro.titulo,
-          portada: libro.portada,
-          epub: libro.epub,
-          autor: libro.autor,
-          categoria: libro.categoria,
-          edad: libro.edad,
-          descripcion: libro.descripcion,
-        };
-        localStorage.setItem('kubika_progress', JSON.stringify(data));
-        localStorage.setItem('kubika_last_book', String(libro.id));
-      } catch (e) {}
-    }
-  }, [currentCfi, libro?.id]);
+  const saveProgress = (cfi, pct) => {
+    try {
+      const data = JSON.parse(localStorage.getItem('kubika_progress') || '{}');
+      data[libro.id] = {
+        cfi,
+        pct,
+        titulo: libro.titulo,
+        portada: libro.portada,
+        epub: libro.epub,
+        autor: libro.autor,
+        categoria: libro.categoria,
+        edad: libro.edad,
+        descripcion: libro.descripcion,
+      };
+      localStorage.setItem('kubika_progress', JSON.stringify(data));
+      localStorage.setItem('kubika_last_book', String(libro.id));
+    } catch (e) {}
+  };
 
   useEffect(() => {
     if (!viewerRef.current) return;
@@ -182,11 +192,23 @@ export default function EpubReader({ libro, onBack, startPage }) {
         setBookAuthor(book.packaging.metadata.creator || libro.autor);
 
         // Eventos
+        let finishedShown = false;
         rendition.on('relocated', (loc) => {
           setCurrentCfi(loc.start.cfi);
           if (book.locations.length() > 0) {
-            const pct = book.locations.percentageFromCfi(loc.start.cfi);
-            setPercentage(Math.round((pct || 0) * 100));
+            const pct = Math.round((book.locations.percentageFromCfi(loc.start.cfi) || 0) * 100);
+            setPercentage(pct);
+            if (loc.atEnd) {
+              // Terminó el libro: marcar 100% y mostrar pregunta de reflexión
+              saveProgress(loc.start.cfi, 100);
+              if (!finishedShown) {
+                finishedShown = true;
+                setShowFinish(true);
+                setPercentage(100);
+              }
+            } else {
+              saveProgress(loc.start.cfi, pct);
+            }
           }
         });
 
@@ -323,6 +345,86 @@ export default function EpubReader({ libro, onBack, startPage }) {
     } catch (e) {}
   };
 
+  const restartBook = () => {
+    setShowFinish(false);
+    try {
+      renditionRef.current?.display().catch(() => {});
+    } catch (e) {}
+  };
+
+  const exportNotesPdf = () => {
+    try {
+      const pdf = new jsPDF({ unit: 'mm', format: 'letter' });
+      const pageW = pdf.internal.pageSize.getWidth();
+      const pageH = pdf.internal.pageSize.getHeight();
+
+      // Encabezado
+      pdf.setFont('helvetica', 'bold');
+      pdf.setFontSize(16);
+      pdf.setTextColor(76, 110, 245);
+      pdf.text('Mis notas de lectura', 15, 20);
+      pdf.setFont('helvetica', 'normal');
+      pdf.setFontSize(10);
+      pdf.setTextColor(100, 100, 100);
+      const student = getStudentName();
+      const date = new Date().toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+      pdf.text(`Alumno: ${student}`, 15, 27);
+      pdf.text(`Libro: ${bookTitle || libro.titulo}`, 15, 33);
+      pdf.text(`Fecha: ${date}  |  ${notes.length} ${notes.length === 1 ? 'nota' : 'notas'}`, 80, 33);
+      pdf.setDrawColor(76, 110, 245);
+      pdf.setLineWidth(0.5);
+      pdf.line(15, 36, pageW - 15, 36);
+
+      if (notes.length === 0) {
+        pdf.setFont('helvetica', 'normal');
+        pdf.setFontSize(11);
+        pdf.setTextColor(80, 80, 80);
+        pdf.text('Todavía no hay notas para este libro.', 15, 48);
+      }
+
+      let y = 48;
+      const bottom = pageH - 25;
+      notes.slice().reverse().forEach(n => {
+        pdf.setFillColor(n.color || '#FFE066');
+        pdf.roundedRect(15, y - 2.5, 4, 4, 1, 1, 'F');
+        if (n.text) {
+          pdf.setFont('helvetica', 'italic');
+          pdf.setFontSize(10);
+          pdf.setTextColor(70, 70, 70);
+          const lines = pdf.splitTextToSize(`“${n.text}”`, pageW - 45);
+          for (const ln of lines) {
+            if (y > bottom) { pdf.addPage(); y = 25; }
+            pdf.text(ln, 23, y);
+            y += 4.3;
+          }
+          y += 1;
+        }
+        if (n.note) {
+          pdf.setFont('helvetica', 'normal');
+          pdf.setFontSize(10);
+          pdf.setTextColor(30, 30, 30);
+          const lines = pdf.splitTextToSize(n.note, pageW - 45);
+          for (const ln of lines) {
+            if (y > bottom) { pdf.addPage(); y = 25; }
+            pdf.text(ln, 23, y);
+            y += 4.5;
+          }
+          y += 1;
+        }
+        y += 4;
+      });
+
+      pdf.setFontSize(8);
+      pdf.setTextColor(180, 180, 180);
+      pdf.text('Generado con Kubika', pageW / 2, pageH - 10, { align: 'center' });
+
+      const fname = 'kubika-notas-' + (bookTitle || libro.titulo).toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + new Date().toISOString().slice(0, 10) + '.pdf';
+      pdf.save(fname);
+    } catch (e) {
+      console.error('Error al exportar PDF:', e);
+    }
+  };
+
   return (
     <div className="flex flex-col h-full bg-white relative">
       <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200 shrink-0">
@@ -364,6 +466,14 @@ export default function EpubReader({ libro, onBack, startPage }) {
                 className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-500 transition-colors"
               >
                 ✕
+              </button>
+            </div>
+            <div className="px-3 pt-2 pb-1 shrink-0">
+              <button
+                onClick={exportNotesPdf}
+                className="w-full py-2 rounded-xl bg-indigo-50 text-indigo-600 text-xs font-semibold hover:bg-indigo-100 transition-colors"
+              >
+                Exportar notas a PDF
               </button>
             </div>
             <div className="flex-1 overflow-y-auto p-3 space-y-2">
@@ -469,6 +579,52 @@ export default function EpubReader({ libro, onBack, startPage }) {
                     Guardar
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showFinish && (
+          <div
+            className="absolute inset-0 z-40 flex items-center justify-center bg-black/40 p-6"
+            onClick={() => setShowFinish(false)}
+          >
+            <div
+              className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-3">
+                <svg className="w-7 h-7 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-bold text-slate-800 text-center mb-1">
+                ¡Terminaste el libro!
+              </h3>
+              <p className="text-xs text-slate-500 text-center mb-4">
+                Felicitaciones por leer {bookTitle || libro.titulo} por completo.
+              </p>
+              {libro.pregunta && (
+                <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+                  <p className="text-[11px] font-semibold text-amber-700 uppercase tracking-wider mb-1">
+                    Para pensar
+                  </p>
+                  <p className="text-sm text-amber-900 leading-relaxed">{libro.pregunta}</p>
+                </div>
+              )}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setShowFinish(false)}
+                  className="flex-1 py-2 rounded-xl bg-slate-100 text-slate-600 text-sm font-semibold hover:bg-slate-200 transition-colors"
+                >
+                  Cerrar
+                </button>
+                <button
+                  onClick={restartBook}
+                  className="flex-1 py-2 rounded-xl bg-indigo-600 text-white text-sm font-bold hover:bg-indigo-700 transition-colors"
+                >
+                  Releer desde el inicio
+                </button>
               </div>
             </div>
           </div>

@@ -1,6 +1,14 @@
 import { useState, useEffect } from 'react';
 import EpubReader from './EpubReader';
 
+function getUserId() {
+  try {
+    return JSON.parse(localStorage.getItem('kubika_local_user') || '{}')?.id || 'anon';
+  } catch {
+    return 'anon';
+  }
+}
+
 export default function Biblioteca({ onClose }) {
   const [libros, setLibros] = useState([]);
   const [search, setSearch] = useState('');
@@ -11,6 +19,30 @@ export default function Biblioteca({ onClose }) {
 
   const [savedProgress, setSavedProgress] = useState(null);
   const [previewLibro, setPreviewLibro] = useState(null);
+  const [progressMap, setProgressMap] = useState({});
+  const [notesCounts, setNotesCounts] = useState({});
+
+  const buildUserData = (data) => {
+    const uid = getUserId();
+    const progMap = {};
+    const notesMap = {};
+    try {
+      const prog = JSON.parse(localStorage.getItem('kubika_progress') || '{}');
+      Object.entries(prog).forEach(([id, info]) => {
+        progMap[id] = { pct: info.pct || 0, finished: (info.pct || 0) >= 99 };
+      });
+    } catch {}
+    try {
+      (data || []).forEach(l => {
+        try {
+          const list = JSON.parse(localStorage.getItem('kubika_notes_' + uid + '_' + l.id) || '[]');
+          if (Array.isArray(list) && list.length > 0) notesMap[l.id] = list.length;
+        } catch {}
+      });
+    } catch {}
+    setProgressMap(progMap);
+    setNotesCounts(notesMap);
+  };
 
   useEffect(() => {
     const base = import.meta.env.BASE_URL.replace(/\/$/, '');
@@ -22,6 +54,7 @@ export default function Biblioteca({ onClose }) {
       .then(data => {
         setLibros(data);
         setLoading(false);
+        buildUserData(data);
         // Leer progreso guardado
         try {
           const lastId = localStorage.getItem('kubika_last_book');
@@ -41,6 +74,7 @@ export default function Biblioteca({ onClose }) {
   // Refrescar progreso al volver del lector
   useEffect(() => {
     if (!selectedLibro) {
+      buildUserData(libros);
       try {
         const lastId = localStorage.getItem('kubika_last_book');
         if (lastId) {
@@ -167,33 +201,53 @@ export default function Biblioteca({ onClose }) {
               <span className="text-[11px] font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{librosCat.length}</span>
             </div>
             <div className="grid grid-cols-8 gap-2 px-4 pb-2">
-              {librosCat.map(libro => (
-                <div
-                  key={libro.id}
-                  onClick={() => setPreviewLibro(libro)}
-                  className="cursor-pointer group"
-                >
-                  <div className="aspect-[130/185] rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shadow-sm group-hover:shadow-md transition-shadow">
-                    <img
-                      src={libro.portada}
-                      alt={libro.titulo}
-                      className="w-full h-full object-cover"
-                      onError={e => {
-                        e.target.style.display = 'none';
-                        const parent = e.target.parentElement;
-                        const ph = document.createElement('div');
-                        ph.className = 'w-full h-full flex items-center justify-center text-slate-400 text-xs text-center p-2';
-                        ph.textContent = libro.titulo;
-                        parent.appendChild(ph);
-                      }}
-                    />
+              {librosCat.map(libro => {
+                const prog = progressMap[libro.id] || null;
+                const pct = prog?.pct || 0;
+                const count = notesCounts[libro.id] || 0;
+                return (
+                  <div
+                    key={libro.id}
+                    onClick={() => setPreviewLibro(libro)}
+                    className="cursor-pointer group"
+                  >
+                    <div className="relative aspect-[130/185] rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shadow-sm group-hover:shadow-md transition-shadow">
+                      {prog?.finished && (
+                        <span className="absolute top-1.5 left-1.5 z-10 text-[9px] font-bold text-white bg-emerald-500 px-1.5 py-0.5 rounded-full shadow-sm">
+                          Leído
+                        </span>
+                      )}
+                      {count > 0 && (
+                        <span className="absolute top-1.5 right-1.5 z-10 text-[9px] font-bold text-white bg-amber-400 px-1.5 py-0.5 rounded-full shadow-sm">
+                          {count} {count === 1 ? 'nota' : 'notas'}
+                        </span>
+                      )}
+                      <img
+                        src={libro.portada}
+                        alt={libro.titulo}
+                        className="w-full h-full object-cover"
+                        onError={e => {
+                          e.target.style.display = 'none';
+                          const parent = e.target.parentElement;
+                          const ph = document.createElement('div');
+                          ph.className = 'w-full h-full flex items-center justify-center text-slate-400 text-xs text-center p-2';
+                          ph.textContent = libro.titulo;
+                          parent.appendChild(ph);
+                        }}
+                      />
+                      {pct > 0 && !prog?.finished && (
+                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/70">
+                          <div className="h-full bg-indigo-500" style={{ width: pct + '%' }} />
+                        </div>
+                      )}
+                    </div>
+                    <div className="mt-1.5 px-0.5">
+                      <p className="text-xs font-semibold text-slate-700 leading-tight group-hover:text-indigo-600 transition-colors line-clamp-3">{libro.titulo}</p>
+                      <p className="text-[11px] text-slate-400 truncate mt-0.5">{libro.autor}</p>
+                    </div>
                   </div>
-                  <div className="mt-1.5 px-0.5">
-                    <p className="text-xs font-semibold text-slate-700 leading-tight group-hover:text-indigo-600 transition-colors line-clamp-3">{libro.titulo}</p>
-                    <p className="text-[11px] text-slate-400 truncate mt-0.5">{libro.autor}</p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
         ))}
