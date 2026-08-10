@@ -49,24 +49,20 @@ export default function SplashScreen({ isLoading, onFinish }) {
 
       <div className="splash-logo flex flex-col items-center relative z-10">
         <div className="relative">
-          <div className="w-28 h-28 rounded-3xl bg-gradient-to-br from-kubika-400 via-purple-500 to-purple-700 shadow-2xl shadow-kubika-500/20 flex items-center justify-center overflow-hidden ring-1 ring-white/10">
-            <img
-              src="logo.png"
-              alt="Kubika"
-              className="w-full h-full object-contain p-1"
-              id="splash-logo-img"
-              onError={(e) => {
-                e.target.style.display = 'none';
-                const fallback = e.target.parentElement.querySelector('.splash-logo-fallback');
-                if (fallback) fallback.style.display = 'flex';
-              }}
-            />
-            <span className="splash-logo-fallback absolute inset-0 hidden items-center justify-center text-5xl font-display font-extrabold text-white drop-shadow-lg pointer-events-none">
-              K
-            </span>
-          </div>
-          <div className="absolute -inset-3 rounded-3xl bg-gradient-to-br from-kubika-400/20 to-purple-500/20 blur-2xl -z-10" />
-          <div className="absolute -inset-1 rounded-3xl bg-gradient-to-br from-kubika-400/10 to-purple-500/10 blur-lg -z-10 animate-pulse-soft" />
+          <img
+            src="logo.png"
+            alt="Kubika"
+            className="w-44 h-44 object-contain drop-shadow-2xl"
+            id="splash-logo-img"
+            onError={(e) => {
+              e.target.style.display = 'none';
+              const fallback = e.target.parentElement.querySelector('.splash-logo-fallback');
+              if (fallback) fallback.style.display = 'flex';
+            }}
+          />
+          <span className="splash-logo-fallback absolute inset-0 hidden items-center justify-center text-5xl font-display font-extrabold text-white drop-shadow-lg pointer-events-none">
+            K
+          </span>
         </div>
 
         <h1 className="mt-6 text-3xl font-display font-extrabold text-white tracking-tight">
