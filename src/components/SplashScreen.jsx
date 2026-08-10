@@ -52,7 +52,7 @@ export default function SplashScreen({ isLoading, onFinish }) {
           <img
             src="logo.png"
             alt="Kubika"
-            className="w-44 h-44 object-contain drop-shadow-2xl"
+            className="w-80 h-80 object-contain drop-shadow-2xl"
             id="splash-logo-img"
             onError={(e) => {
               e.target.style.display = 'none';
@@ -60,17 +60,10 @@ export default function SplashScreen({ isLoading, onFinish }) {
               if (fallback) fallback.style.display = 'flex';
             }}
           />
-          <span className="splash-logo-fallback absolute inset-0 hidden items-center justify-center text-5xl font-display font-extrabold text-white drop-shadow-lg pointer-events-none">
+          <span className="splash-logo-fallback absolute inset-0 hidden items-center justify-center text-8xl font-display font-extrabold text-white drop-shadow-lg pointer-events-none">
             K
           </span>
         </div>
-
-        <h1 className="mt-6 text-3xl font-display font-extrabold text-white tracking-tight">
-          Kubika
-        </h1>
-        <p className="mt-1.5 text-sm text-white/40 font-medium tracking-wider uppercase">
-          Regletas de Cuisenaire
-        </p>
       </div>
 
       <div className="flex flex-col items-center gap-3 mt-10 relative z-10">
