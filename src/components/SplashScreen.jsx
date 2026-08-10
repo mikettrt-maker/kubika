@@ -52,7 +52,7 @@ export default function SplashScreen({ isLoading, onFinish }) {
           <img
             src="logo.png"
             alt="Kubika"
-            className="w-80 h-80 object-contain drop-shadow-2xl"
+            className="w-[480px] h-[480px] max-w-[85vw] max-h-[60vh] object-contain drop-shadow-2xl"
             id="splash-logo-img"
             onError={(e) => {
               e.target.style.display = 'none';
