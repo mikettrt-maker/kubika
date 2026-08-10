@@ -45,6 +45,27 @@ function persistNotes(userId, libroId, list) {
   } catch {}
 }
 
+function ratingsKey() {
+  return 'kubika_ratings_' + getUserId();
+}
+
+function loadRatings() {
+  try {
+    const r = JSON.parse(localStorage.getItem(ratingsKey()) || '{}');
+    return r && typeof r === 'object' ? r : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveRating(bookId, stars) {
+  try {
+    const r = loadRatings();
+    r[String(bookId)] = stars;
+    localStorage.setItem(ratingsKey(), JSON.stringify(r));
+  } catch {}
+}
+
 export default function EpubReader({ libro, onBack, startPage }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -56,8 +77,10 @@ export default function EpubReader({ libro, onBack, startPage }) {
   const [showNotes, setShowNotes] = useState(false);
   const [draft, setDraft] = useState(null);
   const [showFinish, setShowFinish] = useState(false);
+  const [rating, setRating] = useState(0);
 
   const viewerRef = useRef(null);
+  const bookPageRef = useRef(null);
   const bookRef = useRef(null);
   const renditionRef = useRef(null);
   const notesRef = useRef([]);
@@ -194,6 +217,13 @@ export default function EpubReader({ libro, onBack, startPage }) {
         // Eventos
         let finishedShown = false;
         rendition.on('relocated', (loc) => {
+          // Efecto de pasar hoja
+          const pageEl = bookPageRef.current;
+          if (pageEl) {
+            pageEl.classList.remove('page-flip-in');
+            void pageEl.offsetWidth;
+            pageEl.classList.add('page-flip-in');
+          }
           setCurrentCfi(loc.start.cfi);
           if (book.locations.length() > 0) {
             const pct = Math.round((book.locations.percentageFromCfi(loc.start.cfi) || 0) * 100);
@@ -204,6 +234,7 @@ export default function EpubReader({ libro, onBack, startPage }) {
               if (!finishedShown) {
                 finishedShown = true;
                 setShowFinish(true);
+                setRating(loadRatings()[String(libro.id)] || 0);
                 setPercentage(100);
               }
             } else {
@@ -449,7 +480,7 @@ export default function EpubReader({ libro, onBack, startPage }) {
       </div>
 
       <div className="flex-1 overflow-hidden relative min-h-0 bg-slate-200">
-        <div className="absolute inset-0 flex items-center justify-center p-4 md:p-8">
+        <div ref={bookPageRef} className="absolute inset-0 flex items-center justify-center p-4 md:p-8">
           <div
             ref={viewerRef}
             className="w-full h-full max-w-[860px] rounded-lg shadow-2xl border border-slate-300"
@@ -612,6 +643,32 @@ export default function EpubReader({ libro, onBack, startPage }) {
                   <p className="text-sm text-amber-900 leading-relaxed">{libro.pregunta}</p>
                 </div>
               )}
+              <div className="mb-4 text-center">
+                <p className="text-xs font-semibold text-slate-600 mb-1">
+                  ¿Cuántas estrellas le das a este libro?
+                </p>
+                <div className="flex justify-center gap-1">
+                  {[1, 2, 3, 4, 5].map(s => (
+                    <button
+                      key={s}
+                      onClick={() => {
+                        saveRating(libro.id, s);
+                        setRating(s);
+                      }}
+                      className={`text-3xl leading-none transition-transform hover:scale-125 ${
+                        s <= rating ? 'text-amber-400' : 'text-slate-200'
+                      }`}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+                {rating > 0 && (
+                  <p className="text-[11px] font-medium text-emerald-600 mt-1.5">
+                    ¡Gracias por calificar!
+                  </p>
+                )}
+              </div>
               <div className="flex gap-2">
                 <button
                   onClick={() => setShowFinish(false)}

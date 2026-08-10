@@ -21,6 +21,7 @@ export default function Biblioteca({ onClose }) {
   const [previewLibro, setPreviewLibro] = useState(null);
   const [progressMap, setProgressMap] = useState({});
   const [notesCounts, setNotesCounts] = useState({});
+  const [ratingsMap, setRatingsMap] = useState({});
 
   const buildUserData = (data) => {
     const uid = getUserId();
@@ -40,6 +41,12 @@ export default function Biblioteca({ onClose }) {
         } catch {}
       });
     } catch {}
+    try {
+      const r = JSON.parse(localStorage.getItem('kubika_ratings_' + uid) || '{}');
+      setRatingsMap(r && typeof r === 'object' ? r : {});
+    } catch {
+      setRatingsMap({});
+    }
     setProgressMap(progMap);
     setNotesCounts(notesMap);
   };
@@ -107,6 +114,62 @@ export default function Biblioteca({ onClose }) {
     if (!categorias[cat]) categorias[cat] = [];
     categorias[cat].push(l);
   });
+
+  const ratedBooks = libros
+    .filter(l => ratingsMap[l.id])
+    .sort((a, b) => ratingsMap[b.id] - ratingsMap[a.id]);
+
+  const renderBookCard = (libro) => {
+    const prog = progressMap[libro.id] || null;
+    const pct = prog?.pct || 0;
+    const count = notesCounts[libro.id] || 0;
+    const stars = ratingsMap[libro.id] || 0;
+    return (
+      <div
+        key={libro.id}
+        onClick={() => setPreviewLibro(libro)}
+        className="cursor-pointer group"
+      >
+        <div className="relative aspect-[130/185] rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shadow-sm group-hover:shadow-md transition-shadow">
+          {prog?.finished && (
+            <span className="absolute top-1.5 left-1.5 z-10 text-[9px] font-bold text-white bg-emerald-500 px-1.5 py-0.5 rounded-full shadow-sm">
+              Leído
+            </span>
+          )}
+          {count > 0 && (
+            <span className="absolute top-1.5 right-1.5 z-10 text-[9px] font-bold text-white bg-amber-400 px-1.5 py-0.5 rounded-full shadow-sm">
+              {count} {count === 1 ? 'nota' : 'notas'}
+            </span>
+          )}
+          <img
+            src={libro.portada}
+            alt={libro.titulo}
+            className="w-full h-full object-cover"
+            onError={e => {
+              e.target.style.display = 'none';
+              const parent = e.target.parentElement;
+              const ph = document.createElement('div');
+              ph.className = 'w-full h-full flex items-center justify-center text-slate-400 text-xs text-center p-2';
+              ph.textContent = libro.titulo;
+              parent.appendChild(ph);
+            }}
+          />
+          {pct > 0 && !prog?.finished && (
+            <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/70">
+              <div className="h-full bg-indigo-500" style={{ width: pct + '%' }} />
+            </div>
+          )}
+        </div>
+        <div className="mt-1.5 px-0.5">
+          <p className="text-xs font-semibold text-slate-700 leading-tight group-hover:text-indigo-600 transition-colors line-clamp-3">{libro.titulo}</p>
+          <p className="text-[11px] text-slate-400 truncate mt-0.5">{libro.autor}</p>
+          {stars > 0 && (
+            <p className="text-amber-400 text-[11px] leading-none mt-0.5">{'★'.repeat(stars)}</p>
+          )}
+        </div>
+      </div>
+    );
+  };
 
   if (selectedLibro) {
     return (
@@ -194,6 +257,18 @@ export default function Biblioteca({ onClose }) {
           </div>
         )}
 
+        {!loading && !error && ratedBooks.length > 0 && (
+          <section className="mb-6">
+            <div className="flex items-center gap-2 px-4 py-2">
+              <h2 className="text-sm font-bold text-slate-700 uppercase tracking-wider">★ Calificados</h2>
+              <span className="text-[11px] font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{ratedBooks.length}</span>
+            </div>
+            <div className="grid grid-cols-8 gap-2 px-4 pb-2">
+              {ratedBooks.map(libro => renderBookCard(libro))}
+            </div>
+          </section>
+        )}
+
         {!loading && !error && Object.entries(categorias).map(([categoria, librosCat]) => (
           <section key={categoria} className="mb-6">
             <div className="flex items-center gap-2 px-4 py-2">
@@ -201,53 +276,7 @@ export default function Biblioteca({ onClose }) {
               <span className="text-[11px] font-medium text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{librosCat.length}</span>
             </div>
             <div className="grid grid-cols-8 gap-2 px-4 pb-2">
-              {librosCat.map(libro => {
-                const prog = progressMap[libro.id] || null;
-                const pct = prog?.pct || 0;
-                const count = notesCounts[libro.id] || 0;
-                return (
-                  <div
-                    key={libro.id}
-                    onClick={() => setPreviewLibro(libro)}
-                    className="cursor-pointer group"
-                  >
-                    <div className="relative aspect-[130/185] rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shadow-sm group-hover:shadow-md transition-shadow">
-                      {prog?.finished && (
-                        <span className="absolute top-1.5 left-1.5 z-10 text-[9px] font-bold text-white bg-emerald-500 px-1.5 py-0.5 rounded-full shadow-sm">
-                          Leído
-                        </span>
-                      )}
-                      {count > 0 && (
-                        <span className="absolute top-1.5 right-1.5 z-10 text-[9px] font-bold text-white bg-amber-400 px-1.5 py-0.5 rounded-full shadow-sm">
-                          {count} {count === 1 ? 'nota' : 'notas'}
-                        </span>
-                      )}
-                      <img
-                        src={libro.portada}
-                        alt={libro.titulo}
-                        className="w-full h-full object-cover"
-                        onError={e => {
-                          e.target.style.display = 'none';
-                          const parent = e.target.parentElement;
-                          const ph = document.createElement('div');
-                          ph.className = 'w-full h-full flex items-center justify-center text-slate-400 text-xs text-center p-2';
-                          ph.textContent = libro.titulo;
-                          parent.appendChild(ph);
-                        }}
-                      />
-                      {pct > 0 && !prog?.finished && (
-                        <div className="absolute bottom-0 left-0 right-0 h-1 bg-white/70">
-                          <div className="h-full bg-indigo-500" style={{ width: pct + '%' }} />
-                        </div>
-                      )}
-                    </div>
-                    <div className="mt-1.5 px-0.5">
-                      <p className="text-xs font-semibold text-slate-700 leading-tight group-hover:text-indigo-600 transition-colors line-clamp-3">{libro.titulo}</p>
-                      <p className="text-[11px] text-slate-400 truncate mt-0.5">{libro.autor}</p>
-                    </div>
-                  </div>
-                );
-              })}
+              {librosCat.map(libro => renderBookCard(libro))}
             </div>
           </section>
         ))}
