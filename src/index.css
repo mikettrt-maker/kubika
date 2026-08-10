@@ -683,22 +683,22 @@ body {
 
 /* ========== Efecto de pasar hoja en el lector ========== */
 .page-flip-in {
-  animation: pageFlipIn 0.38s ease-out;
+  animation: pageFlipIn 0.3s ease-out;
   transform-origin: left center;
   will-change: transform, opacity;
 }
 
 @keyframes pageFlipIn {
   0% {
-    transform: perspective(1400px) rotateY(-20deg) translateX(34px) scale(0.985);
-    opacity: 0.5;
-    box-shadow: -18px 0 34px -12px rgba(0, 0, 0, 0.35);
+    transform: perspective(1100px) rotateY(-7deg) scale(0.995);
+    opacity: 0.72;
+    box-shadow: -8px 0 18px -8px rgba(0, 0, 0, 0.28);
   }
   55% {
     opacity: 1;
   }
   100% {
-    transform: perspective(1400px) rotateY(0deg) translateX(0) scale(1);
+    transform: perspective(1100px) rotateY(0deg) scale(1);
     opacity: 1;
     box-shadow: none;
   }

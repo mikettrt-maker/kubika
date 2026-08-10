@@ -80,7 +80,6 @@ export default function EpubReader({ libro, onBack, startPage }) {
   const [rating, setRating] = useState(0);
 
   const viewerRef = useRef(null);
-  const bookPageRef = useRef(null);
   const bookRef = useRef(null);
   const renditionRef = useRef(null);
   const notesRef = useRef([]);
@@ -217,8 +216,8 @@ export default function EpubReader({ libro, onBack, startPage }) {
         // Eventos
         let finishedShown = false;
         rendition.on('relocated', (loc) => {
-          // Efecto de pasar hoja
-          const pageEl = bookPageRef.current;
+          // Efecto de pasar hoja (solo el recuadro blanco)
+          const pageEl = viewerRef.current;
           if (pageEl) {
             pageEl.classList.remove('page-flip-in');
             void pageEl.offsetWidth;
@@ -480,7 +479,7 @@ export default function EpubReader({ libro, onBack, startPage }) {
       </div>
 
       <div className="flex-1 overflow-hidden relative min-h-0 bg-slate-200">
-        <div ref={bookPageRef} className="absolute inset-0 flex items-center justify-center p-4 md:p-8">
+        <div className="absolute inset-0 flex items-center justify-center p-4 md:p-8">
           <div
             ref={viewerRef}
             className="w-full h-full max-w-[860px] rounded-lg shadow-2xl border border-slate-300"
