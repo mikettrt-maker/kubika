@@ -361,7 +361,7 @@ export default function App() {
           </div>
 
           {/* Título tipo Canva */}
-          <div className="flex items-center" style={{ width: '200px' }}>
+          <div className="flex items-center" style={{ width: '200px', marginLeft: '30px' }}>
             {isEditingName ? (
               <input
                 type="text"

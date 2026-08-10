@@ -66,7 +66,7 @@ export default function SplashScreen({ isLoading, onFinish }) {
         </div>
       </div>
 
-      <div className="flex flex-col items-center gap-3 mt-10 relative z-10">
+      <div className="absolute inset-x-0 bottom-24 flex flex-col items-center gap-3 z-10">
         <div className="splash-progress-track">
           <div className="splash-progress-bar" />
         </div>

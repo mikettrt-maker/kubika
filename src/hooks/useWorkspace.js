@@ -9,12 +9,31 @@ function extractEmail(userId) {
   return userId;
 }
 
+const MAX_WORKSPACES = 50;
+
+function localKey(email) {
+  return 'kubika_workspaces_' + email;
+}
+
+function readLocal(email) {
+  try {
+    const list = JSON.parse(localStorage.getItem(localKey(email)) || '[]');
+    return Array.isArray(list) ? list : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeLocal(email, list) {
+  try {
+    localStorage.setItem(localKey(email), JSON.stringify(list));
+  } catch (_) {}
+}
+
 export function useWorkspace(userId) {
   const [workspaces, setWorkspaces] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-
-  const MAX_WORKSPACES = 50;
 
   const saveWorkspace = useCallback(async (name, canvasState) => {
     setError(null);
@@ -49,7 +68,35 @@ export function useWorkspace(userId) {
           setLoading(false);
           return { data, error: null };
         }
-      } catch (_) {}
+        console.error('Supabase insert falló, guardando local:', dbError);
+      } catch (err) {
+        console.error('Supabase error, guardando local:', err);
+      }
+    }
+
+    // Respaldo local (localStorage) cuando Supabase no está configurado o falla
+    if (email) {
+      try {
+        const list = readLocal(email);
+        if (list.length >= MAX_WORKSPACES) {
+          setLoading(false);
+          setError(`Límite de ${MAX_WORKSPACES} trabajos alcanzado. Eliminá uno antes de guardar.`);
+          return { data: null, error: 'Límite alcanzado' };
+        }
+        const now = new Date().toISOString();
+        const item = {
+          id: 'loc-' + Date.now(),
+          name,
+          canvas_state: canvasState,
+          created_at: now,
+          updated_at: now,
+        };
+        writeLocal(email, [item, ...list]);
+        setLoading(false);
+        return { data: item, error: null };
+      } catch (err) {
+        console.error('Guardado local falló:', err);
+      }
     }
 
     setLoading(false);
@@ -78,10 +125,19 @@ export function useWorkspace(userId) {
           setLoading(false);
           return data;
         }
-        setError(dbError?.message || 'Error al listar');
+        console.error('Supabase list falló, listando local:', dbError);
       } catch (err) {
-        setError(err.message);
+        console.error('Supabase error, listando local:', err);
       }
+    }
+
+    if (email) {
+      const local = readLocal(email)
+        .map(({ id, name, created_at, updated_at }) => ({ id, name, created_at, updated_at }))
+        .sort((a, b) => (b.updated_at || '').localeCompare(a.updated_at || ''));
+      setWorkspaces(local);
+      setLoading(false);
+      return local;
     }
 
     setLoading(false);
@@ -93,6 +149,14 @@ export function useWorkspace(userId) {
     setLoading(true);
 
     const email = extractEmail(userId);
+
+    if (workspaceId && String(workspaceId).startsWith('loc-')) {
+      const item = readLocal(email || '').find(w => w.id === workspaceId);
+      setLoading(false);
+      if (item) return item.canvas_state;
+      setError('No se pudo cargar');
+      return null;
+    }
 
     if (isSupabaseConfigured && email) {
       try {
@@ -107,7 +171,10 @@ export function useWorkspace(userId) {
           setLoading(false);
           return data.canvas_state;
         }
-      } catch (_) {}
+        console.error('Supabase load falló:', dbError);
+      } catch (err) {
+        console.error('Supabase error:', err);
+      }
     }
 
     setLoading(false);
@@ -119,6 +186,13 @@ export function useWorkspace(userId) {
     setError(null);
 
     const email = extractEmail(userId);
+
+    if (workspaceId && String(workspaceId).startsWith('loc-')) {
+      const list = readLocal(email || '').filter(w => w.id !== workspaceId);
+      writeLocal(email || '', list);
+      setWorkspaces(list.map(({ id, name, created_at, updated_at }) => ({ id, name, created_at, updated_at })));
+      return true;
+    }
 
     if (isSupabaseConfigured && email) {
       try {
@@ -132,7 +206,10 @@ export function useWorkspace(userId) {
           setWorkspaces(prev => prev.filter(w => w.id !== workspaceId));
           return true;
         }
-      } catch (_) {}
+        console.error('Supabase delete falló:', dbError);
+      } catch (err) {
+        console.error('Supabase error:', err);
+      }
     }
 
     setError('No se pudo eliminar');
