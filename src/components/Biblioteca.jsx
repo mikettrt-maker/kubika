@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import EpubReader from './EpubReader';
+import { supabase, isSupabaseConfigured } from '../config/supabase';
 
 function getUserId() {
   try {
@@ -7,6 +8,20 @@ function getUserId() {
   } catch {
     return 'anon';
   }
+}
+
+function aggregateRatings(rows) {
+  const agg = {};
+  (rows || []).forEach(r => {
+    const id = String(r.book_id);
+    const s = Number(r.stars);
+    if (!id || !s) return;
+    agg[id] = agg[id] || { sum: 0, count: 0 };
+    agg[id].sum += s;
+    agg[id].count += 1;
+  });
+  Object.keys(agg).forEach(id => { agg[id].avg = agg[id].sum / agg[id].count; });
+  return agg;
 }
 
 export default function Biblioteca({ onClose }) {
@@ -22,6 +37,32 @@ export default function Biblioteca({ onClose }) {
   const [progressMap, setProgressMap] = useState({});
   const [notesCounts, setNotesCounts] = useState({});
   const [ratingsMap, setRatingsMap] = useState({});
+  const [globalRatings, setGlobalRatings] = useState({});
+
+  const loadGlobalRatings = async () => {
+    if (isSupabaseConfigured) {
+      try {
+        const { data, error } = await supabase
+          .from('ratings')
+          .select('book_id, stars');
+        if (!error) {
+          setGlobalRatings(aggregateRatings(data));
+          return;
+        }
+        console.error('Supabase ratings falló:', error);
+      } catch (err) {
+        console.error('Supabase ratings error:', err);
+      }
+    }
+    // Respaldo: usar las calificaciones locales del usuario como globales
+    try {
+      const r = JSON.parse(localStorage.getItem('kubika_ratings_' + getUserId()) || '{}');
+      const rows = Object.entries(r).map(([book_id, stars]) => ({ book_id, stars }));
+      setGlobalRatings(aggregateRatings(rows));
+    } catch {
+      setGlobalRatings({});
+    }
+  };
 
   const buildUserData = (data) => {
     const uid = getUserId();
@@ -62,6 +103,7 @@ export default function Biblioteca({ onClose }) {
         setLibros(data);
         setLoading(false);
         buildUserData(data);
+        loadGlobalRatings();
         // Leer progreso guardado
         try {
           const lastId = localStorage.getItem('kubika_last_book');
@@ -82,6 +124,7 @@ export default function Biblioteca({ onClose }) {
   useEffect(() => {
     if (!selectedLibro) {
       buildUserData(libros);
+      loadGlobalRatings();
       try {
         const lastId = localStorage.getItem('kubika_last_book');
         if (lastId) {
@@ -116,14 +159,16 @@ export default function Biblioteca({ onClose }) {
   });
 
   const ratedBooks = libros
-    .filter(l => ratingsMap[l.id])
-    .sort((a, b) => ratingsMap[b.id] - ratingsMap[a.id]);
+    .filter(l => globalRatings[l.id])
+    .sort((a, b) => globalRatings[b.id].avg - globalRatings[a.id].avg);
 
   const renderBookCard = (libro) => {
     const prog = progressMap[libro.id] || null;
     const pct = prog?.pct || 0;
     const count = notesCounts[libro.id] || 0;
-    const stars = ratingsMap[libro.id] || 0;
+    const global = globalRatings[libro.id];
+    const stars = global ? global.avg : (ratingsMap[libro.id] || 0);
+    const starsCount = global?.count || 0;
     return (
       <div
         key={libro.id}
@@ -164,7 +209,12 @@ export default function Biblioteca({ onClose }) {
           <p className="text-xs font-semibold text-slate-700 leading-tight group-hover:text-indigo-600 transition-colors line-clamp-3">{libro.titulo}</p>
           <p className="text-[11px] text-slate-400 truncate mt-0.5">{libro.autor}</p>
           {stars > 0 && (
-            <p className="text-amber-400 text-[11px] leading-none mt-0.5">{'★'.repeat(stars)}</p>
+            <p className="text-amber-400 text-[11px] leading-none mt-0.5">
+              {'★'.repeat(Math.round(stars))}
+              {starsCount > 0 && (
+                <span className="text-slate-400 ml-1">{stars.toFixed(1)} ({starsCount})</span>
+              )}
+            </p>
           )}
         </div>
       </div>

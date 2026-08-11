@@ -58,12 +58,27 @@ function loadRatings() {
   }
 }
 
-function saveRating(bookId, stars) {
+async function saveRating(bookId, stars) {
   try {
     const r = loadRatings();
     r[String(bookId)] = stars;
     localStorage.setItem(ratingsKey(), JSON.stringify(r));
   } catch {}
+  try {
+    const { supabase, isSupabaseConfigured } = await import('../config/supabase');
+    if (isSupabaseConfigured) {
+      await supabase
+        .from('ratings')
+        .upsert({
+          user_id: getUserId(),
+          book_id: String(bookId),
+          stars,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'user_id,book_id' });
+    }
+  } catch (err) {
+    console.error('Supabase rating falló:', err);
+  }
 }
 
 export default function EpubReader({ libro, onBack, startPage }) {
