@@ -23,6 +23,7 @@ const SUPABASE_URL = process.env.SUPABASE_URL || 'TU_SUPABASE_URL_AQUI';
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || 'TU_SERVICE_ROLE_KEY_AQUI';
 
 const TOTAL_USERS = 100;
+const TOTAL_BIB_USERS = 5;
 const PASSWORD_LENGTH = 6;
 
 // ========== GENERADOR DE CONTRASEÑAS ==========
@@ -65,8 +66,9 @@ function generatePassword() {
 function generateUserList() {
   const users = [];
 
+  // Alumnos (acceso total)
   for (let i = 1; i <= TOTAL_USERS; i++) {
-    const num = String(i).padStart(3, '0'); // 001, 002, ... 100
+    const num = String(i).padStart(3, '0');
     const username = `kubika.alumno${num}`;
     const email = `${username}@kubika.app`;
     const password = generatePassword();
@@ -77,6 +79,24 @@ function generateUserList() {
       email,
       password,
       displayName: `Alumno ${num}`,
+      role: 'alumno',
+    });
+  }
+
+  // Usuarios solo biblioteca
+  for (let i = 1; i <= TOTAL_BIB_USERS; i++) {
+    const num = String(i).padStart(3, '0');
+    const username = `kubika.bib${num}`;
+    const email = `${username}@kubika.app`;
+    const password = generatePassword();
+
+    users.push({
+      number: TOTAL_USERS + i,
+      username,
+      email,
+      password,
+      displayName: `Biblioteca ${num}`,
+      role: 'biblioteca',
     });
   }
 
@@ -106,10 +126,11 @@ async function createUsersInSupabase(users) {
       const { data, error } = await supabase.auth.admin.createUser({
         email: user.email,
         password: user.password,
-        email_confirm: true, // Confirmar email automáticamente
+        email_confirm: true,
         user_metadata: {
           display_name: user.displayName,
           username: user.username,
+          role: user.role,
         },
       });
 

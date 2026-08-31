@@ -231,13 +231,6 @@ export default function EpubReader({ libro, onBack, startPage }) {
         // Eventos
         let finishedShown = false;
         rendition.on('relocated', (loc) => {
-          // Efecto de pasar hoja (solo el recuadro blanco)
-          const pageEl = viewerRef.current;
-          if (pageEl) {
-            pageEl.classList.remove('page-flip-in');
-            void pageEl.offsetWidth;
-            pageEl.classList.add('page-flip-in');
-          }
           setCurrentCfi(loc.start.cfi);
           if (book.locations.length() > 0) {
             const pct = Math.round((book.locations.percentageFromCfi(loc.start.cfi) || 0) * 100);

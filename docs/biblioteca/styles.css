@@ -79,9 +79,13 @@ button, input {
   gap: 16px;
 }
 
+.input-group {
+  position: relative;
+}
+
 .input-group input {
   width: 100%;
-  padding: 14px 16px;
+  padding: 14px 16px 14px 44px;
   border: 1.5px solid rgba(255,255,255,0.1);
   border-radius: var(--radius);
   background: var(--bg-surface);
@@ -89,6 +93,22 @@ button, input {
   font-size: 1rem;
   outline: none;
   transition: border 0.2s;
+}
+
+.input-group .icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  opacity: 0.5;
+  pointer-events: none;
+  transition: opacity 0.2s;
+}
+
+.input-group:focus-within .icon {
+  opacity: 0.8;
 }
 
 .input-group input:focus {
