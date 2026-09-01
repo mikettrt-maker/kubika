@@ -12,8 +12,8 @@ async function loadUsers() {
     const text = await res.text();
     const lines = text.split('\n').slice(1);
     cachedUsers = lines.map(line => {
-      const [, username, email, password] = line.split(',');
-      return { username: username?.trim(), email: email?.trim(), password: password?.trim() };
+      const [, username, email, password, name, rol] = line.split(',');
+      return { username: username?.trim(), email: email?.trim(), password: password?.trim(), rol: rol?.trim() };
     }).filter(u => u.email);
     return cachedUsers;
   } catch {
@@ -58,7 +58,8 @@ loginForm.addEventListener('submit', async e => {
   loginBtn.textContent = 'Ingresando...';
   loginBtn.disabled = true;
 
-  const email = loginEmail.value.trim();
+  const inputValue = loginEmail.value.trim();
+  const email = inputValue.includes('@') ? inputValue : inputValue + '@kubika.app';
   const password = loginPassword.value.trim();
 
   const users = await loadUsers();
@@ -68,7 +69,12 @@ loginForm.addEventListener('submit', async e => {
   loginBtn.disabled = false;
 
   if (!match) {
-    loginError.textContent = 'Email o contraseña incorrectos';
+    loginError.textContent = 'Usuario o contraseña incorrectos';
+    return;
+  }
+
+  if (match.rol !== 'biblioteca') {
+    loginError.textContent = 'Este acceso es solo para biblioteca';
     return;
   }
 
