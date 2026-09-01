@@ -11,8 +11,8 @@ async function loadUsers() {
     const text = await res.text();
     const lines = text.split('\n').slice(1);
     cachedUsers = lines.map(line => {
-      const [, username, email, password] = line.split(',');
-      return { username, email, password };
+      const [, username, email, password, rol] = line.split(',');
+      return { username, email, password, rol: rol?.trim() || 'alumno' };
     }).filter(u => u.email);
     return cachedUsers;
   } catch {
@@ -66,6 +66,7 @@ export function useAuth() {
       id: 'local-' + email,
       email: email,
       user_metadata: { display_name: matchedUser.username },
+      rol: matchedUser.rol,
     };
     localStorage.setItem('kubika_local_user', JSON.stringify(localUser));
     setUser(localUser);
@@ -89,6 +90,8 @@ export function useAuth() {
     ? (user.user_metadata?.display_name || user.email?.split('@')[0] || 'Alumno')
     : '';
 
+  const userRole = user?.rol || 'alumno';
+
   return {
     user,
     loading,
@@ -96,6 +99,7 @@ export function useAuth() {
     signIn,
     signOut,
     displayName,
+    userRole,
     isConfigured: isSupabaseConfigured,
   };
 }

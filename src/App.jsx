@@ -18,7 +18,7 @@ import { exportToPdf } from './utils/exportPdf';
  * Gestiona la autenticación, el estado del workspace y el layout principal.
  */
 export default function App() {
-  const { user, loading: authLoading, error: authError, signIn, signOut, displayName, isConfigured } = useAuth();
+  const { user, loading: authLoading, error: authError, signIn, signOut, displayName, userRole, isConfigured } = useAuth();
   const { workspaces, loading: wsLoading, saveWorkspace, loadWorkspace, listWorkspaces, deleteWorkspace } = useWorkspace(user?.id);
 
   // Estado del lienzo
@@ -324,6 +324,13 @@ export default function App() {
       />
     );
   }
+
+  // ========== REDIRECT BIBLIOTECA ==========
+  useEffect(() => {
+    if (user && userRole === 'biblioteca') {
+      window.location.href = import.meta.env.BASE_URL + 'biblioteca/';
+    }
+  }, [user, userRole]);
 
   // ========== PANTALLA DE LOGIN ==========
   if (!user) {
