@@ -19,6 +19,13 @@ import { exportToPdf } from './utils/exportPdf';
  */
 export default function App() {
   const { user, loading: authLoading, error: authError, signIn, signOut, displayName, userRole, isConfigured } = useAuth();
+
+  // Redirigir usuarios de biblioteca ANTES de cargar el resto
+  if (!authLoading && user && userRole === 'biblioteca') {
+    window.location.href = import.meta.env.BASE_URL + 'biblioteca/';
+    return <div className="h-screen flex items-center justify-center bg-slate-900 text-white">Redirigiendo a la biblioteca...</div>;
+  }
+
   const { workspaces, loading: wsLoading, saveWorkspace, loadWorkspace, listWorkspaces, deleteWorkspace } = useWorkspace(user?.id);
 
   // Estado del lienzo
@@ -324,13 +331,6 @@ export default function App() {
       />
     );
   }
-
-  // ========== REDIRECT BIBLIOTECA ==========
-  useEffect(() => {
-    if (user && userRole === 'biblioteca') {
-      window.location.href = import.meta.env.BASE_URL + 'biblioteca/';
-    }
-  }, [user, userRole]);
 
   // ========== PANTALLA DE LOGIN ==========
   if (!user) {
