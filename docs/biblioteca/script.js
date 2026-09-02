@@ -85,8 +85,9 @@ loginForm.addEventListener('submit', async e => {
 
 logoutBtn.addEventListener('click', () => {
   localStorage.removeItem('kubika_lib_user');
+  localStorage.removeItem('kubika_local_user');
   currentUser = null;
-  location.reload();
+  window.location.href = '../';
 });
 
 async function mostrarCatalogo() {

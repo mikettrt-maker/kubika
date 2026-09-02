@@ -20,37 +20,12 @@ import { exportToPdf } from './utils/exportPdf';
 export default function App() {
   const { user, loading: authLoading, error: authError, signIn, signOut, displayName, userRole, isConfigured } = useAuth();
 
-  const [redirecting, setRedirecting] = useState(false);
-
-  // Redirigir usuarios de biblioteca a la vista de solo lectura
+  // Redirigir usuarios de biblioteca a la vista standalone
   useEffect(() => {
-    if (!authLoading && user && userRole === 'biblioteca' && !redirecting) {
-      setRedirecting(true);
+    if (!authLoading && user && userRole === 'biblioteca') {
+      window.location.href = (import.meta.env.BASE_URL || '/') + 'biblioteca/';
     }
-  }, [authLoading, user, userRole, redirecting]);
-
-  // Si es usuario biblioteca, mostrar solo la biblioteca (sin regletas)
-  if (redirecting || (!authLoading && user && userRole === 'biblioteca')) {
-    return (
-      <div className="h-screen flex flex-col bg-slate-50 overflow-hidden">
-        <header className="flex items-center justify-between px-4 py-3 bg-white/70 backdrop-blur-xl border-b border-slate-200/50 shadow-sm z-50">
-          <div className="flex items-center gap-2">
-            <img src={`${import.meta.env.BASE_URL}logo.png`} alt="Logo" className="h-8 w-auto" />
-            <span className="text-lg font-bold text-slate-700">Kubika — Biblioteca</span>
-          </div>
-          <button
-            onClick={() => { localStorage.removeItem('kubika_local_user'); location.reload(); }}
-            className="px-3 py-1.5 text-sm font-medium text-slate-500 hover:text-red-500 transition-colors"
-          >
-            Salir
-          </button>
-        </header>
-        <div className="flex-1 overflow-hidden">
-          <Biblioteca onClose={null} />
-        </div>
-      </div>
-    );
-  }
+  }, [authLoading, user, userRole]);
 
   const { workspaces, loading: wsLoading, saveWorkspace, loadWorkspace, listWorkspaces, deleteWorkspace } = useWorkspace(user?.id);
 
