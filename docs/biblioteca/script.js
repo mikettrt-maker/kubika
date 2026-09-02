@@ -12,7 +12,7 @@ async function loadUsers() {
     const text = await res.text();
     const lines = text.split('\n').slice(1);
     cachedUsers = lines.map(line => {
-      const [, username, email, password, name, rol] = line.split(',');
+      const [, username, email, password, rol] = line.split(',');
       return { username: username?.trim(), email: email?.trim(), password: password?.trim(), rol: rol?.trim() };
     }).filter(u => u.email);
     return cachedUsers;
