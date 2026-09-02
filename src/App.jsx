@@ -20,12 +20,13 @@ import { exportToPdf } from './utils/exportPdf';
 export default function App() {
   const { user, loading: authLoading, error: authError, signIn, signOut, displayName, userRole, isConfigured } = useAuth();
 
-  // Redirigir usuarios de biblioteca a la vista standalone
+  // Si el usuario en localStorage es de biblioteca, cerrar sesión
+  // para que la página principal siempre muestre login de alumnos
   useEffect(() => {
     if (!authLoading && user && userRole === 'biblioteca') {
-      window.location.href = (import.meta.env.BASE_URL || '/') + 'biblioteca/';
+      signOut();
     }
-  }, [authLoading, user, userRole]);
+  }, [authLoading, user, userRole, signOut]);
 
   const { workspaces, loading: wsLoading, saveWorkspace, loadWorkspace, listWorkspaces, deleteWorkspace } = useWorkspace(user?.id);
 
