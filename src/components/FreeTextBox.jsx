@@ -26,6 +26,12 @@ export default function FreeTextBox({
   const [bold, setBold] = useState(initialBold);
   const [isEditing, setIsEditing] = useState(!initialText);
   const inputRef = useRef(null);
+  const stateRef = useRef({ text, color, bold });
+  const isBlurBlocked = useRef(false);
+
+  useEffect(() => {
+    stateRef.current = { text, color, bold };
+  }, [text, color, bold]);
 
   useEffect(() => {
     if (isEditing && inputRef.current) {
@@ -40,15 +46,16 @@ export default function FreeTextBox({
   };
 
   const handleBlur = () => {
+    if (isBlurBlocked.current) return;
     setIsEditing(false);
-    if (onUpdate) onUpdate(id, { text, color, bold });
+    if (onUpdate) onUpdate(id, { ...stateRef.current });
   };
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       setIsEditing(false);
-      if (onUpdate) onUpdate(id, { text, color, bold });
+      if (onUpdate) onUpdate(id, { ...stateRef.current });
     }
     if (e.key === 'Escape') {
       setIsEditing(false);
@@ -58,13 +65,15 @@ export default function FreeTextBox({
 
   const handleColorChange = (c) => {
     setColor(c);
-    if (onUpdate) onUpdate(id, { text, color: c, bold });
+    isBlurBlocked.current = true;
+    setTimeout(() => { isBlurBlocked.current = false; }, 50);
   };
 
   const toggleBold = () => {
     const newBold = !bold;
     setBold(newBold);
-    if (onUpdate) onUpdate(id, { text, color, bold: newBold });
+    isBlurBlocked.current = true;
+    setTimeout(() => { isBlurBlocked.current = false; }, 50);
   };
 
   return (
@@ -99,16 +108,14 @@ export default function FreeTextBox({
             {TEXT_COLORS.map((c) => (
               <button
                 key={c.value}
-                onMouseDown={(e) => e.preventDefault()}
-                onClick={() => handleColorChange(c.value)}
+                onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); handleColorChange(c.value); }}
                 className={`w-5 h-5 rounded-full border-2 transition-all ${color === c.value ? 'border-slate-800 scale-125' : 'border-transparent'}`}
                 style={{ backgroundColor: c.value }}
                 title={c.label}
               />
             ))}
             <button
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={toggleBold}
+              onPointerDown={(e) => { e.preventDefault(); e.stopPropagation(); toggleBold(); }}
               className={`ml-1 px-2 py-0.5 text-xs rounded font-bold border transition-all ${bold ? 'bg-slate-800 text-white border-slate-800' : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-100'}`}
               title="Negrita"
             >

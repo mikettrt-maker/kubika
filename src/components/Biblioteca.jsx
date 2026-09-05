@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import EpubReader from './EpubReader';
+import PdfMathReader from './PdfMathReader';
 import { supabase, isSupabaseConfigured } from '../config/supabase';
 
 function getUserId() {
@@ -24,7 +25,7 @@ function aggregateRatings(rows) {
   return agg;
 }
 
-export default function Biblioteca({ onClose }) {
+export default function Biblioteca({ onClose, userGrado }) {
   const [libros, setLibros] = useState([]);
   const [search, setSearch] = useState('');
   const [selectedLibro, setSelectedLibro] = useState(null);
@@ -99,7 +100,7 @@ export default function Biblioteca({ onClose }) {
         if (!r.ok) throw new Error('No se pudo cargar el catálogo');
         return r.json();
       })
-      .then(data => {
+      .then(async data => {
         setLibros(data);
         setLoading(false);
         buildUserData(data);
@@ -111,14 +112,14 @@ export default function Biblioteca({ onClose }) {
             const prog = JSON.parse(localStorage.getItem('kubika_progress') || '{}');
             const info = prog[lastId];
             if (info) {
-              const libroData = data.find(l => l.id == lastId);
+              const libroData = allBooks.find(l => l.id == lastId);
               if (libroData) setSavedProgress({ ...libroData, cfi: info.cfi, pct: info.pct });
             }
           }
         } catch {}
       })
       .catch(e => { setError(e.message); setLoading(false); });
-  }, []);
+  }, [userGrado]);
 
   // Refrescar progreso al volver del lector
   useEffect(() => {
@@ -222,9 +223,13 @@ export default function Biblioteca({ onClose }) {
   };
 
   if (selectedLibro) {
+    const isMath = selectedLibro.tipo === 'matematicas';
     return (
     <div className={onClose ? "fixed inset-0 z-[200] flex flex-col bg-white" : "flex flex-col bg-white h-full"}>
-        <EpubReader libro={selectedLibro} onBack={() => { setSelectedLibro(null); setStartPage(0); }} startPage={startPage} />
+        {isMath
+          ? <PdfMathReader libro={selectedLibro} onBack={() => { setSelectedLibro(null); setStartPage(0); }} />
+          : <EpubReader libro={selectedLibro} onBack={() => { setSelectedLibro(null); setStartPage(0); }} startPage={startPage} />
+        }
       </div>
     );
   }

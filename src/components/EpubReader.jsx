@@ -81,7 +81,7 @@ async function saveRating(bookId, stars) {
   }
 }
 
-export default function EpubReader({ libro, onBack, startPage }) {
+export default function EpubReader({ libro, onBack, startPage, userId }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [bookTitle, setBookTitle] = useState('');

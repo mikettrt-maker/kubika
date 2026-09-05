@@ -3,6 +3,17 @@ import { supabase, isSupabaseConfigured } from '../config/supabase';
 
 let cachedUsers = null;
 
+function getGradeFromUsername(username) {
+  if (!username) return null;
+  const match = username.match(/alumno(\d+)/);
+  if (!match) return null;
+  const num = parseInt(match[1], 10);
+  if (num >= 1 && num <= 30) return 4;
+  if (num >= 31 && num <= 60) return 5;
+  if (num >= 61 && num <= 100) return 6;
+  return null;
+}
+
 async function loadUsers() {
   if (cachedUsers) return cachedUsers;
   try {
@@ -11,8 +22,8 @@ async function loadUsers() {
     const text = await res.text();
     const lines = text.split('\n').slice(1);
     cachedUsers = lines.map(line => {
-      const [, username, email, password, rol] = line.split(',');
-      return { username, email, password, rol: rol?.trim() || 'alumno' };
+      const [, username, email, password, rol, grado] = line.split(',');
+      return { username, email, password, rol: rol?.trim() || 'alumno', grado: grado ? parseInt(grado.trim(), 10) : null };
     }).filter(u => u.email);
     return cachedUsers;
   } catch {
@@ -67,6 +78,7 @@ export function useAuth() {
       email: email,
       user_metadata: { display_name: matchedUser.username },
       rol: matchedUser.rol,
+      grado: matchedUser.grado || getGradeFromUsername(matchedUser.username),
     };
     localStorage.setItem('kubika_local_user', JSON.stringify(localUser));
     setUser(localUser);
@@ -91,6 +103,7 @@ export function useAuth() {
     : '';
 
   const userRole = user?.rol || 'alumno';
+  const userGrado = user?.grado || getGradeFromUsername(displayName);
 
   return {
     user,
@@ -100,6 +113,7 @@ export function useAuth() {
     signOut,
     displayName,
     userRole,
+    userGrado,
     isConfigured: isSupabaseConfigured,
   };
 }

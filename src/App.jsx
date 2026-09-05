@@ -9,6 +9,7 @@ import Antenna from './components/Antenna';
 import SaveLoadModal from './components/SaveLoadModal';
 import SplashScreen from './components/SplashScreen';
 import Biblioteca from './components/Biblioteca';
+import PdfMathReader from './components/PdfMathReader';
 import { generateMathId, generateAntennaId, createAntennaRows } from './utils/rods';
 import { generatePivotId, generateBandId, generateManualPivotId, getRectPivots, getCirclePivots, BAND_COLORS } from './utils/geoplano';
 import { exportToPdf } from './utils/exportPdf';
@@ -18,7 +19,7 @@ import { exportToPdf } from './utils/exportPdf';
  * Gestiona la autenticación, el estado del workspace y el layout principal.
  */
 export default function App() {
-  const { user, loading: authLoading, error: authError, signIn, signOut, displayName, userRole, isConfigured } = useAuth();
+  const { user, loading: authLoading, error: authError, signIn, signOut, displayName, userRole, userGrado, isConfigured } = useAuth();
 
   // Si el usuario en localStorage es de biblioteca, cerrar sesión
   // para que la página principal siempre muestre login de alumnos
@@ -39,6 +40,9 @@ export default function App() {
   const [splashDone, setSplashDone] = useState(false);
   const [showLoginSplash, setShowLoginSplash] = useState(false);
   const [showBiblioteca, setShowBiblioteca] = useState(false);
+  const [showMathBooks, setShowMathBooks] = useState(false);
+  const [selectedMathBook, setSelectedMathBook] = useState(null);
+  const [mathBooks, setMathBooks] = useState([]);
 
   // Modo de herramienta: 'regletas' | 'geoplano'
   const [toolMode, setToolMode] = useState('regletas');
@@ -60,6 +64,16 @@ export default function App() {
       setShowLoginSplash(true);
     }
   }, [authLoading, splashDone, showLoginSplash]);
+
+  // Cargar libros de matemáticas del grado del usuario
+  useEffect(() => {
+    if (!userGrado) return;
+    const base = window.location.origin + window.location.pathname.replace(/\/$/, '');
+    fetch(base + `/biblioteca/libros/matematicas-${userGrado}/data.json?t=` + Date.now())
+      .then(r => r.ok ? r.json() : [])
+      .then(data => setMathBooks(data || []))
+      .catch(() => setMathBooks([]));
+  }, [userGrado]);
 
   // Cambiar modo del geoplano (rectilinear / circular)
   const handleGeoModeChange = useCallback((mode) => {
@@ -549,10 +563,41 @@ export default function App() {
             </button>
             <span className="kubika-tooltip">Limpiar lienzo</span>
           </div>
-        </div>
 
-        {/* Botón independiente de Biblioteca */}
-        <div className="flex items-center flex-shrink-0 ml-2">
+          {/* Libros de matemáticas */}
+          {mathBooks.length > 0 && (
+            <div className="kubika-tooltip-wrapper relative">
+              <button
+                onClick={() => setShowMathBooks(!showMathBooks)}
+                className={`btn-icon btn-ripple flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-200 group ${showMathBooks ? 'bg-amber-100 text-amber-700 shadow-sm ring-2 ring-amber-300' : ''}`}
+              >
+                <svg className="w-6 h-6 text-amber-500 group-hover:scale-125 group-hover:text-amber-700 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+              </button>
+              <span className="kubika-tooltip">Libros de Matemáticas</span>
+              {showMathBooks && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-white rounded-xl shadow-2xl border border-slate-200 p-3 z-50 w-64"
+                  onPointerDown={(e) => e.stopPropagation()}>
+                  <p className="text-xs font-bold text-slate-500 uppercase mb-2">Matemáticas {userGrado}°</p>
+                  {mathBooks.map(book => (
+                    <button key={book.id}
+                      onClick={(e) => { e.stopPropagation(); setSelectedMathBook(book); setShowMathBooks(false); }}
+                      className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 transition-colors text-left">
+                      <div className="w-10 h-14 rounded-md bg-slate-100 flex-shrink-0 overflow-hidden border border-slate-200">
+                        <img src={book.portada} alt="" className="w-full h-full object-cover" onError={(e) => { e.target.style.display = 'none'; }} />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-slate-800 truncate">{book.titulo}</p>
+                        <p className="text-xs text-slate-400">{book.descripcion}</p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="w-px h-8 bg-slate-200 mr-3" />
           <button
             onClick={() => setShowBiblioteca(true)}
@@ -618,7 +663,14 @@ export default function App() {
 
       {/* ===== BIBLIOTECA ===== */}
       {showBiblioteca && (
-        <Biblioteca onClose={() => setShowBiblioteca(false)} />
+        <Biblioteca onClose={() => setShowBiblioteca(false)} userGrado={userGrado} />
+      )}
+
+      {/* ===== LIBRO MATEMÁTICAS ===== */}
+      {selectedMathBook && (
+        <div className="fixed inset-0 z-[9999]">
+          <PdfMathReader libro={selectedMathBook} onBack={() => setSelectedMathBook(null)} />
+        </div>
       )}
 
       {/* ===== MODAL CARGAR (Solo para cargar ahora) ===== */}

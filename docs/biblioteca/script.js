@@ -12,8 +12,8 @@ async function loadUsers() {
     const text = await res.text();
     const lines = text.split('\n').slice(1);
     cachedUsers = lines.map(line => {
-      const [, username, email, password, rol] = line.split(',');
-      return { username: username?.trim(), email: email?.trim(), password: password?.trim(), rol: rol?.trim() };
+      const [, username, email, password, rol, grado] = line.split(',');
+      return { username: username?.trim(), email: email?.trim(), password: password?.trim(), rol: rol?.trim(), grado: grado ? parseInt(grado.trim()) : null };
     }).filter(u => u.email);
     return cachedUsers;
   } catch {
@@ -73,12 +73,12 @@ loginForm.addEventListener('submit', async e => {
     return;
   }
 
-  if (match.rol !== 'biblioteca') {
-    loginError.textContent = 'Este acceso es solo para biblioteca';
+  if (match.rol !== 'biblioteca' && match.rol !== 'alumno') {
+    loginError.textContent = 'Rol no permitido en esta aplicación';
     return;
   }
 
-  currentUser = { email, username: match.username };
+  currentUser = { email, username: match.username, rol: match.rol, grado: match.grado };
   localStorage.setItem('kubika_lib_user', JSON.stringify(currentUser));
   mostrarCatalogo();
 });
@@ -95,11 +95,23 @@ async function mostrarCatalogo() {
   catalogSection.classList.remove('hidden');
 
   const res = await fetch('data.json');
-  libros = await res.json();
-  libros.forEach(libro => {
+  const allLibros = await res.json();
+  allLibros.forEach(libro => {
     libro.epub = libro.epub.replace(/^biblioteca\//, '');
     libro.portada = libro.portada.replace(/^biblioteca\//, '');
   });
+
+  if (currentUser.rol === 'biblioteca') {
+    libros = allLibros;
+  } else {
+    libros = allLibros.filter(libro => {
+      if (libro.tipo === 'matematicas') {
+        return libro.grado === currentUser.grado;
+      }
+      return true;
+    });
+  }
+
   renderizarCatalogo(libros);
 }
 

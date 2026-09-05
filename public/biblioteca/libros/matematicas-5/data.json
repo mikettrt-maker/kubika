@@ -1,0 +1,26 @@
+[
+  {
+    "id": "mat5-1",
+    "titulo": "Matemáticas 5° — Parte 1",
+    "autor": "Kubika",
+    "categoria": "Matemáticas",
+    "edad": "5° Primaria",
+    "portada": "biblioteca/portadas/Matemáticas 5.svg",
+    "pdf": "biblioteca/libros/matematicas-5/5-1de2.pdf",
+    "descripcion": "Libro de matemáticas de quinto grado — Parte 1",
+    "tipo": "matematicas",
+    "grado": 5
+  },
+  {
+    "id": "mat5-2",
+    "titulo": "Matemáticas 5° — Parte 2",
+    "autor": "Kubika",
+    "categoria": "Matemáticas",
+    "edad": "5° Primaria",
+    "portada": "biblioteca/portadas/Matemáticas 5.svg",
+    "pdf": "biblioteca/libros/matematicas-5/5-2de2.pdf",
+    "descripcion": "Libro de matemáticas de quinto grado — Parte 2",
+    "tipo": "matematicas",
+    "grado": 5
+  }
+]
