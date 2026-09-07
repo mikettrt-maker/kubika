@@ -1,0 +1,38 @@
+[
+  {
+    "id": "mat4-1",
+    "titulo": "Matemáticas 4° — Parte 1",
+    "autor": "Kubika",
+    "categoria": "Matemáticas",
+    "edad": "4° Primaria",
+    "portada": "biblioteca/portadas/Matemáticas 4.svg",
+    "pdf": "biblioteca/libros/matematicas-4/4-1de3.pdf",
+    "descripcion": "Libro de matemáticas de cuarto grado — Parte 1",
+    "tipo": "matematicas",
+    "grado": 4
+  },
+  {
+    "id": "mat4-2",
+    "titulo": "Matemáticas 4° — Parte 2",
+    "autor": "Kubika",
+    "categoria": "Matemáticas",
+    "edad": "4° Primaria",
+    "portada": "biblioteca/portadas/Matemáticas 4.svg",
+    "pdf": "biblioteca/libros/matematicas-4/4-2-de3.pdf",
+    "descripcion": "Libro de matemáticas de cuarto grado — Parte 2",
+    "tipo": "matematicas",
+    "grado": 4
+  },
+  {
+    "id": "mat4-3",
+    "titulo": "Matemáticas 4° — Parte 3",
+    "autor": "Kubika",
+    "categoria": "Matemáticas",
+    "edad": "4° Primaria",
+    "portada": "biblioteca/portadas/Matemáticas 4.svg",
+    "pdf": "biblioteca/libros/matematicas-4/4-3-de3.pdf",
+    "descripcion": "Libro de matemáticas de cuarto grado — Parte 3",
+    "tipo": "matematicas",
+    "grado": 4
+  }
+]
