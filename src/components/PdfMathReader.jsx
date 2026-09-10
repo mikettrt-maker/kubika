@@ -89,6 +89,7 @@ export default function PdfMathReader({ libro, onBack }) {
   const quadStart = useRef(null);
   const userId = useRef(getUserId());
   const savedCanvasImage = useRef(null);
+  const stateRef = useRef({ mathTexts: [], freeTexts: [], quads: [], polygons: [], scale: 1.2, currentPage: 1 });
 
   const pdfUrl = (() => {
     const src = libro.pdf || libro.epub;
@@ -104,13 +105,16 @@ export default function PdfMathReader({ libro, onBack }) {
     try {
       savePageData(userId.current, libro.id, currentPage, {
         canvas: canvas.toDataURL(),
+        scale,
+        canvasWidth: canvas.width,
+        canvasHeight: canvas.height,
         mathTexts,
         freeTexts,
         quads,
         polygons,
       });
     } catch {}
-  }, [libro.id, currentPage, mathTexts, freeTexts, quads, polygons]);
+  }, [libro.id, currentPage, scale, mathTexts, freeTexts, quads, polygons]);
 
   const loadCanvas = useCallback(() => {
     const canvas = drawCanvasRef.current;
@@ -128,10 +132,22 @@ export default function PdfMathReader({ libro, onBack }) {
         };
         img.src = saved.canvas;
       }
-      setMathTexts(saved.mathTexts || []);
-      setFreeTexts(saved.freeTexts || []);
-      setQuads(saved.quads || []);
-      setPolygons(saved.polygons || []);
+      const savedW = saved.canvasWidth || canvas.width;
+      const savedH = saved.canvasHeight || canvas.height;
+      const ratioX = savedW > 0 ? canvas.width / savedW : 1;
+      const ratioY = savedH > 0 ? canvas.height / savedH : 1;
+      const needsScale = (Math.abs(ratioX - 1) > 0.001 || Math.abs(ratioY - 1) > 0.001);
+      const scaleX = (m) => needsScale ? Math.round(m.x * ratioX) : m.x;
+      const scaleY = (m) => needsScale ? Math.round(m.y * ratioY) : m.y;
+      const scaleW = (w) => needsScale ? Math.round(w * ratioX) : w;
+      const scaleH = (h) => needsScale ? Math.round(h * ratioY) : h;
+      setMathTexts((saved.mathTexts || []).map(m => ({ ...m, x: scaleX(m), y: scaleY(m), width: m.width ? scaleW(m.width) : undefined })));
+      setFreeTexts((saved.freeTexts || []).map(t => ({ ...t, x: scaleX(t), y: scaleY(t) })));
+      setQuads((saved.quads || []).map(q => ({ ...q, x: scaleX(q), y: scaleY(q), width: scaleW(q.width), height: scaleH(q.height) })));
+      setPolygons((saved.polygons || []).map(p => ({
+        ...p,
+        points: p.points.map(pt => ({ x: Math.round(pt.x * ratioX), y: Math.round(pt.y * ratioY) })),
+      })));
     } else {
       setMathTexts([]);
       setFreeTexts([]);
@@ -148,6 +164,9 @@ export default function PdfMathReader({ libro, onBack }) {
         try {
           savePageData(userId.current, libro.id, currentPage, {
             canvas: canvas.toDataURL(),
+            scale,
+            canvasWidth: canvas.width,
+            canvasHeight: canvas.height,
             mathTexts,
             freeTexts,
             quads,
@@ -156,7 +175,31 @@ export default function PdfMathReader({ libro, onBack }) {
         } catch {}
       }
     }
-  }, [mathTexts, freeTexts, quads, polygons]);
+  }, [mathTexts, freeTexts, quads, polygons, scale, currentPage]);
+
+  useEffect(() => {
+    stateRef.current = { mathTexts, freeTexts, quads, polygons, scale, currentPage };
+  });
+
+  useEffect(() => {
+    return () => {
+      const canvas = drawCanvasRef.current;
+      if (!canvas) return;
+      const { mathTexts: mt, freeTexts: ft, quads: q, polygons: pl, scale: s, currentPage: cp } = stateRef.current;
+      try {
+        savePageData(userId.current, libro.id, cp, {
+          canvas: canvas.toDataURL(),
+          scale: s,
+          canvasWidth: canvas.width,
+          canvasHeight: canvas.height,
+          mathTexts: mt,
+          freeTexts: ft,
+          quads: q,
+          polygons: pl,
+        });
+      } catch {}
+    };
+  }, [libro.id]);
 
   const renderPage = useCallback(async (pageNum) => {
     if (!pdfRef.current || renderingRef.current) return;
@@ -376,19 +419,17 @@ export default function PdfMathReader({ libro, onBack }) {
 
   const handleOverlayClick = (e) => {
     if (activeTool === 'formula') {
-      const rect = e.currentTarget.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      const point = getCanvasPoint(e);
+      if (!point) return;
       const newId = genId();
-      setMathTexts(prev => [...prev, { id: newId, x, y, latex: '', width: 150 }]);
+      setMathTexts(prev => [...prev, { id: newId, x: point.x, y: point.y, latex: '', width: 150 }]);
       setActiveTool('pen');
       setSelectedId(newId);
     } else if (activeTool === 'text') {
-      const rect = e.currentTarget.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      const point = getCanvasPoint(e);
+      if (!point) return;
       const newId = genId();
-      setFreeTexts(prev => [...prev, { id: newId, x, y, text: '', color: '#1e293b', bold: false }]);
+      setFreeTexts(prev => [...prev, { id: newId, x: point.x, y: point.y, text: '', color: '#1e293b', bold: false }]);
       setActiveTool('pen');
       setSelectedId(newId);
     } else {
@@ -406,7 +447,7 @@ export default function PdfMathReader({ libro, onBack }) {
     setQuads([]);
     setPolygons([]);
     setPolygonPoints([]);
-    savePageData(userId.current, libro.id, currentPage, { canvas: '', mathTexts: [], freeTexts: [], quads: [], polygons: [] });
+    savePageData(userId.current, libro.id, currentPage, { canvas: '', scale, canvasWidth: 0, canvasHeight: 0, mathTexts: [], freeTexts: [], quads: [], polygons: [] });
   };
 
   const handleMathUpdate = (id, latex) => {
@@ -526,9 +567,10 @@ export default function PdfMathReader({ libro, onBack }) {
   const handlePolygonClick = (e) => {
     if (activeTool !== 'polygon') return;
     if (showQuadColorPicker) { setShowQuadColorPicker(false); return; }
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const point = getCanvasPoint(e);
+    if (!point) return;
+    const x = point.x;
+    const y = point.y;
 
     if (polygonPoints.length >= 3) {
       const first = polygonPoints[0];
