@@ -175,7 +175,7 @@ export default function PdfMathReader({ libro, onBack }) {
         } catch {}
       }
     }
-  }, [mathTexts, freeTexts, quads, polygons, scale, currentPage]);
+  }, [mathTexts, freeTexts, quads, polygons, scale]);
 
   useEffect(() => {
     stateRef.current = { mathTexts, freeTexts, quads, polygons, scale, currentPage };
