@@ -778,7 +778,33 @@ export default function PdfMathReader({ libro, onBack }) {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
+      // Ctrl+V: pegar fórmula del portapapeles
+      if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+        navigator.clipboard.readText().then(text => {
+          if (text && text.trim().startsWith('\\')) {
+            const newMath = {
+              id: genId(),
+              x: 100 + Math.random() * 200,
+              y: 100 + Math.random() * 200,
+              latex: text.trim(),
+              width: 220,
+            };
+            setMathTexts(prev => [...prev, newMath]);
+          }
+        }).catch(() => {});
+        return;
+      }
+
       if (!selectedId) return;
+
+      // Ctrl+C: copiar fórmula LaTeX al portapapeles
+      if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+        const mt = mathTexts.find(m => m.id === selectedId);
+        if (mt && mt.latex) {
+          navigator.clipboard.writeText(mt.latex).catch(() => {});
+        }
+        return;
+      }
 
       const isEditingText = (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
       const step = e.shiftKey ? 1 : 5;

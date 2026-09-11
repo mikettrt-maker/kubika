@@ -32,15 +32,67 @@ async function loadLogoWatermark(watermarkSize) {
 }
 
 /**
+ * Convierte un elemento KaTeX DOM a un <img> con dataURL renderizado via SVG foreignObject.
+ */
+function katexElementToImage(el) {
+  return new Promise((resolve) => {
+    try {
+      const rect = el.getBoundingClientRect();
+      const w = Math.ceil(rect.width);
+      const h = Math.ceil(rect.height);
+      if (w === 0 || h === 0) { resolve(null); return; }
+      const html = el.innerHTML;
+      const fo = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+      fo.setAttribute('width', w);
+      fo.setAttribute('height', h);
+      fo.innerHTML = `<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:16px;line-height:1.4;white-space:nowrap;padding:0;margin:0;">${html}</div>`;
+      const svg = new Blob([`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">${fo.outerHTML}</svg>`], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svg);
+      const img = new Image();
+      img.onload = () => {
+        const c = document.createElement('canvas');
+        c.width = w * 2;
+        c.height = h * 2;
+        const ctx = c.getContext('2d');
+        ctx.scale(2, 2);
+        ctx.drawImage(img, 0, 0, w, h);
+        URL.revokeObjectURL(url);
+        const result = document.createElement('img');
+        result.src = c.toDataURL('image/png');
+        result.style.cssText = `width:${w}px;height:${h}px;display:inline-block;`;
+        resolve(result);
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
+      img.src = url;
+    } catch { resolve(null); }
+  });
+}
+
+/**
  * Exporta el contenido del lienzo a un archivo PDF.
- * Captura el elemento del lienzo usando html2canvas y lo inserta en un PDF con jsPDF.
- * 
- * @param {HTMLElement} canvasElement - Elemento DOM del lienzo a capturar
- * @param {string} studentName - Nombre del alumno para el encabezado
- * @param {string} workspaceName - Título del proyecto
  */
 export async function exportToPdf(canvasElement, studentName = 'Alumno', workspaceName = 'Diseño sin título') {
   try {
+    // Pre-renderizar KaTeX a imágenes antes de html2canvas
+    const katexEls = canvasElement.querySelectorAll('.katex, .katex-display-container');
+    const katexBackups = [];
+    const replaceJobs = [];
+    for (const el of katexEls) {
+      katexBackups.push({ el, parentHTML: el.outerHTML });
+      const img = await katexElementToImage(el);
+      if (img) {
+        const placeholder = document.createElement('div');
+        placeholder.style.cssText = `display:inline-block;width:${img.style.width};height:${img.style.height};`;
+        placeholder.appendChild(img);
+        replaceJobs.push({ el, placeholder });
+      }
+    }
+    for (const { el, placeholder } of replaceJobs) {
+      el.innerHTML = '';
+      el.appendChild(placeholder);
+      el.style.overflow = 'visible';
+    }
+
     // Capturar el lienzo como imagen
     const canvas = await html2canvas(canvasElement, {
       scale: 2,
@@ -50,6 +102,11 @@ export async function exportToPdf(canvasElement, studentName = 'Alumno', workspa
       logging: false,
       ignoreElements: (element) => element.classList?.contains('no-print'),
     });
+
+    // Restaurar KaTeX originales
+    for (const { el, parentHTML } of katexBackups) {
+      el.outerHTML = parentHTML;
+    }
 
     const imgData = canvas.toDataURL('image/png');
 

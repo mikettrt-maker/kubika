@@ -143,6 +143,21 @@ export default function MathTextBox({
       onDoubleClick={handleDoubleClick}
       onClick={(e) => e.stopPropagation()}
     >
+      {isSelected && !isEditing && latex.trim() && (
+        <button
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            navigator.clipboard.writeText(latex);
+          }}
+          className="absolute -top-9 left-1/2 -translate-x-1/2 px-3 py-1 text-xs font-medium
+                     bg-purple-600 text-white rounded-full shadow-md hover:bg-purple-700
+                     transition-colors no-print whitespace-nowrap"
+          title="Copiar LaTeX"
+        >
+          Copiar fórmula
+        </button>
+      )}
       {isEditing ? (
         <div className="space-y-2" onClick={(e) => e.stopPropagation()}>
           <div className="flex flex-wrap gap-1">

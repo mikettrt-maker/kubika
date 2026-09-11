@@ -419,8 +419,33 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
   // ========== TECLADO ==========
   useEffect(() => {
     const handleKeyDown = (e) => {
+      // Ctrl+V: pegar fórmula del portapapeles
+      if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+        navigator.clipboard.readText().then(text => {
+          if (text && text.trim().startsWith('\\')) {
+            const newMath = {
+              id: generateMathId(),
+              x: 100 + Math.random() * 200,
+              y: 100 + Math.random() * 200,
+              latex: text.trim(),
+            };
+            setMathTexts(prev => [...prev, newMath]);
+          }
+        }).catch(() => {});
+        return;
+      }
+
       const id = selectedRef.current;
       if (!id) return;
+
+      // Ctrl+C: copiar fórmula LaTeX al portapapeles
+      if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+        const mt = mathTexts.find(m => m.id === id);
+        if (mt && mt.latex) {
+          navigator.clipboard.writeText(mt.latex).catch(() => {});
+        }
+        return;
+      }
 
       if (e.key === 'Delete' || e.key === 'Backspace') {
         e.preventDefault();
