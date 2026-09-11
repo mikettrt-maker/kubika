@@ -419,33 +419,53 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
   // ========== TECLADO ==========
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Ctrl+V: pegar fórmula del portapapeles
-      if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
-        navigator.clipboard.readText().then(text => {
-          if (text && text.trim().startsWith('\\')) {
-            const newMath = {
-              id: generateMathId(),
-              x: 100 + Math.random() * 200,
-              y: 100 + Math.random() * 200,
-              latex: text.trim(),
-            };
-            setMathTexts(prev => [...prev, newMath]);
+      const isEditingText = (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
+      if (isEditingText) return;
+
+      // Ctrl+C: copiar fórmula LaTeX
+      if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
+        const id = selectedRef.current;
+        if (id) {
+          const mt = mathTexts.find(m => m.id === id);
+          if (mt && mt.latex) {
+            const ta = document.createElement('textarea');
+            ta.value = mt.latex;
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
           }
-        }).catch(() => {});
+        }
+        return;
+      }
+
+      // Ctrl+V: pegar fórmula LaTeX (usando textarea oculto)
+      if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+        e.preventDefault();
+        const ta = document.createElement('textarea');
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.focus();
+        document.execCommand('paste');
+        const text = ta.value;
+        document.body.removeChild(ta);
+        if (text && text.trim().startsWith('\\')) {
+          const newMath = {
+            id: generateMathId(),
+            x: 100 + Math.random() * 200,
+            y: 100 + Math.random() * 200,
+            latex: text.trim(),
+          };
+          setMathTexts(prev => [...prev, newMath]);
+        }
         return;
       }
 
       const id = selectedRef.current;
       if (!id) return;
-
-      // Ctrl+C: copiar fórmula LaTeX al portapapeles
-      if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
-        const mt = mathTexts.find(m => m.id === id);
-        if (mt && mt.latex) {
-          navigator.clipboard.writeText(mt.latex).catch(() => {});
-        }
-        return;
-      }
 
       if (e.key === 'Delete' || e.key === 'Backspace') {
         e.preventDefault();

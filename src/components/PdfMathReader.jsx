@@ -778,35 +778,52 @@ export default function PdfMathReader({ libro, onBack }) {
 
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Ctrl+V: pegar fórmula del portapapeles
-      if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
-        navigator.clipboard.readText().then(text => {
-          if (text && text.trim().startsWith('\\')) {
-            const newMath = {
-              id: genId(),
-              x: 100 + Math.random() * 200,
-              y: 100 + Math.random() * 200,
-              latex: text.trim(),
-              width: 220,
-            };
-            setMathTexts(prev => [...prev, newMath]);
-          }
-        }).catch(() => {});
-        return;
-      }
+      const isEditingText = (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
+      if (isEditingText) return;
 
-      if (!selectedId) return;
-
-      // Ctrl+C: copiar fórmula LaTeX al portapapeles
+      // Ctrl+C: copiar fórmula LaTeX
       if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
-        const mt = mathTexts.find(m => m.id === selectedId);
-        if (mt && mt.latex) {
-          navigator.clipboard.writeText(mt.latex).catch(() => {});
+        if (selectedId) {
+          const mt = mathTexts.find(m => m.id === selectedId);
+          if (mt && mt.latex) {
+            const ta = document.createElement('textarea');
+            ta.value = mt.latex;
+            ta.style.position = 'fixed';
+            ta.style.left = '-9999px';
+            document.body.appendChild(ta);
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
+          }
         }
         return;
       }
 
-      const isEditingText = (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
+      // Ctrl+V: pegar fórmula LaTeX
+      if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+        e.preventDefault();
+        const ta = document.createElement('textarea');
+        ta.style.position = 'fixed';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.focus();
+        document.execCommand('paste');
+        const text = ta.value;
+        document.body.removeChild(ta);
+        if (text && text.trim().startsWith('\\')) {
+          const newMath = {
+            id: genId(),
+            x: 100 + Math.random() * 200,
+            y: 100 + Math.random() * 200,
+            latex: text.trim(),
+            width: 220,
+          };
+          setMathTexts(prev => [...prev, newMath]);
+        }
+        return;
+      }
+
+      if (!selectedId) return;
       const step = e.shiftKey ? 1 : 5;
 
       if (e.key === 'Escape') {
