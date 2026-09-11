@@ -1,6 +1,47 @@
 import { useState, useRef, useEffect } from 'react';
 import katex from 'katex';
 
+function copyToClipboard(text) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    return navigator.clipboard.writeText(text);
+  }
+  return new Promise((resolve, reject) => {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.cssText = 'position:fixed;left:0;top:0;opacity:0;';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    try { document.execCommand('copy'); resolve(); }
+    catch (err) { reject(err); }
+    finally { document.body.removeChild(ta); }
+  });
+}
+
+function CopyButton({ latex }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = async (e) => {
+    e.stopPropagation();
+    try {
+      await copyToClipboard(latex);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch { /* ignore */ }
+  };
+  return (
+    <button
+      onPointerDown={(e) => e.stopPropagation()}
+      onClick={handleCopy}
+      className={`absolute -top-9 left-1/2 -translate-x-1/2 px-3 py-1 text-xs font-medium
+                 rounded-full shadow-md transition-colors no-print whitespace-nowrap
+                 ${copied ? 'bg-green-500 text-white' : 'bg-purple-600 text-white hover:bg-purple-700'}`}
+      title="Copiar LaTeX al portapapeles"
+    >
+      {copied ? 'Copiado!' : 'Copiar fórmula'}
+    </button>
+  );
+}
+
 /**
  * Cuadro de texto matemático movible y redimensionable en el lienzo.
  * Usa KaTeX para renderizar LaTeX.
@@ -144,19 +185,7 @@ export default function MathTextBox({
       onClick={(e) => e.stopPropagation()}
     >
       {isSelected && !isEditing && latex.trim() && (
-        <button
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={(e) => {
-            e.stopPropagation();
-            navigator.clipboard.writeText(latex);
-          }}
-          className="absolute -top-9 left-1/2 -translate-x-1/2 px-3 py-1 text-xs font-medium
-                     bg-purple-600 text-white rounded-full shadow-md hover:bg-purple-700
-                     transition-colors no-print whitespace-nowrap"
-          title="Copiar LaTeX"
-        >
-          Copiar fórmula
-        </button>
+        <CopyButton latex={latex} />
       )}
       {isEditing ? (
         <div className="space-y-2" onClick={(e) => e.stopPropagation()}>

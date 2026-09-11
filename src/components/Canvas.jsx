@@ -48,7 +48,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
   const [selectedId, setSelectedId] = useState(null);
   const selectedRef = useRef(null);
   const innerRef = useRef(null);
-  const pasteRef = useRef(null);
+  const containerRef = useRef(null);
 
   const updateSelection = useCallback((id) => {
     setSelectedId(id);
@@ -429,18 +429,15 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
         if (id) {
           const mt = mathTexts.find(m => m.id === id);
           if (mt && mt.latex) {
-            navigator.clipboard.writeText(mt.latex).catch(() => {});
+            const ta = document.createElement('textarea');
+            ta.value = mt.latex;
+            ta.style.cssText = 'position:fixed;left:0;top:0;opacity:0;';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
           }
-        }
-        return;
-      }
-
-      // Ctrl+V: pegar fórmula LaTeX
-      if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
-        e.preventDefault();
-        if (pasteRef.current) {
-          pasteRef.current.value = '';
-          pasteRef.current.focus();
         }
         return;
       }
@@ -551,21 +548,17 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
 
   return (
     <div
+      ref={containerRef}
       className="relative flex-1 overflow-auto bg-slate-100 canvas-inset-shadow"
       onDragOver={handleDragOver}
       onDrop={handleDrop}
-      onMouseDown={handleCanvasMouseDown}
+      onMouseDown={(e) => { handleCanvasMouseDown(e); containerRef.current?.focus(); }}
       onClick={handleCanvasClick}
       onKeyDown={handleKeyDown}
+      onPaste={handlePaste}
       tabIndex={-1}
       style={{ outline: 'none' }}
     >
-      <textarea
-        ref={pasteRef}
-        onPaste={handlePaste}
-        style={{ position: 'fixed', left: '-9999px', top: 0, opacity: 0, width: 1, height: 1 }}
-        aria-hidden="true"
-      />
       {/* Contenedor interno grande para scrollear y capturar */}
       <div 
         ref={setCanvasRef}

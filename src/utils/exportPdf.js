@@ -1,5 +1,6 @@
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { toPng } from 'html-to-image';
 
 /**
  * Carga el logo y lo devuelve como un canvas con opacidad reducida.
@@ -32,7 +33,8 @@ async function loadLogoWatermark(watermarkSize) {
 }
 
 /**
- * Pre-renderiza cada fórmula KaTeX como imagen individual usando html2canvas aislado.
+ * Pre-renderiza cada fórmula KaTeX como imagen individual usando html-to-image.
+ * html-to-image serializa el DOM a SVG, preservando fuentes web y layout CSS.
  */
 async function preRenderAllKatex(katexEls) {
   const backups = [];
@@ -40,19 +42,15 @@ async function preRenderAllKatex(katexEls) {
     const origOuterHTML = el.outerHTML;
     backups.push({ el, origOuterHTML });
     try {
-      const clone = el.cloneNode(true);
-      clone.style.cssText = 'position:absolute;left:-9999px;top:0;padding:4px 8px;background:white;display:inline-block;z-index:-1;';
-      document.body.appendChild(clone);
-      await document.fonts.ready;
-      const c = await html2canvas(clone, {
-        scale: 2,
+      const dataUrl = await toPng(el, {
+        pixelRatio: 2,
         backgroundColor: 'white',
-        logging: false,
-        useCORS: true,
+        cacheBust: true,
+        skipFonts: true,
+        style: { overflow: 'visible' },
       });
-      document.body.removeChild(clone);
       const img = document.createElement('img');
-      img.src = c.toDataURL('image/png');
+      img.src = dataUrl;
       const w = el.offsetWidth;
       const h = el.offsetHeight;
       img.style.cssText = `width:${w}px;height:${h}px;display:inline-block;vertical-align:middle;`;

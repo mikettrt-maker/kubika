@@ -96,7 +96,6 @@ export default function PdfMathReader({ libro, onBack }) {
   const userId = useRef(getUserId());
   const savedCanvasImage = useRef(null);
   const stateRef = useRef({ mathTexts: [], freeTexts: [], quads: [], polygons: [], scale: 1.2, currentPage: 1 });
-  const pasteRef = useRef(null);
 
   const pdfUrl = (() => {
     const src = libro.pdf || libro.epub;
@@ -787,18 +786,15 @@ export default function PdfMathReader({ libro, onBack }) {
         if (selectedId) {
           const mt = mathTexts.find(m => m.id === selectedId);
           if (mt && mt.latex) {
-            navigator.clipboard.writeText(mt.latex).catch(() => {});
+            const ta = document.createElement('textarea');
+            ta.value = mt.latex;
+            ta.style.cssText = 'position:fixed;left:0;top:0;opacity:0;';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            document.execCommand('copy');
+            document.body.removeChild(ta);
           }
-        }
-        return;
-      }
-
-      // Ctrl+V: pegar fórmula LaTeX
-      if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
-        e.preventDefault();
-        if (pasteRef.current) {
-          pasteRef.current.value = '';
-          pasteRef.current.focus();
         }
         return;
       }
@@ -914,13 +910,7 @@ export default function PdfMathReader({ libro, onBack }) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white">
-      <textarea
-        ref={pasteRef}
-        onPaste={handlePaste}
-        style={{ position: 'fixed', left: '-9999px', top: 0, opacity: 0, width: 1, height: 1 }}
-        aria-hidden="true"
-      />
+    <div className="flex flex-col h-full bg-white" onPaste={handlePaste}>
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-3 border-b border-slate-200 shrink-0">
         <button onClick={onBack} className="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">
