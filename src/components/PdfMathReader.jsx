@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+import katex from 'katex';
 import MathTextBox from './MathTextBox';
 import FreeTextBox from './FreeTextBox';
 
@@ -61,7 +64,7 @@ export default function PdfMathReader({ libro, onBack }) {
   const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
-  const [scale, setScale] = useState(1.2);
+  const scale = 1.2;
 
   const [activeTool, setActiveTool] = useState('pen');
   const [penColor, setPenColor] = useState(PEN_COLORS[1].value);
@@ -78,6 +81,9 @@ export default function PdfMathReader({ libro, onBack }) {
   const [polygons, setPolygons] = useState([]);
   const [polygonPoints, setPolygonPoints] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const [selectedExportPages, setSelectedExportPages] = useState([]);
+  const [exporting, setExporting] = useState(false);
 
   const containerRef = useRef(null);
   const drawCanvasRef = useRef(null);
@@ -448,6 +454,115 @@ export default function PdfMathReader({ libro, onBack }) {
     setPolygons([]);
     setPolygonPoints([]);
     savePageData(userId.current, libro.id, currentPage, { canvas: '', scale, canvasWidth: 0, canvasHeight: 0, mathTexts: [], freeTexts: [], quads: [], polygons: [] });
+  };
+
+  const renderPageToCanvas = useCallback(async (pageNum) => {
+    const pdf = pdfRef.current;
+    if (!pdf) return null;
+    const page = await pdf.getPage(pageNum);
+    const viewport = page.getViewport({ scale });
+    const c = document.createElement('canvas');
+    c.width = viewport.width;
+    c.height = viewport.height;
+    await page.render({ canvasContext: c.getContext('2d'), viewport }).promise;
+    const saved = loadPageData(userId.current, libro.id, pageNum);
+    const ctx = c.getContext('2d');
+    if (saved && saved.canvas) {
+      const img = new Image();
+      await new Promise(r => { img.onload = r; img.src = saved.canvas; });
+      ctx.drawImage(img, 0, 0, c.width, c.height);
+    }
+    if (saved) {
+      (saved.quads || []).forEach(q => {
+        ctx.fillStyle = q.fill; ctx.globalAlpha = 0.6;
+        ctx.fillRect(q.x, q.y, q.width, q.height);
+        ctx.strokeStyle = q.fill; ctx.lineWidth = 2; ctx.globalAlpha = 1;
+        ctx.strokeRect(q.x, q.y, q.width, q.height);
+      });
+      (saved.polygons || []).forEach(p => {
+        if (!p.points || p.points.length < 2) return;
+        ctx.beginPath(); ctx.moveTo(p.points[0].x, p.points[0].y);
+        p.points.forEach(pt => ctx.lineTo(pt.x, pt.y)); ctx.closePath();
+        ctx.fillStyle = p.fill; ctx.globalAlpha = 0.6; ctx.fill();
+        ctx.globalAlpha = 1; ctx.strokeStyle = p.fill; ctx.lineWidth = 2; ctx.stroke();
+      });
+      for (const mt of (saved.mathTexts || [])) {
+        if (!mt.latex) continue;
+        try {
+          const s = document.createElement('span');
+          s.innerHTML = katex.renderToString(mt.latex, { throwOnError: false });
+          const w = mt.width || 150;
+          const fo = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+          fo.setAttribute('width', w); fo.setAttribute('height', w * 0.6);
+          fo.innerHTML = `<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:16px;padding:4px;">${s.innerHTML}</div>`;
+          const svg = new Blob([`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${w * 0.6}">${fo.outerHTML}</svg>`], { type: 'image/svg+xml;charset=utf-8' });
+          const url = URL.createObjectURL(svg);
+          const si = new Image();
+          await new Promise(r => { si.onload = r; si.onerror = r; si.src = url; });
+          ctx.drawImage(si, mt.x, mt.y, w, w * 0.6);
+          URL.revokeObjectURL(url);
+        } catch {}
+      }
+      (saved.freeTexts || []).forEach(ft => {
+        ctx.font = `${ft.bold ? 'bold ' : ''}14px Inter, sans-serif`;
+        ctx.fillStyle = ft.color || '#1e293b'; ctx.globalAlpha = 1;
+        (ft.text || '').split('\n').forEach((l, i) => { ctx.fillText(l, ft.x, ft.y + 14 + i * 18); });
+      });
+    }
+    ctx.globalAlpha = 1;
+    return { canvas: c, viewport };
+  }, [scale, libro.id]);
+
+  const exportPageToPdf = async (pageNum) => {
+    const result = await renderPageToCanvas(pageNum);
+    if (!result) return;
+    const { canvas: c, viewport } = result;
+    const imgData = c.toDataURL('image/png');
+    const orientation = viewport.width > viewport.height ? 'landscape' : 'portrait';
+    const pdfDoc = new jsPDF({ orientation, unit: 'mm', format: 'letter' });
+    const pW = pdfDoc.internal.pageSize.getWidth();
+    const pH = pdfDoc.internal.pageSize.getHeight();
+    const iW = pW - 10;
+    const iH = (c.height * iW) / c.width;
+    const fH = iH > pH - 10 ? (c.width * (pH - 10)) / c.height : iH;
+    const fW = fH === iH ? iW : (c.width * fH) / c.height;
+    pdfDoc.addImage(imgData, 'PNG', (pW - fW) / 2, (pH - fH) / 2, fW, fH);
+    pdfDoc.save(`${libro.titulo || 'pagina'}-${pageNum}.pdf`);
+  };
+
+  const handleExportCurrent = async () => {
+    try { await exportPageToPdf(currentPage); } catch (e) { console.error('Export error:', e); }
+  };
+
+  const handleExportSelected = async () => {
+    if (selectedExportPages.length === 0) return;
+    setExporting(true);
+    try {
+      const pages = [...selectedExportPages].sort((a, b) => a - b);
+      const results = [];
+      for (const p of pages) { results.push(await renderPageToCanvas(p)); }
+      const first = results.find(r => r);
+      if (!first) return;
+      const orientation = first.viewport.width > first.viewport.height ? 'landscape' : 'portrait';
+      const pdfDoc = new jsPDF({ orientation, unit: 'mm', format: 'letter' });
+      const pW = pdfDoc.internal.pageSize.getWidth();
+      const pH = pdfDoc.internal.pageSize.getHeight();
+      const iW = pW - 10;
+      const iH = (first.canvas.height * iW) / first.canvas.width;
+      const fH = iH > pH - 10 ? (first.canvas.width * (pH - 10)) / first.canvas.height : iH;
+      const fW = fH === iH ? iW : (first.canvas.width * fH) / first.canvas.height;
+      const xO = (pW - fW) / 2;
+      const yO = (pH - fH) / 2;
+      results.forEach((r, i) => {
+        if (!r) return;
+        if (i > 0) pdfDoc.addPage();
+        pdfDoc.addImage(r.canvas.toDataURL('image/png'), 'PNG', xO, yO, fW, fH);
+      });
+      pdfDoc.save(`${libro.titulo || 'paginas'}-${pages[0]}-${pages[pages.length - 1]}.pdf`);
+      setShowExportModal(false);
+      setSelectedExportPages([]);
+    } catch (e) { console.error('Export error:', e); }
+    setExporting(false);
   };
 
   const handleMathUpdate = (id, latex) => {
@@ -933,27 +1048,26 @@ export default function PdfMathReader({ libro, onBack }) {
 
         <div className="header-divider" />
 
-        {/* Zoom */}
+        {/* Descargar página actual */}
         <div className="kubika-tooltip-wrapper">
-          <button onClick={() => setScale(s => Math.max(0.5, s - 0.2))}
-            className="btn-icon btn-ripple flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-200 group">
-            <svg className="w-5 h-5 text-slate-500 group-hover:scale-125 group-hover:text-slate-700 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM13 10H7" />
+          <button onClick={handleExportCurrent}
+            className="btn-icon btn-ripple flex items-center justify-center w-9 h-9 rounded-xl hover:bg-emerald-50 transition-all duration-200 group">
+            <svg className="w-6 h-6 text-emerald-500 group-hover:scale-125 group-hover:text-emerald-700 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </button>
-          <span className="kubika-tooltip">Reducir</span>
+          <span className="kubika-tooltip">Descargar página</span>
         </div>
 
-        <span className="text-[10px] text-slate-400 font-medium select-none">{Math.round(scale * 100)}%</span>
-
+        {/* Seleccionar páginas para descargar */}
         <div className="kubika-tooltip-wrapper">
-          <button onClick={() => setScale(s => Math.min(3, s + 0.2))}
-            className="btn-icon btn-ripple flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-200 group">
-            <svg className="w-5 h-5 text-slate-500 group-hover:scale-125 group-hover:text-slate-700 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
+          <button onClick={() => setShowExportModal(true)}
+            className="btn-icon btn-ripple flex items-center justify-center w-9 h-9 rounded-xl hover:bg-blue-50 transition-all duration-200 group">
+            <svg className="w-6 h-6 text-blue-500 group-hover:scale-125 group-hover:text-blue-700 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
           </button>
-          <span className="kubika-tooltip">Aumentar</span>
+          <span className="kubika-tooltip">Seleccionar páginas</span>
         </div>
       </div>
 
@@ -1163,6 +1277,43 @@ export default function PdfMathReader({ libro, onBack }) {
           </svg>
         </button>
       </div>
+
+      {/* Modal de selección de páginas para exportar */}
+      {showExportModal && (
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/40" onClick={() => { setShowExportModal(false); setSelectedExportPages([]); }}>
+          <div className="bg-white rounded-2xl shadow-2xl p-6 w-80 max-h-[80vh] flex flex-col" onClick={e => e.stopPropagation()}>
+            <h3 className="text-base font-bold text-slate-800 mb-3">Seleccionar páginas</h3>
+            <div className="flex gap-2 mb-3">
+              <button onClick={() => setSelectedExportPages(Array.from({ length: totalPages }, (_, i) => i + 1))}
+                className="text-xs text-indigo-600 underline">Todas</button>
+              <button onClick={() => setSelectedExportPages([])}
+                className="text-xs text-slate-400 underline">Ninguna</button>
+              <button onClick={() => setSelectedExportPages(prev => prev.includes(currentPage) ? prev : [...prev, currentPage])}
+                className="text-xs text-emerald-600 underline">Actual</button>
+            </div>
+            <div className="flex-1 overflow-auto space-y-1 mb-4">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                <label key={p} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg cursor-pointer transition-colors ${selectedExportPages.includes(p) ? 'bg-indigo-50 text-indigo-700' : 'hover:bg-slate-50'}`}>
+                  <input type="checkbox" checked={selectedExportPages.includes(p)}
+                    onChange={() => setSelectedExportPages(prev => prev.includes(p) ? prev.filter(x => x !== p) : [...prev, p])}
+                    className="accent-indigo-600" />
+                  <span className="text-sm">Página {p}</span>
+                </label>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => { setShowExportModal(false); setSelectedExportPages([]); }}
+                className="flex-1 px-3 py-2 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50">
+                Cancelar
+              </button>
+              <button onClick={handleExportSelected} disabled={selectedExportPages.length === 0 || exporting}
+                className="flex-1 px-3 py-2 rounded-xl bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed">
+                {exporting ? 'Exportando...' : `Descargar (${selectedExportPages.length})`}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
