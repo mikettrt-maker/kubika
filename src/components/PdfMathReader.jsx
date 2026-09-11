@@ -492,22 +492,25 @@ export default function PdfMathReader({ libro, onBack }) {
           const s = document.createElement('span');
           s.innerHTML = katex.renderToString(mt.latex, { throwOnError: false });
           const w = mt.width || 150;
+          const h = w * 0.8;
           const fo = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
-          fo.setAttribute('width', w); fo.setAttribute('height', w * 0.6);
-          fo.innerHTML = `<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:16px;padding:4px;">${s.innerHTML}</div>`;
-          const svg = new Blob([`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${w * 0.6}">${fo.outerHTML}</svg>`], { type: 'image/svg+xml;charset=utf-8' });
+          fo.setAttribute('width', w); fo.setAttribute('height', h);
+          fo.innerHTML = `<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:16px;padding:12px;">${s.innerHTML}</div>`;
+          const svg = new Blob([`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">${fo.outerHTML}</svg>`], { type: 'image/svg+xml;charset=utf-8' });
           const url = URL.createObjectURL(svg);
           const si = new Image();
           await new Promise(r => { si.onload = r; si.onerror = r; si.src = url; });
-          ctx.drawImage(si, mt.x, mt.y, w, w * 0.6);
+          ctx.drawImage(si, mt.x, mt.y, w, h);
           URL.revokeObjectURL(url);
         } catch {}
       }
       (saved.freeTexts || []).forEach(ft => {
-        ctx.font = `${ft.bold ? 'bold ' : ''}14px Inter, sans-serif`;
+        ctx.textBaseline = 'top';
+        ctx.font = `${ft.bold ? 'bold ' : ''}30px Caveat, cursive`;
         ctx.fillStyle = ft.color || '#1e293b'; ctx.globalAlpha = 1;
-        (ft.text || '').split('\n').forEach((l, i) => { ctx.fillText(l, ft.x, ft.y + 14 + i * 18); });
+        (ft.text || '').split('\n').forEach((l, i) => { ctx.fillText(l, ft.x + 8, ft.y + 8 + i * 36); });
       });
+      ctx.textBaseline = 'alphabetic';
     }
     ctx.globalAlpha = 1;
     return { canvas: c, viewport };
