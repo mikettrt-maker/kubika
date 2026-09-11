@@ -32,10 +32,49 @@ async function loadLogoWatermark(watermarkSize) {
 }
 
 /**
+ * Pre-renderiza cada fórmula KaTeX como imagen individual usando html2canvas aislado.
+ */
+async function preRenderAllKatex(katexEls) {
+  const backups = [];
+  for (const el of katexEls) {
+    const origOuterHTML = el.outerHTML;
+    backups.push({ el, origOuterHTML });
+    try {
+      const clone = el.cloneNode(true);
+      clone.style.cssText = 'position:absolute;left:-9999px;top:0;padding:4px 8px;background:white;display:inline-block;z-index:-1;';
+      document.body.appendChild(clone);
+      await document.fonts.ready;
+      const c = await html2canvas(clone, {
+        scale: 2,
+        backgroundColor: 'white',
+        logging: false,
+        useCORS: true,
+      });
+      document.body.removeChild(clone);
+      const img = document.createElement('img');
+      img.src = c.toDataURL('image/png');
+      const w = el.offsetWidth;
+      const h = el.offsetHeight;
+      img.style.cssText = `width:${w}px;height:${h}px;display:inline-block;vertical-align:middle;`;
+      el.innerHTML = '';
+      el.appendChild(img);
+      el.style.overflow = 'visible';
+    } catch {
+      // Si falla, dejar el KaTeX original
+    }
+  }
+  return backups;
+}
+
+/**
  * Exporta el contenido del lienzo a un archivo PDF.
  */
 export async function exportToPdf(canvasElement, studentName = 'Alumno', workspaceName = 'Diseño sin título') {
   try {
+    // Pre-renderizar KaTeX a imágenes antes de html2canvas principal
+    const katexEls = canvasElement.querySelectorAll('.katex');
+    const backups = await preRenderAllKatex(katexEls);
+
     // Capturar el lienzo como imagen
     const canvas = await html2canvas(canvasElement, {
       scale: 2,
@@ -45,6 +84,11 @@ export async function exportToPdf(canvasElement, studentName = 'Alumno', workspa
       logging: false,
       ignoreElements: (element) => element.classList?.contains('no-print'),
     });
+
+    // Restaurar KaTeX originales
+    for (const { el, origOuterHTML } of backups) {
+      el.outerHTML = origOuterHTML;
+    }
 
     const imgData = canvas.toDataURL('image/png');
 

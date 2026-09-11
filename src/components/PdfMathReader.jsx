@@ -96,6 +96,7 @@ export default function PdfMathReader({ libro, onBack }) {
   const userId = useRef(getUserId());
   const savedCanvasImage = useRef(null);
   const stateRef = useRef({ mathTexts: [], freeTexts: [], quads: [], polygons: [], scale: 1.2, currentPage: 1 });
+  const pasteRef = useRef(null);
 
   const pdfUrl = (() => {
     const src = libro.pdf || libro.epub;
@@ -786,14 +787,7 @@ export default function PdfMathReader({ libro, onBack }) {
         if (selectedId) {
           const mt = mathTexts.find(m => m.id === selectedId);
           if (mt && mt.latex) {
-            const ta = document.createElement('textarea');
-            ta.value = mt.latex;
-            ta.style.position = 'fixed';
-            ta.style.left = '-9999px';
-            document.body.appendChild(ta);
-            ta.select();
-            document.execCommand('copy');
-            document.body.removeChild(ta);
+            navigator.clipboard.writeText(mt.latex).catch(() => {});
           }
         }
         return;
@@ -802,23 +796,9 @@ export default function PdfMathReader({ libro, onBack }) {
       // Ctrl+V: pegar fórmula LaTeX
       if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
         e.preventDefault();
-        const ta = document.createElement('textarea');
-        ta.style.position = 'fixed';
-        ta.style.left = '-9999px';
-        document.body.appendChild(ta);
-        ta.focus();
-        document.execCommand('paste');
-        const text = ta.value;
-        document.body.removeChild(ta);
-        if (text && text.trim().startsWith('\\')) {
-          const newMath = {
-            id: genId(),
-            x: 100 + Math.random() * 200,
-            y: 100 + Math.random() * 200,
-            latex: text.trim(),
-            width: 220,
-          };
-          setMathTexts(prev => [...prev, newMath]);
+        if (pasteRef.current) {
+          pasteRef.current.value = '';
+          pasteRef.current.focus();
         }
         return;
       }
@@ -918,8 +898,29 @@ export default function PdfMathReader({ libro, onBack }) {
     );
   }
 
+  const handlePaste = (e) => {
+    const text = e.clipboardData.getData('text');
+    if (text && text.trim().startsWith('\\')) {
+      e.preventDefault();
+      const newMath = {
+        id: genId(),
+        x: 100 + Math.random() * 200,
+        y: 100 + Math.random() * 200,
+        latex: text.trim(),
+        width: 220,
+      };
+      setMathTexts(prev => [...prev, newMath]);
+    }
+  };
+
   return (
     <div className="flex flex-col h-full bg-white">
+      <textarea
+        ref={pasteRef}
+        onPaste={handlePaste}
+        style={{ position: 'fixed', left: '-9999px', top: 0, opacity: 0, width: 1, height: 1 }}
+        aria-hidden="true"
+      />
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-3 border-b border-slate-200 shrink-0">
         <button onClick={onBack} className="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">

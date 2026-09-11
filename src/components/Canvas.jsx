@@ -48,6 +48,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
   const [selectedId, setSelectedId] = useState(null);
   const selectedRef = useRef(null);
   const innerRef = useRef(null);
+  const pasteRef = useRef(null);
 
   const updateSelection = useCallback((id) => {
     setSelectedId(id);
@@ -428,38 +429,18 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
         if (id) {
           const mt = mathTexts.find(m => m.id === id);
           if (mt && mt.latex) {
-            const ta = document.createElement('textarea');
-            ta.value = mt.latex;
-            ta.style.position = 'fixed';
-            ta.style.left = '-9999px';
-            document.body.appendChild(ta);
-            ta.select();
-            document.execCommand('copy');
-            document.body.removeChild(ta);
+            navigator.clipboard.writeText(mt.latex).catch(() => {});
           }
         }
         return;
       }
 
-      // Ctrl+V: pegar fórmula LaTeX (usando textarea oculto)
+      // Ctrl+V: pegar fórmula LaTeX
       if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
         e.preventDefault();
-        const ta = document.createElement('textarea');
-        ta.style.position = 'fixed';
-        ta.style.left = '-9999px';
-        document.body.appendChild(ta);
-        ta.focus();
-        document.execCommand('paste');
-        const text = ta.value;
-        document.body.removeChild(ta);
-        if (text && text.trim().startsWith('\\')) {
-          const newMath = {
-            id: generateMathId(),
-            x: 100 + Math.random() * 200,
-            y: 100 + Math.random() * 200,
-            latex: text.trim(),
-          };
-          setMathTexts(prev => [...prev, newMath]);
+        if (pasteRef.current) {
+          pasteRef.current.value = '';
+          pasteRef.current.focus();
         }
         return;
       }
@@ -554,6 +535,20 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
     setFreeTexts(prev => prev.map(t => t.id === id ? { ...t, ...data } : t));
   };
 
+  const handlePaste = (e) => {
+    const text = e.clipboardData.getData('text');
+    if (text && text.trim().startsWith('\\')) {
+      e.preventDefault();
+      const newMath = {
+        id: generateMathId(),
+        x: 100 + Math.random() * 200,
+        y: 100 + Math.random() * 200,
+        latex: text.trim(),
+      };
+      setMathTexts(prev => [...prev, newMath]);
+    }
+  };
+
   return (
     <div
       className="relative flex-1 overflow-auto bg-slate-100 canvas-inset-shadow"
@@ -565,6 +560,12 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
       tabIndex={-1}
       style={{ outline: 'none' }}
     >
+      <textarea
+        ref={pasteRef}
+        onPaste={handlePaste}
+        style={{ position: 'fixed', left: '-9999px', top: 0, opacity: 0, width: 1, height: 1 }}
+        aria-hidden="true"
+      />
       {/* Contenedor interno grande para scrollear y capturar */}
       <div 
         ref={setCanvasRef}

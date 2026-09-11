@@ -201,7 +201,7 @@ export default function MathTextBox({
         <div ref={inputRef}>
           {latex.trim() ? (
             <div
-              className="katex-display-container text-lg overflow-hidden"
+              className="katex-display-container text-lg"
               style={{ fontSize: '16px', lineHeight: 1.4 }}
               dangerouslySetInnerHTML={{ __html: renderedHtml }}
             />
