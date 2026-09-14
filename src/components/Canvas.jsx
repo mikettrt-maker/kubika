@@ -574,7 +574,6 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
       onMouseDown={(e) => { handleCanvasMouseDown(e); containerRef.current?.focus(); }}
       onClick={handleCanvasClick}
       onKeyDown={handleKeyDown}
-      onPaste={handlePaste}
       tabIndex={-1}
       style={{ outline: 'none' }}
     >
