@@ -11,6 +11,41 @@ const TEXT_COLORS = [
   { label: 'Gris', value: '#64748b' },
 ];
 
+function CopyButton({ text }) {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = async (e) => {
+    e.stopPropagation();
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.cssText = 'position:fixed;left:0;top:0;opacity:0;';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    }
+  };
+  return (
+    <button
+      onPointerDown={(e) => e.stopPropagation()}
+      onClick={handleCopy}
+      className={`absolute -top-9 left-1/2 -translate-x-1/2 px-3 py-1 text-xs font-medium
+                 rounded-full shadow-md transition-colors no-print whitespace-nowrap
+                 ${copied ? 'bg-green-500 text-white' : 'bg-kubika-600 text-white hover:bg-kubika-700'}`}
+      title="Copiar texto al portapapeles"
+    >
+      {copied ? 'Copiado!' : 'Copiar texto'}
+    </button>
+  );
+}
+
 export default function FreeTextBox({
   id,
   initialText = '',
@@ -91,6 +126,9 @@ export default function FreeTextBox({
       onDoubleClick={handleDoubleClick}
       onClick={(e) => e.stopPropagation()}
     >
+      {isSelected && !isEditing && text.trim() && (
+        <CopyButton text={text} />
+      )}
       {isEditing ? (
         <div className="flex flex-col gap-2">
           <input

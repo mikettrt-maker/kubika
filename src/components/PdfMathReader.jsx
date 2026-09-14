@@ -777,23 +777,29 @@ export default function PdfMathReader({ libro, onBack }) {
   };
 
   useEffect(() => {
-    const handleKeyDown = (e) => {
+    const handleKeyDown = async (e) => {
       const isEditingText = (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
       if (isEditingText) return;
 
-      // Ctrl+C: copiar fórmula LaTeX
+      // Ctrl+C: copiar fórmula LaTeX o texto libre
       if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
         if (selectedId) {
           const mt = mathTexts.find(m => m.id === selectedId);
           if (mt && mt.latex) {
-            const ta = document.createElement('textarea');
-            ta.value = mt.latex;
-            ta.style.cssText = 'position:fixed;left:0;top:0;opacity:0;';
-            document.body.appendChild(ta);
-            ta.focus();
-            ta.select();
-            document.execCommand('copy');
-            document.body.removeChild(ta);
+            try {
+              await navigator.clipboard.writeText(mt.latex);
+            } catch (err) {
+              console.warn('No se pudo copiar:', err);
+            }
+          } else {
+            const ft = freeTexts.find(t => t.id === selectedId);
+            if (ft && ft.text) {
+              try {
+                await navigator.clipboard.writeText(ft.text);
+              } catch (err) {
+                console.warn('No se pudo copiar:', err);
+              }
+            }
           }
         }
         return;

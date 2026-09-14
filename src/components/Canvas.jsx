@@ -423,7 +423,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
       const isEditingText = (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
       if (isEditingText) return;
 
-      // Ctrl+C: copiar fórmula LaTeX
+      // Ctrl+C: copiar fórmula LaTeX o texto libre
       if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
         const id = selectedRef.current;
         if (id) {
@@ -433,6 +433,15 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
               await navigator.clipboard.writeText(mt.latex);
             } catch (err) {
               console.warn('No se pudo copiar al portapapeles:', err);
+            }
+          } else {
+            const ft = freeTexts.find(t => t.id === id);
+            if (ft && ft.text) {
+              try {
+                await navigator.clipboard.writeText(ft.text);
+              } catch (err) {
+                console.warn('No se pudo copiar al portapapeles:', err);
+              }
             }
           }
         }
@@ -523,7 +532,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('paste', handlePasteGlobal);
     };
-  }, [onAntennaDelete, onAntennaUpdate, antennas, mathTexts]);
+  }, [onAntennaDelete, onAntennaUpdate, antennas, mathTexts, freeTexts]);
 
   const handleKeyDown = (e) => {
     if (!selectedId) return;
