@@ -778,6 +778,7 @@ export default function PdfMathReader({ libro, onBack }) {
 
   useEffect(() => {
     const handleKeyDown = async (e) => {
+      e.stopImmediatePropagation();
       const isEditingText = (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
       if (isEditingText) return;
 
@@ -857,6 +858,7 @@ export default function PdfMathReader({ libro, onBack }) {
       }
     };
     const handlePasteGlobal = (e) => {
+      e.stopImmediatePropagation();
       const t = e.target;
       if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA') return;
       const text = e.clipboardData.getData('text');
@@ -883,11 +885,11 @@ export default function PdfMathReader({ libro, onBack }) {
         setFreeTexts(prev => [...prev, newFree]);
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('paste', handlePasteGlobal);
+    window.addEventListener('keydown', handleKeyDown, true);
+    window.addEventListener('paste', handlePasteGlobal, true);
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      window.removeEventListener('paste', handlePasteGlobal);
+      window.removeEventListener('keydown', handleKeyDown, true);
+      window.removeEventListener('paste', handlePasteGlobal, true);
     };
   }, [selectedId, mathTexts, freeTexts, quads, polygons]);
 
