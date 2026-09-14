@@ -456,10 +456,10 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
         return;
       }
 
-      // Ctrl+V: pegar regleta, fórmula o texto
+      // Ctrl+V: pegar regleta copiada
       if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
-        e.preventDefault();
         if (copiedRodRef.current) {
+          e.preventDefault();
           const copy = copiedRodRef.current;
           const newRod = {
             ...copy,
@@ -470,31 +470,6 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
           setRods(prev => [...prev, newRod]);
           return;
         }
-        try {
-          const text = await navigator.clipboard.readText();
-          if (text && text.trim()) {
-            if (text.trim().startsWith('\\')) {
-              setMathTexts(prev => [...prev, {
-                id: generateMathId(),
-                x: 100 + Math.random() * 200,
-                y: 100 + Math.random() * 200,
-                latex: text.trim(),
-              }]);
-            } else {
-              setFreeTexts(prev => [...prev, {
-                id: generateMathId(),
-                x: 100 + Math.random() * 200,
-                y: 200 + Math.random() * 200,
-                text: text.trim(),
-                color: '#1e293b',
-                bold: false,
-              }]);
-            }
-          }
-        } catch (err) {
-          console.warn('No se pudo leer del portapapeles:', err);
-        }
-        return;
       }
 
       const id = selectedRef.current;
@@ -560,8 +535,36 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
         }
       }
     };
+    const handlePasteGlobal = (e) => {
+      if (document.querySelector('[data-pdf-reader-open]')) return;
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      const text = e.clipboardData.getData('text');
+      if (!text || !text.trim()) return;
+      e.preventDefault();
+      if (text.trim().startsWith('\\')) {
+        setMathTexts(prev => [...prev, {
+          id: generateMathId(),
+          x: 100 + Math.random() * 200,
+          y: 100 + Math.random() * 200,
+          latex: text.trim(),
+        }]);
+      } else {
+        setFreeTexts(prev => [...prev, {
+          id: generateMathId(),
+          x: 100 + Math.random() * 200,
+          y: 200 + Math.random() * 200,
+          text: text.trim(),
+          color: '#1e293b',
+          bold: false,
+        }]);
+      }
+    };
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('paste', handlePasteGlobal);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('paste', handlePasteGlobal);
+    };
   }, [onAntennaDelete, onAntennaUpdate, antennas, mathTexts, freeTexts, rods]);
 
   const handleKeyDown = (e) => {
