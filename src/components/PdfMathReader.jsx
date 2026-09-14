@@ -949,7 +949,7 @@ export default function PdfMathReader({ libro, onBack }) {
   };
 
   return (
-    <div className="flex flex-col h-full bg-white" onPaste={handlePaste}>
+    <div className="flex flex-col h-full bg-white" onPaste={handlePaste} data-pdf-reader-open>
       {/* Header */}
       <header className="flex items-center justify-between px-4 py-3 border-b border-slate-200 shrink-0">
         <button onClick={onBack} className="flex items-center gap-1.5 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors">

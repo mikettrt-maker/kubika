@@ -49,6 +49,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
   const selectedRef = useRef(null);
   const innerRef = useRef(null);
   const containerRef = useRef(null);
+  const copiedRodRef = useRef(null);
 
   const updateSelection = useCallback((id) => {
     setSelectedId(id);
@@ -420,30 +421,52 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
   // ========== TECLADO ==========
   useEffect(() => {
     const handleKeyDown = async (e) => {
+      if (document.querySelector('[data-pdf-reader-open]')) return;
       const isEditingText = (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
       if (isEditingText) return;
 
-      // Ctrl+C: copiar fórmula LaTeX o texto libre
+      // Ctrl+C: copiar regleta, fórmula LaTeX o texto libre
       if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
         const id = selectedRef.current;
         if (id) {
-          const mt = mathTexts.find(m => m.id === id);
-          if (mt && mt.latex) {
-            try {
-              await navigator.clipboard.writeText(mt.latex);
-            } catch (err) {
-              console.warn('No se pudo copiar al portapapeles:', err);
-            }
+          const rod = rods.find(r => r.id === id);
+          if (rod) {
+            copiedRodRef.current = { ...rod };
           } else {
-            const ft = freeTexts.find(t => t.id === id);
-            if (ft && ft.text) {
+            const mt = mathTexts.find(m => m.id === id);
+            if (mt && mt.latex) {
               try {
-                await navigator.clipboard.writeText(ft.text);
+                await navigator.clipboard.writeText(mt.latex);
               } catch (err) {
                 console.warn('No se pudo copiar al portapapeles:', err);
               }
+            } else {
+              const ft = freeTexts.find(t => t.id === id);
+              if (ft && ft.text) {
+                try {
+                  await navigator.clipboard.writeText(ft.text);
+                } catch (err) {
+                  console.warn('No se pudo copiar al portapapeles:', err);
+                }
+              }
             }
           }
+        }
+        return;
+      }
+
+      // Ctrl+V: pegar regleta copiada
+      if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+        if (copiedRodRef.current) {
+          e.preventDefault();
+          const copy = copiedRodRef.current;
+          const newRod = {
+            ...copy,
+            id: generateRodId(),
+            x: copy.x + 40,
+            y: copy.y + 40,
+          };
+          setRods(prev => [...prev, newRod]);
         }
         return;
       }
@@ -512,6 +535,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
       }
     };
     const handlePasteGlobal = (e) => {
+      if (document.querySelector('[data-pdf-reader-open]')) return;
       const t = e.target;
       if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA') return;
       const text = e.clipboardData.getData('text');
@@ -543,7 +567,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('paste', handlePasteGlobal);
     };
-  }, [onAntennaDelete, onAntennaUpdate, antennas, mathTexts, freeTexts]);
+  }, [onAntennaDelete, onAntennaUpdate, antennas, mathTexts, freeTexts, rods]);
 
   const handleKeyDown = (e) => {
     if (!selectedId) return;
