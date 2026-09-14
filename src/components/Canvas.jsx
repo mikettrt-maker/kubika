@@ -419,7 +419,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
 
   // ========== TECLADO ==========
   useEffect(() => {
-    const handleKeyDown = (e) => {
+    const handleKeyDown = async (e) => {
       const isEditingText = (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
       if (isEditingText) return;
 
@@ -429,14 +429,11 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
         if (id) {
           const mt = mathTexts.find(m => m.id === id);
           if (mt && mt.latex) {
-            const ta = document.createElement('textarea');
-            ta.value = mt.latex;
-            ta.style.cssText = 'position:fixed;left:0;top:0;opacity:0;';
-            document.body.appendChild(ta);
-            ta.focus();
-            ta.select();
-            document.execCommand('copy');
-            document.body.removeChild(ta);
+            try {
+              await navigator.clipboard.writeText(mt.latex);
+            } catch (err) {
+              console.warn('No se pudo copiar al portapapeles:', err);
+            }
           }
         }
         return;
@@ -526,7 +523,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('paste', handlePasteGlobal);
     };
-  }, [onAntennaDelete, onAntennaUpdate, antennas]);
+  }, [onAntennaDelete, onAntennaUpdate, antennas, mathTexts]);
 
   const handleKeyDown = (e) => {
     if (!selectedId) return;
