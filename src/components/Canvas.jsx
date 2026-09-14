@@ -505,8 +505,27 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
         }
       }
     };
+    const handlePasteGlobal = (e) => {
+      const t = e.target;
+      if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA') return;
+      const text = e.clipboardData.getData('text');
+      if (text && text.trim().startsWith('\\')) {
+        e.preventDefault();
+        const newMath = {
+          id: generateMathId(),
+          x: 100 + Math.random() * 200,
+          y: 100 + Math.random() * 200,
+          latex: text.trim(),
+        };
+        setMathTexts(prev => [...prev, newMath]);
+      }
+    };
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('paste', handlePasteGlobal);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('paste', handlePasteGlobal);
+    };
   }, [onAntennaDelete, onAntennaUpdate, antennas]);
 
   const handleKeyDown = (e) => {

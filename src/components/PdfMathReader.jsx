@@ -850,8 +850,28 @@ export default function PdfMathReader({ libro, onBack }) {
         setPolygons(prev => prev.map(p => p.id === selectedId ? { ...p, points: p.points.map(pt => ({ x: Math.max(0, pt.x + dx), y: Math.max(0, pt.y + dy) })) } : p));
       }
     };
+    const handlePasteGlobal = (e) => {
+      const t = e.target;
+      if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA') return;
+      const text = e.clipboardData.getData('text');
+      if (text && text.trim().startsWith('\\')) {
+        e.preventDefault();
+        const newMath = {
+          id: genId(),
+          x: 100 + Math.random() * 200,
+          y: 100 + Math.random() * 200,
+          latex: text.trim(),
+          width: 220,
+        };
+        setMathTexts(prev => [...prev, newMath]);
+      }
+    };
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener('paste', handlePasteGlobal);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener('paste', handlePasteGlobal);
+    };
   }, [selectedId, mathTexts, freeTexts, quads, polygons]);
 
   const isDrawingTool = activeTool === 'pen' || activeTool === 'eraser' || activeTool === 'line' || activeTool === 'pivot' || activeTool === 'quad' || activeTool === 'polygon';
