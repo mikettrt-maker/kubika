@@ -433,6 +433,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
           if (rod) {
             copiedRodRef.current = { ...rod };
           } else {
+            copiedRodRef.current = null;
             const mt = mathTexts.find(m => m.id === id);
             if (mt && mt.latex) {
               try {
