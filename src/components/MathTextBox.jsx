@@ -111,6 +111,7 @@ export default function MathTextBox({
       if (onUpdate) onUpdate(id, latexRef.current);
     }
     if (e.key === 'Escape') setIsEditing(false);
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'v')) return;
     e.stopPropagation();
   };
 

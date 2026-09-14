@@ -860,8 +860,9 @@ export default function PdfMathReader({ libro, onBack }) {
       const t = e.target;
       if (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA') return;
       const text = e.clipboardData.getData('text');
-      if (text && text.trim().startsWith('\\')) {
-        e.preventDefault();
+      if (!text || !text.trim()) return;
+      e.preventDefault();
+      if (text.trim().startsWith('\\')) {
         const newMath = {
           id: genId(),
           x: 100 + Math.random() * 200,
@@ -870,6 +871,16 @@ export default function PdfMathReader({ libro, onBack }) {
           width: 220,
         };
         setMathTexts(prev => [...prev, newMath]);
+      } else {
+        const newFree = {
+          id: genId(),
+          x: 100 + Math.random() * 200,
+          y: 200 + Math.random() * 200,
+          text: text.trim(),
+          color: '#1e293b',
+          bold: false,
+        };
+        setFreeTexts(prev => [...prev, newFree]);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
