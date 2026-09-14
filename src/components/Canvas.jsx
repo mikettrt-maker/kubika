@@ -467,8 +467,8 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
             y: copy.y + 40,
           };
           setRods(prev => [...prev, newRod]);
+          return;
         }
-        return;
       }
 
       const id = selectedRef.current;
