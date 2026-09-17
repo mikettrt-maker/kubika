@@ -33,15 +33,16 @@ async function loadLogoWatermark(watermarkSize) {
  * Misma técnica que PdfMathReader.renderPageToCanvas para math texts.
  */
 async function renderKatexToImage(el) {
-  const w = el.offsetWidth;
-  const h = el.offsetHeight;
-  if (w === 0 || h === 0) return null;
+  const pad = 12;
+  const w = el.offsetWidth + pad * 2;
+  const h = el.offsetHeight + pad * 2;
+  if (w <= pad * 2 || h <= pad * 2) return null;
 
   try {
     const fo = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
     fo.setAttribute('width', w);
     fo.setAttribute('height', h);
-    fo.innerHTML = `<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:16px;line-height:1.4;padding:4px;">${el.innerHTML}</div>`;
+    fo.innerHTML = `<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:16px;line-height:1.4;padding:${pad}px;overflow:visible;">${el.innerHTML}</div>`;
 
     const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">${fo.outerHTML}</svg>`;
     const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
@@ -58,7 +59,7 @@ async function renderKatexToImage(el) {
     ctx.drawImage(img, 0, 0, w, h);
     URL.revokeObjectURL(url);
 
-    return { dataUrl: offscreen.toDataURL('image/png'), width: w, height: h };
+    return { dataUrl: offscreen.toDataURL('image/png'), width: w, height: h, pad };
   } catch {
     return null;
   }
@@ -92,8 +93,9 @@ export async function exportToPdf(canvasElement, studentName = 'Alumno', workspa
       if (!result) continue;
 
       const containerRect = container.getBoundingClientRect();
-      const x = (containerRect.left - canvasRect.left) * 2;
-      const y = (containerRect.top - canvasRect.top) * 2;
+      const pad = result.pad || 0;
+      const x = (containerRect.left - canvasRect.left - pad) * 2;
+      const y = (containerRect.top - canvasRect.top - pad) * 2;
 
       const img = new Image();
       await new Promise((resolve) => { img.onload = resolve; img.src = result.dataUrl; });
