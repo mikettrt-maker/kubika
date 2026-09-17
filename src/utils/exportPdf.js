@@ -1,6 +1,10 @@
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import katex from 'katex';
 
+/**
+ * Carga el logo y lo devuelve como un canvas con opacidad reducida.
+ */
 async function loadLogoWatermark(watermarkSize) {
   try {
     const img = new Image();
@@ -29,20 +33,48 @@ async function loadLogoWatermark(watermarkSize) {
 }
 
 /**
- * Renderiza un elemento KaTeX a una imagen usando SVG foreignObject.
- * Misma técnica que PdfMathReader.renderPageToCanvas para math texts.
+ * Extrae el CSS de KaTeX y resuelve las rutas de fuentes contra la CDN base.
+ */
+function getKatexCss() {
+  let css = '';
+  let fontBaseUrl = 'https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/';
+  for (const sheet of document.styleSheets) {
+    try {
+      if (sheet.href && sheet.href.includes('katex')) {
+        const parts = sheet.href.split('/');
+        parts.pop();
+        fontBaseUrl = parts.join('/') + '/';
+      }
+    } catch {}
+  }
+  for (const sheet of document.styleSheets) {
+    try {
+      for (const rule of sheet.cssRules) {
+        const text = rule.cssText || '';
+        if (text.includes('katex') || text.includes('KaTeX')) {
+          css += text.replace(/url\(fonts\//g, `url(${fontBaseUrl}fonts/`) + '\n';
+        }
+      }
+    } catch {}
+  }
+  return css;
+}
+
+/**
+ * Renderiza un elemento KaTeX a una imagen usando SVG foreignObject
+ * con el CSS de KaTeX embebido inline para que las fuentes funcionen.
  */
 async function renderKatexToImage(el) {
-  const pad = 12;
-  const w = el.offsetWidth + pad * 2;
-  const h = el.offsetHeight + pad * 2;
-  if (w <= pad * 2 || h <= pad * 2) return null;
+  const w = el.offsetWidth;
+  const h = el.offsetHeight;
+  if (w === 0 || h === 0) return null;
 
   try {
+    const katexCss = getKatexCss();
     const fo = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
     fo.setAttribute('width', w);
     fo.setAttribute('height', h);
-    fo.innerHTML = `<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:16px;line-height:1.4;padding:${pad}px;overflow:visible;">${el.innerHTML}</div>`;
+    fo.innerHTML = `<div xmlns="http://www.w3.org/1999/xhtml"><style>${katexCss}</style>${el.outerHTML}</div>`;
 
     const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">${fo.outerHTML}</svg>`;
     const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
@@ -59,7 +91,7 @@ async function renderKatexToImage(el) {
     ctx.drawImage(img, 0, 0, w, h);
     URL.revokeObjectURL(url);
 
-    return { dataUrl: offscreen.toDataURL('image/png'), width: w, height: h, pad };
+    return { dataUrl: offscreen.toDataURL('image/png'), width: w, height: h };
   } catch {
     return null;
   }
@@ -70,7 +102,7 @@ async function renderKatexToImage(el) {
  */
 export async function exportToPdf(canvasElement, studentName = 'Alumno', workspaceName = 'Diseño sin título') {
   try {
-    // 1. Capturar el lienzo (las fórmulas KaTeX no se renderizan bien con html2canvas)
+    // 1. Capturar el lienzo
     const mainCanvas = await html2canvas(canvasElement, {
       scale: 2,
       useCORS: true,
@@ -93,13 +125,12 @@ export async function exportToPdf(canvasElement, studentName = 'Alumno', workspa
       if (!result) continue;
 
       const containerRect = container.getBoundingClientRect();
-      const pad = result.pad || 0;
-      const x = (containerRect.left - canvasRect.left - pad) * 2;
-      const y = (containerRect.top - canvasRect.top - pad) * 2;
+      const x = containerRect.left - canvasRect.left;
+      const y = containerRect.top - canvasRect.top;
 
       const img = new Image();
       await new Promise((resolve) => { img.onload = resolve; img.src = result.dataUrl; });
-      mainCtx.drawImage(img, x, y, result.width * 2, result.height * 2);
+      mainCtx.drawImage(img, x * 2, y * 2, result.width * 2, result.height * 2);
     }
 
     const imgData = mainCanvas.toDataURL('image/png');

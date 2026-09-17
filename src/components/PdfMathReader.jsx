@@ -495,6 +495,36 @@ export default function PdfMathReader({ libro, onBack }) {
         ctx.fillStyle = p.fill; ctx.globalAlpha = 0.6; ctx.fill();
         ctx.globalAlpha = 1; ctx.strokeStyle = p.fill; ctx.lineWidth = 2; ctx.stroke();
       });
+      let katexCssCache = null;
+      function getKatexCssForSvg() {
+        if (katexCssCache) return katexCssCache;
+        let fontBaseUrl = 'https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/';
+        try {
+          for (const sheet of document.styleSheets) {
+            if (sheet.href && sheet.href.includes('katex')) {
+              const parts = sheet.href.split('/');
+              parts.pop();
+              fontBaseUrl = parts.join('/') + '/';
+              break;
+            }
+          }
+        } catch {}
+        let css = '';
+        try {
+          for (const sheet of document.styleSheets) {
+            try {
+              for (const rule of sheet.cssRules) {
+                const text = rule.cssText || '';
+                if (text.includes('katex') || text.includes('KaTeX')) {
+                  css += text.replace(/url\(fonts\//g, `url(${fontBaseUrl}fonts/`) + '\n';
+                }
+              }
+            } catch {}
+          }
+        } catch {}
+        katexCssCache = css;
+        return css;
+      }
       for (const mt of (saved.mathTexts || [])) {
         if (!mt.latex) continue;
         try {
@@ -504,7 +534,8 @@ export default function PdfMathReader({ libro, onBack }) {
           const h = w * 0.8;
           const fo = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
           fo.setAttribute('width', w); fo.setAttribute('height', h);
-          fo.innerHTML = `<div xmlns="http://www.w3.org/1999/xhtml" style="font-size:16px;padding:12px;">${s.innerHTML}</div>`;
+          const katexCss = getKatexCssForSvg();
+          fo.innerHTML = `<div xmlns="http://www.w3.org/1999/xhtml"><style>${katexCss}</style>${s.innerHTML}</div>`;
           const svg = new Blob([`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">${fo.outerHTML}</svg>`], { type: 'image/svg+xml;charset=utf-8' });
           const url = URL.createObjectURL(svg);
           const si = new Image();
