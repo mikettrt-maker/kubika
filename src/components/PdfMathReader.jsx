@@ -468,9 +468,18 @@ export default function PdfMathReader({ libro, onBack }) {
     const saved = loadPageData(userId.current, libro.id, pageNum);
     const ctx = c.getContext('2d');
     if (saved && saved.canvas) {
-      const img = new Image();
-      await new Promise(r => { img.onload = r; img.src = saved.canvas; });
-      ctx.drawImage(img, 0, 0, c.width, c.height);
+      try {
+        const img = new Image();
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = () => reject(new Error('Canvas image load failed'));
+          img.src = saved.canvas;
+          setTimeout(() => reject(new Error('Canvas image load timeout')), 5000);
+        });
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+      } catch (err) {
+        console.warn(`Page ${pageNum}: canvas image failed:`, err.message);
+      }
     }
     if (saved) {
       (saved.quads || []).forEach(q => {
@@ -499,7 +508,7 @@ export default function PdfMathReader({ libro, onBack }) {
           const svg = new Blob([`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">${fo.outerHTML}</svg>`], { type: 'image/svg+xml;charset=utf-8' });
           const url = URL.createObjectURL(svg);
           const si = new Image();
-          await new Promise(r => { si.onload = r; si.onerror = r; si.src = url; });
+          await new Promise(r => { si.onload = r; si.onerror = r; setTimeout(r, 3000); si.src = url; });
           ctx.drawImage(si, mt.x, mt.y, w, h);
           URL.revokeObjectURL(url);
         } catch {}
