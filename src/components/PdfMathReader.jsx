@@ -543,7 +543,15 @@ export default function PdfMathReader({ libro, onBack }) {
     try {
       const pages = [...selectedExportPages].sort((a, b) => a - b);
       const results = [];
-      for (const p of pages) { results.push(await renderPageToCanvas(p)); }
+      for (const p of pages) {
+        if (!pdfRef.current) { console.warn(`PDF reference lost at page ${p}, stopping export`); break; }
+        try {
+          results.push(await renderPageToCanvas(p));
+        } catch (err) {
+          console.warn(`Failed to render page ${p}:`, err);
+          results.push(null);
+        }
+      }
       const first = results.find(r => r);
       if (!first) return;
       const orientation = first.viewport.width > first.viewport.height ? 'landscape' : 'portrait';
@@ -556,10 +564,12 @@ export default function PdfMathReader({ libro, onBack }) {
       const fW = fH === iH ? iW : (first.canvas.width * fH) / first.canvas.height;
       const xO = (pW - fW) / 2;
       const yO = (pH - fH) / 2;
-      results.forEach((r, i) => {
+      let isFirstPage = true;
+      results.forEach((r) => {
         if (!r) return;
-        if (i > 0) pdfDoc.addPage();
+        if (!isFirstPage) pdfDoc.addPage();
         pdfDoc.addImage(r.canvas.toDataURL('image/png'), 'PNG', xO, yO, fW, fH);
+        isFirstPage = false;
       });
       pdfDoc.save(`${libro.titulo || 'paginas'}-${pages[0]}-${pages[pages.length - 1]}.pdf`);
       setShowExportModal(false);

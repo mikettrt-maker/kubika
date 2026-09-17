@@ -51,8 +51,8 @@ async function preRenderAllKatex(katexEls) {
       });
       const img = document.createElement('img');
       img.src = dataUrl;
-      const w = el.offsetWidth;
-      const h = el.offsetHeight;
+      const w = el.scrollWidth || el.offsetWidth;
+      const h = el.scrollHeight || el.offsetHeight;
       img.style.cssText = `width:${w}px;height:${h}px;display:inline-block;vertical-align:middle;`;
       el.innerHTML = '';
       el.appendChild(img);
