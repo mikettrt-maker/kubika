@@ -42,6 +42,9 @@ async function preRenderAllKatex(katexEls) {
     const origOuterHTML = el.outerHTML;
     backups.push({ el, origOuterHTML });
     try {
+      const w = el.offsetWidth;
+      const h = el.offsetHeight;
+      if (w === 0 || h === 0) continue;
       const dataUrl = await toPng(el, {
         pixelRatio: 2,
         backgroundColor: 'white',
@@ -51,14 +54,12 @@ async function preRenderAllKatex(katexEls) {
       });
       const img = document.createElement('img');
       img.src = dataUrl;
-      const w = el.scrollWidth || el.offsetWidth;
-      const h = el.scrollHeight || el.offsetHeight;
       img.style.cssText = `width:${w}px;height:${h}px;display:inline-block;vertical-align:middle;`;
       el.innerHTML = '';
       el.appendChild(img);
       el.style.overflow = 'visible';
-    } catch {
-      // Si falla, dejar el KaTeX original
+    } catch (err) {
+      console.warn('preRenderAllKatex: toPng failed for element, keeping original KaTeX:', err);
     }
   }
   return backups;

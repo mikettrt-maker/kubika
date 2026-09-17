@@ -456,8 +456,8 @@ export default function PdfMathReader({ libro, onBack }) {
     savePageData(userId.current, libro.id, currentPage, { canvas: '', scale, canvasWidth: 0, canvasHeight: 0, mathTexts: [], freeTexts: [], quads: [], polygons: [] });
   };
 
-  const renderPageToCanvas = useCallback(async (pageNum) => {
-    const pdf = pdfRef.current;
+  const renderPageToCanvas = useCallback(async (pageNum, pdfInstance) => {
+    const pdf = pdfInstance || pdfRef.current;
     if (!pdf) return null;
     const page = await pdf.getPage(pageNum);
     const viewport = page.getViewport({ scale });
@@ -517,7 +517,7 @@ export default function PdfMathReader({ libro, onBack }) {
   }, [scale, libro.id]);
 
   const exportPageToPdf = async (pageNum) => {
-    const result = await renderPageToCanvas(pageNum);
+    const result = await renderPageToCanvas(pageNum, pdfRef.current);
     if (!result) return;
     const { canvas: c, viewport } = result;
     const imgData = c.toDataURL('image/png');
@@ -541,12 +541,13 @@ export default function PdfMathReader({ libro, onBack }) {
     if (selectedExportPages.length === 0) return;
     setExporting(true);
     try {
+      const pdf = pdfRef.current;
+      if (!pdf) { console.warn('PDF not loaded'); setExporting(false); return; }
       const pages = [...selectedExportPages].sort((a, b) => a - b);
       const results = [];
       for (const p of pages) {
-        if (!pdfRef.current) { console.warn(`PDF reference lost at page ${p}, stopping export`); break; }
         try {
-          results.push(await renderPageToCanvas(p));
+          results.push(await renderPageToCanvas(p, pdf));
         } catch (err) {
           console.warn(`Failed to render page ${p}:`, err);
           results.push(null);
