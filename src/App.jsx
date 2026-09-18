@@ -606,7 +606,7 @@ export default function App() {
             </svg>
             Biblioteca
           </button>
-          <span className="ml-1 px-1.5 py-0.5 text-[9px] font-bold bg-slate-200 text-slate-500 rounded-md leading-none select-none" title="Versión de la aplicación">v1.13</span>
+          <span className="ml-1 px-1.5 py-0.5 text-[9px] font-bold bg-slate-200 text-slate-500 rounded-md leading-none select-none" title="Versión de la aplicación">v2.0</span>
         </div>
 
       </header>

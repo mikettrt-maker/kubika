@@ -4,7 +4,8 @@ import jsPDF from 'jspdf';
 import MathTextBox from './MathTextBox';
 import FreeTextBox from './FreeTextBox';
 
-import { RODS } from '../utils/rods';
+import { RODS, getRodWidth, generateRodId, UNIT_SIZE } from '../utils/rods';
+import DraggableRod from './DraggableRod';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
 
@@ -56,6 +57,26 @@ function loadPageData(userId, bookId, page) {
 
 let idCounter = 0;
 function genId() { return 'mp_' + Date.now() + '_' + (++idCounter); }
+
+const ROD_GRID = UNIT_SIZE;
+function getRodBoundingBox(rod) {
+  const L = rod.value;
+  if (rod.rotation === 90) {
+    return { left: rod.x, right: rod.x + ROD_GRID, top: rod.y, bottom: rod.y + L * ROD_GRID };
+  }
+  return { left: rod.x, right: rod.x + L * ROD_GRID, top: rod.y, bottom: rod.y + ROD_GRID };
+}
+function checkRodCollision(a, b) {
+  return !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
+}
+function isRodOverlapping(newRod, allRods) {
+  const box1 = getRodBoundingBox(newRod);
+  for (const r of allRods) {
+    if (r.id === newRod.id) continue;
+    if (checkRodCollision(box1, getRodBoundingBox(r))) return true;
+  }
+  return false;
+}
 
 const KATEX_SYMBOLS = {
   '\\times': '×', '\\cdot': '·', '\\div': '÷', '\\pm': '±',
@@ -204,6 +225,9 @@ export default function PdfMathReader({ libro, onBack }) {
   const [showExportModal, setShowExportModal] = useState(false);
   const [selectedExportPages, setSelectedExportPages] = useState([]);
   const [exporting, setExporting] = useState(false);
+  const [rods, setRods] = useState([]);
+  const [showRodPalette, setShowRodPalette] = useState(true);
+  const [contextMenu, setContextMenu] = useState(null);
 
   const containerRef = useRef(null);
   const viewerRef = useRef(null);
@@ -216,7 +240,8 @@ export default function PdfMathReader({ libro, onBack }) {
   const quadStart = useRef(null);
   const userId = useRef(getUserId());
   const savedCanvasImage = useRef(null);
-  const stateRef = useRef({ mathTexts: [], freeTexts: [], quads: [], polygons: [], scale: 1.2, currentPage: 1 });
+  const stateRef = useRef({ mathTexts: [], freeTexts: [], quads: [], polygons: [], rods: [], scale: 1.2, currentPage: 1 });
+  const copiedRodRef = useRef(null);
 
   const pdfUrl = (() => {
     const src = libro.pdf || libro.epub;
@@ -239,9 +264,10 @@ export default function PdfMathReader({ libro, onBack }) {
         freeTexts,
         quads,
         polygons,
+        rods,
       });
     } catch {}
-  }, [libro.id, currentPage, scale, mathTexts, freeTexts, quads, polygons]);
+  }, [libro.id, currentPage, scale, mathTexts, freeTexts, quads, polygons, rods]);
 
   const loadCanvas = useCallback(() => {
     const canvas = drawCanvasRef.current;
@@ -275,11 +301,13 @@ export default function PdfMathReader({ libro, onBack }) {
         ...p,
         points: p.points.map(pt => ({ x: Math.round(pt.x * ratioX), y: Math.round(pt.y * ratioY) })),
       })));
+      setRods((saved.rods || []).map(r => ({ ...r, x: Math.round(r.x * ratioX), y: Math.round(r.y * ratioY) })));
     } else {
       setMathTexts([]);
       setFreeTexts([]);
       setQuads([]);
       setPolygons([]);
+      setRods([]);
     }
   }, [libro.id, currentPage]);
 
@@ -298,21 +326,22 @@ export default function PdfMathReader({ libro, onBack }) {
             freeTexts,
             quads,
             polygons,
+            rods,
           });
         } catch {}
       }
     }
-  }, [mathTexts, freeTexts, quads, polygons, scale]);
+  }, [mathTexts, freeTexts, quads, polygons, rods, scale]);
 
   useEffect(() => {
-    stateRef.current = { mathTexts, freeTexts, quads, polygons, scale, currentPage };
+    stateRef.current = { mathTexts, freeTexts, quads, polygons, rods, scale, currentPage };
   });
 
   useEffect(() => {
     return () => {
       const canvas = drawCanvasRef.current;
       if (!canvas) return;
-      const { mathTexts: mt, freeTexts: ft, quads: q, polygons: pl, scale: s, currentPage: cp } = stateRef.current;
+      const { mathTexts: mt, freeTexts: ft, quads: q, polygons: pl, rods: r, scale: s, currentPage: cp } = stateRef.current;
       try {
         savePageData(userId.current, libro.id, cp, {
           canvas: canvas.toDataURL(),
@@ -323,6 +352,7 @@ export default function PdfMathReader({ libro, onBack }) {
           freeTexts: ft,
           quads: q,
           polygons: pl,
+          rods: r,
         });
       } catch {}
     };
@@ -574,7 +604,8 @@ export default function PdfMathReader({ libro, onBack }) {
     setQuads([]);
     setPolygons([]);
     setPolygonPoints([]);
-    savePageData(userId.current, libro.id, currentPage, { canvas: '', scale, canvasWidth: 0, canvasHeight: 0, mathTexts: [], freeTexts: [], quads: [], polygons: [] });
+    setRods([]);
+    savePageData(userId.current, libro.id, currentPage, { canvas: '', scale, canvasWidth: 0, canvasHeight: 0, mathTexts: [], freeTexts: [], quads: [], polygons: [], rods: [] });
   };
 
   const renderPageToCanvas = useCallback(async (pageNum, pdfInstance) => {
@@ -629,6 +660,23 @@ export default function PdfMathReader({ libro, onBack }) {
         ctx.font = `${ft.bold ? 'bold ' : ''}30px Caveat, cursive`;
         ctx.fillStyle = ft.color || '#1e293b'; ctx.globalAlpha = 1;
         (ft.text || '').split('\n').forEach((l, i) => { ctx.fillText(l, ft.x + 8, ft.y + 8 + i * 36); });
+      });
+      (saved.rods || []).forEach(rod => {
+        const rodW = getRodWidth(rod.value);
+        const rodH = ROD_GRID;
+        ctx.save();
+        ctx.translate(rod.x + (rod.rotation === 90 ? ROD_GRID / 2 : rodW / 2), rod.y + (rod.rotation === 90 ? rodW / 2 : rodH / 2));
+        ctx.rotate((rod.rotation || 0) * Math.PI / 180);
+        ctx.fillStyle = rod.color;
+        ctx.shadowColor = 'rgba(0,0,0,0.2)';
+        ctx.shadowBlur = 4;
+        ctx.shadowOffsetY = 2;
+        ctx.fillRect(-rodW / 2, -rodH / 2, rodW, rodH);
+        ctx.shadowColor = 'transparent';
+        ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(-rodW / 2, -rodH / 2, rodW, rodH);
+        ctx.restore();
       });
       ctx.textBaseline = 'alphabetic';
     }
@@ -916,43 +964,146 @@ export default function PdfMathReader({ libro, onBack }) {
     target.addEventListener('pointerup', handleUp);
   };
 
+  // ========== RODS: drag & drop from palette ==========
+  const handleDragOver = (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; };
+  const handleDrop = (e) => {
+    e.preventDefault();
+    const data = e.dataTransfer.getData('application/json');
+    if (!data) return;
+    try {
+      const rodDef = JSON.parse(data);
+      const rect = viewerRef.current.getBoundingClientRect();
+      const rawX = e.clientX - rect.left - (getRodWidth(rodDef.value) / 2);
+      const rawY = e.clientY - rect.top - (ROD_GRID / 2);
+      const snappedX = Math.round(Math.max(0, rawX) / ROD_GRID) * ROD_GRID;
+      const snappedY = Math.round(Math.max(0, rawY) / ROD_GRID) * ROD_GRID;
+      const newRod = { id: generateRodId(), ...rodDef, x: snappedX, y: snappedY, rotation: 0 };
+      if (!isRodOverlapping(newRod, rods)) {
+        setRods(prev => [...prev, newRod]);
+        setSelectedId(newRod.id);
+        saveCanvas();
+      }
+    } catch {}
+  };
+
+  // ========== RODS: move on canvas ==========
+  const handleRodPointerDown = (e, rodId) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    setSelectedId(rodId);
+    const rod = rods.find(r => r.id === rodId);
+    if (!rod) return;
+    const startX = e.clientX, startY = e.clientY;
+    const origX = rod.x, origY = rod.y;
+    const target = e.currentTarget;
+    target.setPointerCapture(e.pointerId);
+    const handleMove = (ev) => {
+      const snappedX = Math.round(Math.max(0, origX + ev.clientX - startX) / ROD_GRID) * ROD_GRID;
+      const snappedY = Math.round(Math.max(0, origY + ev.clientY - startY) / ROD_GRID) * ROD_GRID;
+      setRods(prev => prev.map(r => {
+        if (r.id !== rodId) return r;
+        const temp = { ...r, x: snappedX, y: snappedY };
+        return { ...temp, isInvalid: isRodOverlapping(temp, prev) };
+      }));
+    };
+    const handleUp = () => {
+      setRods(prev => prev.map(r => {
+        if (r.id !== rodId) return r;
+        if (r.isInvalid) return { ...r, x: origX, y: origY, isInvalid: false };
+        return { ...r, isInvalid: false };
+      }));
+      target.releasePointerCapture(e.pointerId);
+      target.removeEventListener('pointermove', handleMove);
+      target.removeEventListener('pointerup', handleUp);
+      saveCanvas();
+    };
+    target.addEventListener('pointermove', handleMove);
+    target.addEventListener('pointerup', handleUp);
+  };
+
+  // ========== RODS: context menu ==========
+  const handleRodContextMenu = (e, rodId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSelectedId(rodId);
+    setContextMenu({
+      x: e.clientX, y: e.clientY,
+      options: [
+        { label: 'Girar 90°', shortcut: 'R', action: () => rotateRod(rodId) },
+        { label: 'Eliminar', shortcut: 'Del', action: () => { setRods(prev => prev.filter(r => r.id !== rodId)); setSelectedId(null); saveCanvas(); } },
+      ],
+    });
+  };
+
+  const rotateRod = (rodId) => {
+    setRods(prev => prev.map(r => {
+      if (r.id !== rodId) return r;
+      const newRot = r.rotation === 90 ? 0 : 90;
+      const temp = { ...r, rotation: newRot };
+      temp.isInvalid = isRodOverlapping(temp, prev);
+      return temp;
+    }));
+    setContextMenu(null);
+    saveCanvas();
+  };
+
+  useEffect(() => {
+    if (!contextMenu) return;
+    const close = () => setContextMenu(null);
+    window.addEventListener('click', close, { once: true });
+    return () => window.removeEventListener('click', close);
+  }, [contextMenu]);
+
   useEffect(() => {
     const handleKeyDown = async (e) => {
       e.stopImmediatePropagation();
       const isEditingText = (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
       if (isEditingText) return;
 
-      // Ctrl+C: copiar fórmula LaTeX o texto libre
+      // R: rotate selected rod
+      if (e.key === 'r' && !e.ctrlKey && !e.metaKey) {
+        const isRod = rods.some(r => r.id === selectedId);
+        if (isRod) { rotateRod(selectedId); return; }
+      }
+
+      // Ctrl+C: copy rod or formula/text
       if ((e.ctrlKey || e.metaKey) && e.key === 'c') {
         if (selectedId) {
-          const mt = mathTexts.find(m => m.id === selectedId);
-          if (mt && mt.latex) {
-            try {
-              await navigator.clipboard.writeText(mt.latex);
-            } catch (err) {
-              console.warn('No se pudo copiar:', err);
-            }
+          const rod = rods.find(r => r.id === selectedId);
+          if (rod) {
+            copiedRodRef.current = { ...rod };
           } else {
-            const ft = freeTexts.find(t => t.id === selectedId);
-            if (ft && ft.text) {
-              try {
-                await navigator.clipboard.writeText(ft.text);
-              } catch (err) {
-                console.warn('No se pudo copiar:', err);
-              }
+            const mt = mathTexts.find(m => m.id === selectedId);
+            if (mt && mt.latex) {
+              try { await navigator.clipboard.writeText(mt.latex); } catch {}
+            } else {
+              const ft = freeTexts.find(t => t.id === selectedId);
+              if (ft && ft.text) { try { await navigator.clipboard.writeText(ft.text); } catch {} }
             }
           }
         }
         return;
       }
 
-      if (!selectedId) return;
-      const step = e.shiftKey ? 1 : 5;
-
-      if (e.key === 'Escape') {
-        setSelectedId(null);
+      // Ctrl+V: paste rod
+      if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
+        if (copiedRodRef.current) {
+          const copy = { ...copiedRodRef.current, id: generateRodId(), x: copiedRodRef.current.x + ROD_GRID, y: copiedRodRef.current.y + ROD_GRID };
+          if (!isRodOverlapping(copy, rods)) {
+            setRods(prev => [...prev, copy]);
+            setSelectedId(copy.id);
+            copiedRodRef.current = { ...copy };
+            saveCanvas();
+          }
+        }
         return;
       }
+
+      if (!selectedId) return;
+      const step = e.shiftKey ? 1 : ROD_GRID;
+
+      if (e.key === 'Escape') { setSelectedId(null); setContextMenu(null); return; }
 
       if (e.key === 'Delete' || e.key === 'Backspace') {
         e.preventDefault();
@@ -960,15 +1111,12 @@ export default function PdfMathReader({ libro, onBack }) {
         const isFree = freeTexts.some(t => t.id === selectedId);
         const isQuad = quads.some(q => q.id === selectedId);
         const isPoly = polygons.some(p => p.id === selectedId);
-        if (isMath) {
-          setMathTexts(prev => prev.filter(m => m.id !== selectedId));
-        } else if (isFree) {
-          setFreeTexts(prev => prev.filter(t => t.id !== selectedId));
-        } else if (isQuad) {
-          setQuads(prev => prev.filter(q => q.id !== selectedId));
-        } else if (isPoly) {
-          setPolygons(prev => prev.filter(p => p.id !== selectedId));
-        }
+        const isRod = rods.some(r => r.id === selectedId);
+        if (isMath) setMathTexts(prev => prev.filter(m => m.id !== selectedId));
+        else if (isFree) setFreeTexts(prev => prev.filter(t => t.id !== selectedId));
+        else if (isQuad) setQuads(prev => prev.filter(q => q.id !== selectedId));
+        else if (isPoly) setPolygons(prev => prev.filter(p => p.id !== selectedId));
+        else if (isRod) setRods(prev => prev.filter(r => r.id !== selectedId));
         setSelectedId(null);
         return;
       }
@@ -987,15 +1135,12 @@ export default function PdfMathReader({ libro, onBack }) {
       const isFree = freeTexts.some(t => t.id === selectedId);
       const isQuad = quads.some(q => q.id === selectedId);
       const isPoly = polygons.some(p => p.id === selectedId);
-      if (isMath) {
-        setMathTexts(prev => prev.map(m => m.id === selectedId ? { ...m, x: Math.max(0, m.x + dx), y: Math.max(0, m.y + dy) } : m));
-      } else if (isFree) {
-        setFreeTexts(prev => prev.map(t => t.id === selectedId ? { ...t, x: Math.max(0, t.x + dx), y: Math.max(0, t.y + dy) } : t));
-      } else if (isQuad) {
-        setQuads(prev => prev.map(q => q.id === selectedId ? { ...q, x: Math.max(0, q.x + dx), y: Math.max(0, q.y + dy) } : q));
-      } else if (isPoly) {
-        setPolygons(prev => prev.map(p => p.id === selectedId ? { ...p, points: p.points.map(pt => ({ x: Math.max(0, pt.x + dx), y: Math.max(0, pt.y + dy) })) } : p));
-      }
+      const isRod = rods.some(r => r.id === selectedId);
+      if (isMath) setMathTexts(prev => prev.map(m => m.id === selectedId ? { ...m, x: Math.max(0, m.x + dx), y: Math.max(0, m.y + dy) } : m));
+      else if (isFree) setFreeTexts(prev => prev.map(t => t.id === selectedId ? { ...t, x: Math.max(0, t.x + dx), y: Math.max(0, t.y + dy) } : t));
+      else if (isQuad) setQuads(prev => prev.map(q => q.id === selectedId ? { ...q, x: Math.max(0, q.x + dx), y: Math.max(0, q.y + dy) } : q));
+      else if (isPoly) setPolygons(prev => prev.map(p => p.id === selectedId ? { ...p, points: p.points.map(pt => ({ x: Math.max(0, pt.x + dx), y: Math.max(0, pt.y + dy) })) } : p));
+      else if (isRod) setRods(prev => prev.map(r => r.id === selectedId ? { ...r, x: Math.max(0, r.x + dx), y: Math.max(0, r.y + dy) } : r));
     };
     const handlePasteGlobal = (e) => {
       e.stopImmediatePropagation();
@@ -1031,7 +1176,7 @@ export default function PdfMathReader({ libro, onBack }) {
       window.removeEventListener('keydown', handleKeyDown, true);
       window.removeEventListener('paste', handlePasteGlobal, true);
     };
-  }, [selectedId, mathTexts, freeTexts, quads, polygons]);
+  }, [selectedId, mathTexts, freeTexts, quads, polygons, rods]);
 
   const isDrawingTool = activeTool === 'pen' || activeTool === 'eraser' || activeTool === 'line' || activeTool === 'pivot' || activeTool === 'quad' || activeTool === 'polygon';
 
@@ -1251,7 +1396,20 @@ export default function PdfMathReader({ libro, onBack }) {
 
         <div className="header-divider" />
 
-        {/* Limpiar */}
+        {/* Regletas toggle */}
+        <div className="kubika-tooltip-wrapper">
+          <button onClick={() => setShowRodPalette(!showRodPalette)}
+            className={`btn-icon btn-ripple flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-200 group ${showRodPalette ? 'bg-amber-100 text-amber-700 shadow-sm ring-2 ring-amber-300' : ''}`}>
+            <svg className="w-5 h-5 group-hover:scale-125 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+              <rect x="2" y="9" width="4" height="6" rx="1" fill="currentColor" opacity="0.5" />
+              <rect x="7" y="7" width="6" height="10" rx="1" fill="currentColor" opacity="0.7" />
+              <rect x="14" y="5" width="8" height="14" rx="1" fill="currentColor" />
+            </svg>
+          </button>
+          <span className="kubika-tooltip">Regletas</span>
+        </div>
+
+        <div className="header-divider" />
         <div className="kubika-tooltip-wrapper">
           <button onClick={clearCanvas}
             className="btn-icon btn-ripple flex items-center justify-center w-9 h-9 rounded-xl hover:bg-red-50 transition-all duration-200 group">
@@ -1298,8 +1456,58 @@ export default function PdfMathReader({ libro, onBack }) {
       )}
 
       {/* PDF + Canvas overlay + Text overlays */}
-      <div className="flex-1 overflow-auto flex justify-center bg-slate-100">
-        <div ref={viewerRef} className="relative inline-block my-4 shadow-lg">
+      <div className="flex-1 flex overflow-hidden bg-slate-100">
+        {/* Rod Palette */}
+        {showRodPalette && (
+          <div className="w-56 shrink-0 bg-slate-50/80 backdrop-blur border-r border-slate-200/60 overflow-y-auto flex flex-col">
+            <div className="p-3 border-b border-slate-200/60">
+              <h3 className="text-xs font-extrabold text-slate-600 tracking-wider uppercase">Regletas</h3>
+            </div>
+            <div className="flex-1 overflow-y-auto p-3 space-y-3">
+              {RODS.map((rod) => (
+                <div key={rod.value} className="group">
+                  <div className="flex items-center mb-1 px-1">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest group-hover:text-slate-600 transition-colors">
+                      {rod.name} ({rod.value})
+                    </span>
+                  </div>
+                  <div
+                    draggable="true"
+                    onDragStart={(e) => {
+                      e.dataTransfer.setData('application/json', JSON.stringify(rod));
+                      e.dataTransfer.effectAllowed = 'copy';
+                    }}
+                    className={`rod-3d ${rod.cssClass} flex items-center justify-center rounded-lg transition-all duration-300 cursor-grab active:cursor-grabbing group-hover:translate-x-1`}
+                    style={{
+                      backgroundColor: rod.color,
+                      width: `${(rod.value / 10) * 100}%`,
+                      minWidth: '40px',
+                      height: '28px',
+                      boxShadow: `0 4px 0 ${rod.color}80, inset 0 -2px 4px rgba(0,0,0,0.2)`,
+                    }}
+                    title={`${rod.name} (${rod.value}) — arrastra a la hoja`}
+                  />
+                </div>
+              ))}
+            </div>
+            <div className="p-3 border-t border-slate-200/60">
+              <p className="text-[9px] font-bold text-slate-400 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
+                Arrastra a la hoja
+              </p>
+              <p className="text-[9px] font-bold text-slate-400 flex items-center gap-1.5 mt-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
+                R = girar · Del = eliminar
+              </p>
+            </div>
+          </div>
+        )}
+
+        <div className="flex-1 overflow-auto flex justify-center">
+          <div ref={viewerRef}
+            className="relative inline-block my-4 shadow-lg"
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}>
           <div ref={containerRef} />
 
           {/* Drawing canvas — always present, receives pointer events only for drawing tools */}
@@ -1472,6 +1680,29 @@ export default function PdfMathReader({ libro, onBack }) {
               ))}
             </svg>
           )}
+
+          {/* Rods */}
+          {rods.map(rod => (
+            <div key={rod.id}
+              data-rod-id={rod.id}
+              className="absolute z-30"
+              style={{
+                left: rod.x, top: rod.y,
+                pointerEvents: 'auto',
+                cursor: 'grab',
+              }}
+              onPointerDown={(e) => handleRodPointerDown(e, rod.id)}
+              onContextMenu={(e) => handleRodContextMenu(e, rod.id)}
+              onDoubleClick={(e) => handleRodContextMenu(e, rod.id)}>
+              <DraggableRod
+                rod={rod}
+                showValue={false}
+                rotation={rod.rotation || 0}
+                isSelected={selectedId === rod.id}
+              />
+            </div>
+          ))}
+        </div>
         </div>
       </div>
 
@@ -1528,6 +1759,23 @@ export default function PdfMathReader({ libro, onBack }) {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Context menu for rods */}
+      {contextMenu && (
+        <div
+          className="fixed z-[10001] bg-white rounded-xl shadow-2xl border border-slate-200 py-1 min-w-[160px]"
+          style={{ left: contextMenu.x, top: contextMenu.y }}
+          onClick={(e) => e.stopPropagation()}>
+          {contextMenu.options.map((opt, i) => (
+            <button key={i}
+              onClick={() => { opt.action(); setContextMenu(null); }}
+              className="w-full flex items-center justify-between px-3 py-2 text-sm text-slate-700 hover:bg-slate-100 transition-colors">
+              <span>{opt.label}</span>
+              {opt.shortcut && <span className="text-[10px] text-slate-400 font-mono">{opt.shortcut}</span>}
+            </button>
+          ))}
         </div>
       )}
     </div>
