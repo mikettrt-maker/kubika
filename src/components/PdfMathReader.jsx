@@ -59,6 +59,41 @@ function loadPageData(userId, bookId, page) {
 let idCounter = 0;
 function genId() { return 'mp_' + Date.now() + '_' + (++idCounter); }
 
+let _katexCssBase64 = null;
+async function _getKatexCssWithFonts() {
+  if (_katexCssBase64) return _katexCssBase64;
+  let katexHref = '';
+  for (const sheet of document.styleSheets) {
+    if (sheet.href && sheet.href.includes('katex')) { katexHref = sheet.href; break; }
+  }
+  if (!katexHref) return '';
+  try {
+    const resp = await fetch(katexHref);
+    let css = await resp.text();
+    const base = katexHref.split('/').slice(0, -1).join('/') + '/';
+    const re = /url\(([^)]+)\)/g;
+    const fonts = new Set();
+    let m;
+    while ((m = re.exec(css)) !== null) {
+      const u = m[1].replace(/['"]/g, '');
+      if (u.includes('fonts/') && !u.startsWith('data:')) fonts.add(u);
+    }
+    for (const u of fonts) {
+      try {
+        const full = u.startsWith('http') ? u : base + u;
+        const r = await fetch(full);
+        const blob = await r.blob();
+        const b64 = await new Promise(res => { const rd = new FileReader(); rd.onload = () => res(rd.result); rd.readAsDataURL(blob); });
+        css = css.split(`url(${u})`).join(`url(${b64})`);
+        css = css.split(`url('${u}')`).join(`url('${b64}')`);
+        css = css.split(`url("${u}")`).join(`url("${b64}")`);
+      } catch {}
+    }
+    _katexCssBase64 = css;
+    return css;
+  } catch { return ''; }
+}
+
 export default function PdfMathReader({ libro, onBack }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -526,12 +561,48 @@ export default function PdfMathReader({ libro, onBack }) {
       const prevSelected = selectedId;
       setSelectedId(null);
       await new Promise(r => setTimeout(r, 100));
+      const scrollContainer = viewerRef.current.parentElement;
+      const prevOverflow = scrollContainer?.style.overflow;
+      const prevHeight = viewerRef.current.style.height;
+      const prevMinHeight = viewerRef.current.style.minHeight;
+      if (scrollContainer) scrollContainer.style.overflow = 'visible';
+      viewerRef.current.style.minHeight = 'auto';
+      viewerRef.current.style.height = viewerRef.current.scrollHeight + 'px';
+      const katexEls = viewerRef.current.querySelectorAll('.katex-display-container');
+      const katexData = [];
+      katexEls.forEach(container => {
+        const katexEl = container.querySelector('.katex');
+        if (katexEl) {
+          const r = katexEl.getBoundingClientRect();
+          const vr = viewerRef.current.getBoundingClientRect();
+          katexData.push({ el: katexEl, x: r.left - vr.left, y: r.top - vr.top, w: r.width, h: r.height });
+          katexEl.style.visibility = 'hidden';
+        }
+      });
       const captured = await html2canvas(viewerRef.current, {
         scale: 2,
         useCORS: true,
         backgroundColor: '#ffffff',
         logging: false,
       });
+      katexData.forEach(d => { d.el.style.visibility = ''; });
+      if (scrollContainer) scrollContainer.style.overflow = prevOverflow;
+      viewerRef.current.style.height = prevHeight;
+      viewerRef.current.style.minHeight = prevMinHeight;
+      const mainCtx = captured.getContext('2d');
+      for (const d of katexData) {
+        try {
+          const css = await _getKatexCssWithFonts();
+          if (!css) continue;
+          const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="${d.w}" height="${d.h}"><foreignObject width="${d.w}" height="${d.h}"><div xmlns="http://www.w3.org/1999/xhtml"><style>${css}</style>${d.el.outerHTML}</div></foreignObject></svg>`;
+          const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const img = new Image();
+          await new Promise(r => { img.onload = r; img.onerror = r; img.src = url; });
+          mainCtx.drawImage(img, d.x * 2, d.y * 2, d.w * 2, d.h * 2);
+          URL.revokeObjectURL(url);
+        } catch {}
+      }
       setSelectedId(prevSelected);
       const imgData = captured.toDataURL('image/png');
       const orientation = captured.width > captured.height ? 'landscape' : 'portrait';
@@ -580,12 +651,45 @@ export default function PdfMathReader({ libro, onBack }) {
             const prevSelected = selectedId;
             setSelectedId(null);
             await new Promise(r => setTimeout(r, 100));
-            const captured = await html2canvas(viewerRef.current, {
-              scale: 2,
-              useCORS: true,
-              backgroundColor: '#ffffff',
-              logging: false,
+            const scrollContainer = viewerRef.current.parentElement;
+            const prevOverflow = scrollContainer?.style.overflow;
+            const prevHeight = viewerRef.current.style.height;
+            const prevMinHeight = viewerRef.current.style.minHeight;
+            if (scrollContainer) scrollContainer.style.overflow = 'visible';
+            viewerRef.current.style.minHeight = 'auto';
+            viewerRef.current.style.height = viewerRef.current.scrollHeight + 'px';
+            const katexEls = viewerRef.current.querySelectorAll('.katex-display-container');
+            const katexData = [];
+            katexEls.forEach(container => {
+              const katexEl = container.querySelector('.katex');
+              if (katexEl) {
+                const r = katexEl.getBoundingClientRect();
+                const vr = viewerRef.current.getBoundingClientRect();
+                katexData.push({ el: katexEl, x: r.left - vr.left, y: r.top - vr.top, w: r.width, h: r.height });
+                katexEl.style.visibility = 'hidden';
+              }
             });
+            const captured = await html2canvas(viewerRef.current, {
+              scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false,
+            });
+            katexData.forEach(d => { d.el.style.visibility = ''; });
+            if (scrollContainer) scrollContainer.style.overflow = prevOverflow;
+            viewerRef.current.style.height = prevHeight;
+            viewerRef.current.style.minHeight = prevMinHeight;
+            const mainCtx = captured.getContext('2d');
+            for (const d of katexData) {
+              try {
+                const css = await _getKatexCssWithFonts();
+                if (!css) continue;
+                const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="${d.w}" height="${d.h}"><foreignObject width="${d.w}" height="${d.h}"><div xmlns="http://www.w3.org/1999/xhtml"><style>${css}</style>${d.el.outerHTML}</div></foreignObject></svg>`;
+                const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const img = new Image();
+                await new Promise(r => { img.onload = r; img.onerror = r; img.src = url; });
+                mainCtx.drawImage(img, d.x * 2, d.y * 2, d.w * 2, d.h * 2);
+                URL.revokeObjectURL(url);
+              } catch {}
+            }
             setSelectedId(prevSelected);
             results.push({ canvas: captured, viewport: { width: captured.width, height: captured.height } });
           } else {
