@@ -1,10 +1,6 @@
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import katex from 'katex';
 
-/**
- * Carga el logo y lo devuelve como un canvas con opacidad reducida.
- */
 async function loadLogoWatermark(watermarkSize) {
   try {
     const img = new Image();
@@ -32,60 +28,18 @@ async function loadLogoWatermark(watermarkSize) {
   }
 }
 
-/**
- * Renderiza un elemento KaTeX a un canvas usando html2canvas
- * sobre un div temporal (sin contaminar el canvas principal).
- */
-async function renderKatexToCanvas(el) {
-  try {
-    const tmpDiv = document.createElement('div');
-    tmpDiv.style.cssText = 'position:fixed;left:-9999px;top:0;visibility:hidden;font-size:16px;line-height:1.4;padding:8px;display:inline-block;';
-    tmpDiv.innerHTML = el.outerHTML;
-    document.body.appendChild(tmpDiv);
-    const c = await html2canvas(tmpDiv, { scale: 2, backgroundColor: null, useCORS: true, logging: false });
-    document.body.removeChild(tmpDiv);
-    return c;
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Exporta el contenido del lienzo a un archivo PDF.
- */
 export async function exportToPdf(canvasElement, studentName = 'Alumno', workspaceName = 'Diseño sin título') {
   try {
-    // 1. Capturar el lienzo (sin KaTeX)
-    const mainCanvas = await html2canvas(canvasElement, {
+    const captured = await html2canvas(canvasElement, {
       scale: 2,
       useCORS: true,
       backgroundColor: '#f8f9fc',
       logging: false,
-      ignoreElements: (element) => element.classList?.contains('no-print') || element.classList?.contains('katex'),
+      ignoreElements: (element) => element.classList?.contains('no-print'),
     });
 
-    // 2. Buscar contenedores KaTeX y renderizar cada uno encima del canvas capturado
-    const katexContainers = canvasElement.querySelectorAll('.katex-display-container');
-    const mainCtx = mainCanvas.getContext('2d');
-    const canvasRect = canvasElement.getBoundingClientRect();
+    const imgData = captured.toDataURL('image/png');
 
-    for (const container of katexContainers) {
-      const katexEl = container.querySelector('.katex');
-      if (!katexEl) continue;
-
-      const katexCanvas = await renderKatexToCanvas(katexEl);
-      if (!katexCanvas) continue;
-
-      const containerRect = container.getBoundingClientRect();
-      const x = containerRect.left - canvasRect.left;
-      const y = containerRect.top - canvasRect.top;
-
-      mainCtx.drawImage(katexCanvas, x * 2, y * 2);
-    }
-
-    const imgData = mainCanvas.toDataURL('image/png');
-
-    // 3. Crear PDF en formato carta horizontal (landscape)
     const pdf = new jsPDF({
       orientation: 'landscape',
       unit: 'mm',
@@ -115,11 +69,11 @@ export async function exportToPdf(canvasElement, studentName = 'Alumno', workspa
     pdf.line(10, 20, pageWidth - 10, 20);
 
     const imgWidth = pageWidth - 20;
-    const imgHeight = (mainCanvas.height * imgWidth) / mainCanvas.width;
+    const imgHeight = (captured.height * imgWidth) / captured.width;
     const maxImgHeight = pageHeight - 30;
 
     const finalWidth = imgHeight > maxImgHeight
-      ? (mainCanvas.width * maxImgHeight) / mainCanvas.height
+      ? (captured.width * maxImgHeight) / captured.height
       : imgWidth;
     const finalHeight = imgHeight > maxImgHeight
       ? maxImgHeight

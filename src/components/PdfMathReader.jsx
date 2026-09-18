@@ -86,6 +86,7 @@ export default function PdfMathReader({ libro, onBack }) {
   const [exporting, setExporting] = useState(false);
 
   const containerRef = useRef(null);
+  const viewerRef = useRef(null);
   const drawCanvasRef = useRef(null);
   const pdfRef = useRef(null);
   const renderingRef = useRef(false);
@@ -521,6 +522,30 @@ export default function PdfMathReader({ libro, onBack }) {
   }, [scale, libro.id]);
 
   const exportPageToPdf = async (pageNum) => {
+    if (pageNum === currentPage && viewerRef.current) {
+      const prevSelected = selectedId;
+      setSelectedId(null);
+      await new Promise(r => setTimeout(r, 100));
+      const captured = await html2canvas(viewerRef.current, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+      });
+      setSelectedId(prevSelected);
+      const imgData = captured.toDataURL('image/png');
+      const orientation = captured.width > captured.height ? 'landscape' : 'portrait';
+      const pdfDoc = new jsPDF({ orientation, unit: 'mm', format: 'letter' });
+      const pW = pdfDoc.internal.pageSize.getWidth();
+      const pH = pdfDoc.internal.pageSize.getHeight();
+      const iW = pW - 10;
+      const iH = (captured.height * iW) / captured.width;
+      const fH = iH > pH - 10 ? (captured.width * (pH - 10)) / captured.height : iH;
+      const fW = fH === iH ? iW : (captured.width * fH) / captured.height;
+      pdfDoc.addImage(imgData, 'PNG', (pW - fW) / 2, (pH - fH) / 2, fW, fH);
+      pdfDoc.save(`${libro.titulo || 'pagina'}-${pageNum}.pdf`);
+      return;
+    }
     const result = await renderPageToCanvas(pageNum, pdfRef.current);
     if (!result) return;
     const { canvas: c, viewport } = result;
@@ -551,7 +576,21 @@ export default function PdfMathReader({ libro, onBack }) {
       const results = [];
       for (const p of pages) {
         try {
-          results.push(await renderPageToCanvas(p, pdf));
+          if (p === currentPage && viewerRef.current) {
+            const prevSelected = selectedId;
+            setSelectedId(null);
+            await new Promise(r => setTimeout(r, 100));
+            const captured = await html2canvas(viewerRef.current, {
+              scale: 2,
+              useCORS: true,
+              backgroundColor: '#ffffff',
+              logging: false,
+            });
+            setSelectedId(prevSelected);
+            results.push({ canvas: captured, viewport: { width: captured.width, height: captured.height } });
+          } else {
+            results.push(await renderPageToCanvas(p, pdf));
+          }
         } catch (err) {
           console.warn(`Failed to render page ${p}:`, err);
           results.push(null);
@@ -1174,7 +1213,7 @@ export default function PdfMathReader({ libro, onBack }) {
 
       {/* PDF + Canvas overlay + Text overlays */}
       <div className="flex-1 overflow-auto flex justify-center bg-slate-100">
-        <div className="relative inline-block my-4 shadow-lg">
+        <div ref={viewerRef} className="relative inline-block my-4 shadow-lg">
           <div ref={containerRef} />
 
           {/* Drawing canvas — always present, receives pointer events only for drawing tools */}
