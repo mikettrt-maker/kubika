@@ -57,8 +57,8 @@ function loadPageData(userId, bookId, page) {
 let idCounter = 0;
 function genId() { return 'mp_' + Date.now() + '_' + (++idCounter); }
 
-const PDF_ROD_UNIT = 32;
-const PDF_ROD_HEIGHT = 32;
+const PDF_ROD_UNIT = 34;
+const PDF_ROD_HEIGHT = 34;
 function getRodBoundingBox(rod) {
   const L = rod.value;
   if (rod.rotation === 90) {
