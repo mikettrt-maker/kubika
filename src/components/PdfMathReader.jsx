@@ -1101,7 +1101,8 @@ export default function PdfMathReader({ libro, onBack }) {
       }
 
       if (!selectedId) return;
-      const step = e.shiftKey ? 1 : PDF_ROD_UNIT;
+      const isRod = rods.some(r => r.id === selectedId);
+      const step = isRod ? (e.shiftKey ? 1 : 4) : (e.shiftKey ? 1 : 5);
 
       if (e.key === 'Escape') { setSelectedId(null); setContextMenu(null); return; }
 
@@ -1135,7 +1136,6 @@ export default function PdfMathReader({ libro, onBack }) {
       const isFree = freeTexts.some(t => t.id === selectedId);
       const isQuad = quads.some(q => q.id === selectedId);
       const isPoly = polygons.some(p => p.id === selectedId);
-      const isRod = rods.some(r => r.id === selectedId);
       if (isMath) setMathTexts(prev => prev.map(m => m.id === selectedId ? { ...m, x: Math.max(0, m.x + dx), y: Math.max(0, m.y + dy) } : m));
       else if (isFree) setFreeTexts(prev => prev.map(t => t.id === selectedId ? { ...t, x: Math.max(0, t.x + dx), y: Math.max(0, t.y + dy) } : t));
       else if (isQuad) setQuads(prev => prev.map(q => q.id === selectedId ? { ...q, x: Math.max(0, q.x + dx), y: Math.max(0, q.y + dy) } : q));
