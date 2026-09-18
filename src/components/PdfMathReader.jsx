@@ -500,14 +500,17 @@ export default function PdfMathReader({ libro, onBack }) {
         if (!mt.latex) continue;
         try {
           const w = mt.width || 150;
+          const viewer = viewerRef.current;
+          if (!viewer) continue;
           const tmpDiv = document.createElement('div');
-          tmpDiv.style.cssText = `position:fixed;left:-9999px;top:0;visibility:hidden;font-size:16px;line-height:1.4;padding:8px;`;
-          tmpDiv.innerHTML = katex.renderToString(mt.latex, { throwOnError: false });
-          document.body.appendChild(tmpDiv);
-          const tmpCanvas = await html2canvas(tmpDiv, { scale: 2, backgroundColor: null, useCORS: true, logging: false });
-          document.body.removeChild(tmpDiv);
-          ctx.drawImage(tmpCanvas, mt.x, mt.y, w, tmpCanvas.height / tmpCanvas.width * w);
-        } catch {}
+          tmpDiv.style.cssText = `position:absolute;left:-9999px;top:0;padding:8px;font-size:16px;line-height:1.4;background:#fff;white-space:nowrap;`;
+          tmpDiv.innerHTML = katex.renderToString(mt.latex, { throwOnError: false, displayMode: false });
+          viewer.appendChild(tmpDiv);
+          await new Promise(r => setTimeout(r, 100));
+          const tmpCanvas = await html2canvas(tmpDiv, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false });
+          tmpDiv.remove();
+          ctx.drawImage(tmpCanvas, mt.x, mt.y, w, (tmpCanvas.height / tmpCanvas.width) * w);
+        } catch (e) { console.warn('KaTeX render failed:', mt.latex, e); }
       }
       (saved.freeTexts || []).forEach(ft => {
         ctx.textBaseline = 'top';
