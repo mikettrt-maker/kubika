@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import * as pdfjsLib from 'pdfjs-dist';
-import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
-import katex from 'katex';
 import MathTextBox from './MathTextBox';
 import FreeTextBox from './FreeTextBox';
 
@@ -58,6 +56,128 @@ function loadPageData(userId, bookId, page) {
 
 let idCounter = 0;
 function genId() { return 'mp_' + Date.now() + '_' + (++idCounter); }
+
+const KATEX_SYMBOLS = {
+  '\\times': '×', '\\cdot': '·', '\\div': '÷', '\\pm': '±',
+  '\\sqrt': '√', '\\infty': '∞', '\\pi': 'π', '\\alpha': 'α',
+  '\\beta': 'β', '\\gamma': 'γ', '\\delta': 'δ', '\\theta': 'θ',
+  '\\neq': '≠', '\\leq': '≤', '\\geq': '≥', '\\approx': '≈',
+  '\\frac{}{}': null,
+};
+
+function drawLatexOnCanvas(ctx, latex, x, y, fontSize) {
+  const fs = fontSize || 22;
+  ctx.save();
+  ctx.textBaseline = 'middle';
+  let cx = x;
+
+  function measureSegment(text) {
+    const prevAlign = ctx.textAlign;
+    ctx.textAlign = 'left';
+    const w = ctx.measureText(text).width;
+    ctx.textAlign = prevAlign;
+    return w;
+  }
+
+  function drawToken(token) {
+    if (token.type === 'text') {
+      ctx.textAlign = 'left';
+      ctx.fillText(token.value, cx, y);
+      cx += measureSegment(token.value);
+    } else if (token.type === 'frac') {
+      const gap = fs * 0.3;
+      const numW = measureSegment(token.num);
+      const denW = measureSegment(token.den);
+      const fw = Math.max(numW, denW) + fs * 0.3;
+      const lineY = y;
+      const numY = lineY - gap - fs * 0.25;
+      const denY = lineY + gap + fs * 0.25;
+      const halfFw = fw / 2;
+      ctx.textAlign = 'center';
+      ctx.fillText(token.num, cx + halfFw, numY);
+      ctx.strokeStyle = ctx.fillStyle || '#000';
+      ctx.lineWidth = Math.max(1, fs * 0.06);
+      ctx.beginPath();
+      ctx.moveTo(cx + fs * 0.05, lineY);
+      ctx.lineTo(cx + fw - fs * 0.05, lineY);
+      ctx.stroke();
+      ctx.fillText(token.den, cx + halfFw, denY);
+      cx += fw;
+    } else if (token.type === 'sqrt') {
+      const innerW = measureSegment(token.value);
+      ctx.textAlign = 'left';
+      ctx.fillText(token.value, cx + fs * 0.5, y);
+      ctx.strokeStyle = ctx.fillStyle || '#000';
+      ctx.lineWidth = Math.max(1, fs * 0.05);
+      ctx.beginPath();
+      const top = y - fs * 0.4;
+      const bot = y + fs * 0.4;
+      ctx.moveTo(cx, y + fs * 0.15);
+      ctx.lineTo(cx + fs * 0.2, y + fs * 0.15);
+      ctx.lineTo(cx + fs * 0.4, top);
+      ctx.lineTo(cx + fs * 0.4 + innerW + fs * 0.1, top);
+      ctx.lineTo(cx + fs * 0.4 + innerW + fs * 0.1, bot);
+      ctx.stroke();
+      cx += fs * 0.5 + innerW + fs * 0.1;
+    }
+  }
+
+  function tokenize(latex) {
+    const tokens = [];
+    let i = 0;
+    while (i < latex.length) {
+      if (latex[i] === '\\') {
+        if (latex.substr(i, 5) === '\\frac') {
+          const open1 = latex.indexOf('{', i + 5);
+          const close1 = latex.indexOf('}', open1);
+          const open2 = latex.indexOf('{', close1 + 1);
+          const close2 = latex.indexOf('}', open2);
+          if (open1 !== -1 && close1 !== -1 && open2 !== -1 && close2 !== -1) {
+            tokens.push({ type: 'frac', num: latex.slice(open1 + 1, close1), den: latex.slice(open2 + 1, close2) });
+            i = close2 + 1;
+            continue;
+          }
+        }
+        if (latex.substr(i, 5) === '\\sqrt') {
+          const open = latex.indexOf('{', i + 5);
+          const close = latex.indexOf('}', open);
+          if (open !== -1 && close !== -1) {
+            tokens.push({ type: 'sqrt', value: latex.slice(open + 1, close) });
+            i = close + 1;
+            continue;
+          }
+        }
+        let sym = null;
+        let matchLen = 1;
+        for (const key of Object.keys(KATEX_SYMBOLS)) {
+          if (key.startsWith('\\') && latex.substr(i, key.length) === key && key.length > matchLen) {
+            sym = KATEX_SYMBOLS[key];
+            matchLen = key.length;
+          }
+        }
+        if (sym !== null) {
+          tokens.push({ type: 'text', value: sym });
+          i += matchLen;
+        } else {
+          let cmd = '\\';
+          i++;
+          while (i < latex.length && /[a-zA-Z]/.test(latex[i])) { cmd += latex[i]; i++; }
+          tokens.push({ type: 'text', value: KATEX_SYMBOLS[cmd] || cmd });
+        }
+      } else {
+        let text = '';
+        while (i < latex.length && latex[i] !== '\\') { text += latex[i]; i++; }
+        tokens.push({ type: 'text', value: text });
+      }
+    }
+    return tokens;
+  }
+
+  const tokens = tokenize(latex);
+  for (const t of tokens) drawToken(t);
+  ctx.restore();
+  return cx - x;
+}
 
 export default function PdfMathReader({ libro, onBack }) {
   const [loading, setLoading] = useState(true);
@@ -500,16 +620,8 @@ export default function PdfMathReader({ libro, onBack }) {
         if (!mt.latex) continue;
         try {
           const w = mt.width || 150;
-          const viewer = viewerRef.current;
-          if (!viewer) continue;
-          const tmpDiv = document.createElement('div');
-          tmpDiv.style.cssText = `position:absolute;left:-9999px;top:0;padding:8px;font-size:16px;line-height:1.4;background:#fff;white-space:nowrap;`;
-          tmpDiv.innerHTML = katex.renderToString(mt.latex, { throwOnError: false, displayMode: false });
-          viewer.appendChild(tmpDiv);
-          await new Promise(r => setTimeout(r, 100));
-          const tmpCanvas = await html2canvas(tmpDiv, { scale: 2, backgroundColor: '#ffffff', useCORS: true, logging: false });
-          tmpDiv.remove();
-          ctx.drawImage(tmpCanvas, mt.x, mt.y, w, (tmpCanvas.height / tmpCanvas.width) * w);
+          const fontSize = Math.max(14, Math.min(28, w / (mt.latex.length * 0.35)));
+          drawLatexOnCanvas(ctx, mt.latex, mt.x, mt.y + fontSize / 2, fontSize);
         } catch (e) { console.warn('KaTeX render failed:', mt.latex, e); }
       }
       (saved.freeTexts || []).forEach(ft => {
