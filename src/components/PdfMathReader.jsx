@@ -4,8 +4,7 @@ import jsPDF from 'jspdf';
 import MathTextBox from './MathTextBox';
 import FreeTextBox from './FreeTextBox';
 
-import { RODS, getRodWidth, generateRodId, UNIT_SIZE } from '../utils/rods';
-import DraggableRod from './DraggableRod';
+import { RODS, generateRodId } from '../utils/rods';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.js';
 
@@ -58,13 +57,14 @@ function loadPageData(userId, bookId, page) {
 let idCounter = 0;
 function genId() { return 'mp_' + Date.now() + '_' + (++idCounter); }
 
-const ROD_GRID = UNIT_SIZE;
+const PDF_ROD_UNIT = 24;
+const PDF_ROD_HEIGHT = 24;
 function getRodBoundingBox(rod) {
   const L = rod.value;
   if (rod.rotation === 90) {
-    return { left: rod.x, right: rod.x + ROD_GRID, top: rod.y, bottom: rod.y + L * ROD_GRID };
+    return { left: rod.x, right: rod.x + PDF_ROD_HEIGHT, top: rod.y, bottom: rod.y + L * PDF_ROD_UNIT };
   }
-  return { left: rod.x, right: rod.x + L * ROD_GRID, top: rod.y, bottom: rod.y + ROD_GRID };
+  return { left: rod.x, right: rod.x + L * PDF_ROD_UNIT, top: rod.y, bottom: rod.y + PDF_ROD_HEIGHT };
 }
 function checkRodCollision(a, b) {
   return !(a.right <= b.left || a.left >= b.right || a.bottom <= b.top || a.top >= b.bottom);
@@ -662,10 +662,10 @@ export default function PdfMathReader({ libro, onBack }) {
         (ft.text || '').split('\n').forEach((l, i) => { ctx.fillText(l, ft.x + 8, ft.y + 8 + i * 36); });
       });
       (saved.rods || []).forEach(rod => {
-        const rodW = getRodWidth(rod.value);
-        const rodH = ROD_GRID;
+        const rodW = rod.value * PDF_ROD_UNIT;
+        const rodH = PDF_ROD_HEIGHT;
         ctx.save();
-        ctx.translate(rod.x + (rod.rotation === 90 ? ROD_GRID / 2 : rodW / 2), rod.y + (rod.rotation === 90 ? rodW / 2 : rodH / 2));
+        ctx.translate(rod.x + (rod.rotation === 90 ? PDF_ROD_UNIT / 2 : rodW / 2), rod.y + (rod.rotation === 90 ? rodW / 2 : rodH / 2));
         ctx.rotate((rod.rotation || 0) * Math.PI / 180);
         ctx.fillStyle = rod.color;
         ctx.shadowColor = 'rgba(0,0,0,0.2)';
@@ -973,10 +973,10 @@ export default function PdfMathReader({ libro, onBack }) {
     try {
       const rodDef = JSON.parse(data);
       const rect = viewerRef.current.getBoundingClientRect();
-      const rawX = e.clientX - rect.left - (getRodWidth(rodDef.value) / 2);
-      const rawY = e.clientY - rect.top - (ROD_GRID / 2);
-      const snappedX = Math.round(Math.max(0, rawX) / ROD_GRID) * ROD_GRID;
-      const snappedY = Math.round(Math.max(0, rawY) / ROD_GRID) * ROD_GRID;
+      const rawX = e.clientX - rect.left - (rodDef.value * PDF_ROD_UNIT / 2);
+      const rawY = e.clientY - rect.top - (PDF_ROD_HEIGHT / 2);
+      const snappedX = Math.round(Math.max(0, rawX) / PDF_ROD_UNIT) * PDF_ROD_UNIT;
+      const snappedY = Math.round(Math.max(0, rawY) / PDF_ROD_UNIT) * PDF_ROD_UNIT;
       const newRod = { id: generateRodId(), ...rodDef, x: snappedX, y: snappedY, rotation: 0 };
       if (!isRodOverlapping(newRod, rods)) {
         setRods(prev => [...prev, newRod]);
@@ -999,8 +999,8 @@ export default function PdfMathReader({ libro, onBack }) {
     const target = e.currentTarget;
     target.setPointerCapture(e.pointerId);
     const handleMove = (ev) => {
-      const snappedX = Math.round(Math.max(0, origX + ev.clientX - startX) / ROD_GRID) * ROD_GRID;
-      const snappedY = Math.round(Math.max(0, origY + ev.clientY - startY) / ROD_GRID) * ROD_GRID;
+      const snappedX = Math.round(Math.max(0, origX + ev.clientX - startX) / PDF_ROD_UNIT) * PDF_ROD_UNIT;
+      const snappedY = Math.round(Math.max(0, origY + ev.clientY - startY) / PDF_ROD_UNIT) * PDF_ROD_UNIT;
       setRods(prev => prev.map(r => {
         if (r.id !== rodId) return r;
         const temp = { ...r, x: snappedX, y: snappedY };
@@ -1089,7 +1089,7 @@ export default function PdfMathReader({ libro, onBack }) {
       // Ctrl+V: paste rod
       if ((e.ctrlKey || e.metaKey) && e.key === 'v') {
         if (copiedRodRef.current) {
-          const copy = { ...copiedRodRef.current, id: generateRodId(), x: copiedRodRef.current.x + ROD_GRID, y: copiedRodRef.current.y + ROD_GRID };
+          const copy = { ...copiedRodRef.current, id: generateRodId(), x: copiedRodRef.current.x + PDF_ROD_UNIT, y: copiedRodRef.current.y + PDF_ROD_UNIT };
           if (!isRodOverlapping(copy, rods)) {
             setRods(prev => [...prev, copy]);
             setSelectedId(copy.id);
@@ -1101,7 +1101,7 @@ export default function PdfMathReader({ libro, onBack }) {
       }
 
       if (!selectedId) return;
-      const step = e.shiftKey ? 1 : ROD_GRID;
+      const step = e.shiftKey ? 1 : PDF_ROD_UNIT;
 
       if (e.key === 'Escape') { setSelectedId(null); setContextMenu(null); return; }
 
@@ -1682,26 +1682,35 @@ export default function PdfMathReader({ libro, onBack }) {
           )}
 
           {/* Rods */}
-          {rods.map(rod => (
-            <div key={rod.id}
-              data-rod-id={rod.id}
-              className="absolute z-30"
-              style={{
-                left: rod.x, top: rod.y,
-                pointerEvents: 'auto',
-                cursor: 'grab',
-              }}
-              onPointerDown={(e) => handleRodPointerDown(e, rod.id)}
-              onContextMenu={(e) => handleRodContextMenu(e, rod.id)}
-              onDoubleClick={(e) => handleRodContextMenu(e, rod.id)}>
-              <DraggableRod
-                rod={rod}
-                showValue={false}
-                rotation={rod.rotation || 0}
-                isSelected={selectedId === rod.id}
+          {rods.map(rod => {
+            const rw = rod.value * PDF_ROD_UNIT;
+            const rh = PDF_ROD_HEIGHT;
+            return (
+              <div key={rod.id}
+                data-rod-id={rod.id}
+                className="absolute z-30 select-none touch-none"
+                style={{
+                  left: rod.x, top: rod.y,
+                  width: rw, height: rh,
+                  pointerEvents: 'auto',
+                  cursor: selectedId === rod.id ? 'grab' : 'grab',
+                  transform: `rotate(${rod.rotation || 0}deg)`,
+                  transformOrigin: 'center center',
+                  backgroundColor: rod.color,
+                  borderRadius: '3px',
+                  boxShadow: rod.isInvalid
+                    ? '0 0 0 2px #ef4444, 0 2px 6px rgba(239,68,68,0.4)'
+                    : selectedId === rod.id
+                      ? '0 0 0 2px #4c6ef5, 0 2px 8px rgba(76,110,245,0.35)'
+                      : '0 2px 4px rgba(0,0,0,0.2)',
+                  border: `1px solid rgba(0,0,0,0.1)`,
+                }}
+                onPointerDown={(e) => handleRodPointerDown(e, rod.id)}
+                onContextMenu={(e) => handleRodContextMenu(e, rod.id)}
+                onDoubleClick={(e) => handleRodContextMenu(e, rod.id)}
               />
-            </div>
-          ))}
+            );
+          })}
         </div>
         </div>
       </div>
