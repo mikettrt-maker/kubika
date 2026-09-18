@@ -26,6 +26,13 @@ const TOTAL_USERS = 100;
 const TOTAL_BIB_USERS = 5;
 const PASSWORD_LENGTH = 6;
 
+// Usuarios de 1° a 3° (solo regletas, geoplanos, antenas, biblioteca)
+const PRIMARIA_BAJA = [
+  { grade: 1, start: 101, end: 117 },
+  { grade: 2, start: 118, end: 134 },
+  { grade: 3, start: 135, end: 150 },
+];
+
 // ========== GENERADOR DE CONTRASEÑAS ==========
 
 /**
@@ -66,7 +73,7 @@ function generatePassword() {
 function generateUserList() {
   const users = [];
 
-  // Alumnos (acceso total)
+  // Alumnos 4°-6° (acceso total)
   for (let i = 1; i <= TOTAL_USERS; i++) {
     const num = String(i).padStart(3, '0');
     const username = `kubika.alumno${num}`;
@@ -97,8 +104,31 @@ function generateUserList() {
       password,
       displayName: `Biblioteca ${num}`,
       role: 'biblioteca',
+      grado: null,
     });
   }
+
+  // Alumnos 1°-3° (solo regletas, geoplanos, antenas, biblioteca)
+  let nextNum = TOTAL_USERS + TOTAL_BIB_USERS + 1;
+  PRIMARIA_BAJA.forEach(({ grade, start, end }) => {
+    for (let i = start; i <= end; i++) {
+      const num = String(i).padStart(3, '0');
+      const username = `kubika.alumno${num}`;
+      const email = `${username}@kubika.app`;
+      const password = generatePassword();
+
+      users.push({
+        number: nextNum,
+        username,
+        email,
+        password,
+        displayName: `Alumno ${num}`,
+        role: 'alumno',
+        grado: grade,
+      });
+      nextNum++;
+    }
+  });
 
   return users;
 }
@@ -159,9 +189,9 @@ async function createUsersInSupabase(users) {
 
 function generateCSV(users) {
   // CSV con las credenciales
-  let csv = 'Numero,Usuario,Email,Contraseña\n';
+  let csv = 'Numero,Usuario,Email,Contraseña,Rol,Grado\n';
   users.forEach(u => {
-    csv += `${u.number},${u.username},${u.email},${u.password}\n`;
+    csv += `${u.number},${u.username},${u.email},${u.password},${u.role || 'alumno'},${u.grado || ''}\n`;
   });
 
   const csvPath = path.join(__dirname, '..', 'kubika-usuarios.csv');

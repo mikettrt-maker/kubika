@@ -11,6 +11,9 @@ function getGradeFromUsername(username) {
   if (num >= 1 && num <= 30) return 4;
   if (num >= 31 && num <= 60) return 5;
   if (num >= 61 && num <= 100) return 6;
+  if (num >= 101 && num <= 117) return 1;
+  if (num >= 118 && num <= 134) return 2;
+  if (num >= 135 && num <= 150) return 3;
   return null;
 }
 
