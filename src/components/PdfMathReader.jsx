@@ -57,8 +57,8 @@ function loadPageData(userId, bookId, page) {
 let idCounter = 0;
 function genId() { return 'mp_' + Date.now() + '_' + (++idCounter); }
 
-const PDF_ROD_UNIT = 34;
-const PDF_ROD_HEIGHT = 34;
+const PDF_ROD_UNIT = 32;
+const PDF_ROD_HEIGHT = 32;
 function getRodBoundingBox(rod) {
   const L = rod.value;
   if (rod.rotation === 90) {
@@ -242,6 +242,9 @@ export default function PdfMathReader({ libro, onBack }) {
   const savedCanvasImage = useRef(null);
   const stateRef = useRef({ mathTexts: [], freeTexts: [], quads: [], polygons: [], rods: [], scale: 1.2, currentPage: 1 });
   const copiedRodRef = useRef(null);
+  const isDraggingRef = useRef(false);
+  const dragRafRef = useRef(null);
+  const saveTimeoutRef = useRef(null);
 
   const pdfUrl = (() => {
     const src = libro.pdf || libro.epub;
@@ -313,24 +316,28 @@ export default function PdfMathReader({ libro, onBack }) {
 
   // Auto-save when texts/quads/polygons change
   useEffect(() => {
-    if (pdfRef.current && !loading) {
-      const canvas = drawCanvasRef.current;
-      if (canvas) {
-        try {
-          savePageData(userId.current, libro.id, currentPage, {
-            canvas: canvas.toDataURL(),
-            scale,
-            canvasWidth: canvas.width,
-            canvasHeight: canvas.height,
-            mathTexts,
-            freeTexts,
-            quads,
-            polygons,
-            rods,
-          });
-        } catch {}
+    if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+    saveTimeoutRef.current = setTimeout(() => {
+      if (pdfRef.current && !loading) {
+        const canvas = drawCanvasRef.current;
+        if (canvas) {
+          try {
+            savePageData(userId.current, libro.id, currentPage, {
+              canvas: canvas.toDataURL(),
+              scale,
+              canvasWidth: canvas.width,
+              canvasHeight: canvas.height,
+              mathTexts,
+              freeTexts,
+              quads,
+              polygons,
+              rods,
+            });
+          } catch {}
+        }
       }
-    }
+    }, 500);
+    return () => { if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current); };
   }, [mathTexts, freeTexts, quads, polygons, rods, scale]);
 
   useEffect(() => {
@@ -998,20 +1005,73 @@ export default function PdfMathReader({ libro, onBack }) {
     const origX = rod.x, origY = rod.y;
     const target = e.currentTarget;
     target.setPointerCapture(e.pointerId);
+    target.style.cursor = 'grabbing';
+    isDraggingRef.current = true;
+
+    const MAGNETIC_RANGE = 15;
+
+    function findMagneticSnap(x, y, w, h, rotation, allRods, movingId) {
+      let bestDx = 0, bestDy = 0, bestDist = MAGNETIC_RANGE + 1;
+      for (const other of allRods) {
+        if (other.id === movingId) continue;
+        const ob = getRodBoundingBox(other);
+        const mb = rotation === 90
+          ? { left: x, right: x + PDF_ROD_HEIGHT, top: y, bottom: y + w }
+          : { left: x, right: x + w, top: y, bottom: y + h };
+
+        const sides = [
+          { dx: ob.left - mb.right, dy: 0 },
+          { dx: ob.right - mb.left, dy: 0 },
+          { dx: 0, dy: ob.top - mb.bottom },
+          { dx: 0, dy: ob.bottom - mb.top },
+        ];
+        for (const s of sides) {
+          const nx = x + s.dx, ny = y + s.dy;
+          const dist = Math.abs(s.dx) + Math.abs(s.dy);
+          if (dist < bestDist) {
+            const nb = rotation === 90
+              ? { left: nx, right: nx + PDF_ROD_HEIGHT, top: ny, bottom: ny + w }
+              : { left: nx, right: nx + w, top: ny, bottom: ny + h };
+            let blocked = false;
+            for (const check of allRods) {
+              if (check.id === movingId || check.id === other.id) continue;
+              if (checkRodCollision(nb, getRodBoundingBox(check))) { blocked = true; break; }
+            }
+            if (!blocked) { bestDist = dist; bestDx = s.dx; bestDy = s.dy; }
+          }
+        }
+      }
+      return { x: x + bestDx, y: y + bestDy };
+    }
+
     const handleMove = (ev) => {
-      const snappedX = Math.round(Math.max(0, origX + ev.clientX - startX) / PDF_ROD_UNIT) * PDF_ROD_UNIT;
-      const snappedY = Math.round(Math.max(0, origY + ev.clientY - startY) / PDF_ROD_UNIT) * PDF_ROD_UNIT;
-      setRods(prev => prev.map(r => {
-        if (r.id !== rodId) return r;
-        const temp = { ...r, x: snappedX, y: snappedY };
-        return { ...temp, isInvalid: isRodOverlapping(temp, prev) };
-      }));
+      const rawX = Math.max(0, origX + ev.clientX - startX);
+      const rawY = Math.max(0, origY + ev.clientY - startY);
+      const snappedX = Math.round(rawX / PDF_ROD_UNIT) * PDF_ROD_UNIT;
+      const snappedY = Math.round(rawY / PDF_ROD_UNIT) * PDF_ROD_UNIT;
+      if (dragRafRef.current) cancelAnimationFrame(dragRafRef.current);
+      dragRafRef.current = requestAnimationFrame(() => {
+        const rw = rod.value * PDF_ROD_UNIT;
+        const rh = PDF_ROD_HEIGHT;
+        const rot = rod.rotation || 0;
+        const snapped = findMagneticSnap(snappedX, snappedY, rw, rh, rot, rods, rodId);
+        target.style.left = snapped.x + 'px';
+        target.style.top = snapped.y + 'px';
+        target.dataset.snapX = snapped.x;
+        target.dataset.snapY = snapped.y;
+      });
     };
+
     const handleUp = () => {
+      isDraggingRef.current = false;
+      target.style.cursor = 'grab';
+      const finalX = parseFloat(target.dataset.snapX ?? origX);
+      const finalY = parseFloat(target.dataset.snapY ?? origY);
       setRods(prev => prev.map(r => {
         if (r.id !== rodId) return r;
-        if (r.isInvalid) return { ...r, x: origX, y: origY, isInvalid: false };
-        return { ...r, isInvalid: false };
+        const temp = { ...r, x: finalX, y: finalY };
+        if (isRodOverlapping(temp, prev)) return { ...r, x: origX, y: origY, isInvalid: false };
+        return { ...temp, isInvalid: false };
       }));
       target.releasePointerCapture(e.pointerId);
       target.removeEventListener('pointermove', handleMove);
@@ -1468,7 +1528,7 @@ export default function PdfMathReader({ libro, onBack }) {
                 <div key={rod.value} className="group">
                   <div className="flex items-center mb-1 px-1">
                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest group-hover:text-slate-600 transition-colors">
-                      {rod.name} ({rod.value})
+                      {rod.name}
                     </span>
                   </div>
                   <div
@@ -1485,7 +1545,7 @@ export default function PdfMathReader({ libro, onBack }) {
                       height: '28px',
                       boxShadow: `0 4px 0 ${rod.color}80, inset 0 -2px 4px rgba(0,0,0,0.2)`,
                     }}
-                    title={`${rod.name} (${rod.value}) — arrastra a la hoja`}
+                    title={`${rod.name} — arrastra a la hoja`}
                   />
                 </div>
               ))}
@@ -1693,7 +1753,7 @@ export default function PdfMathReader({ libro, onBack }) {
                   left: rod.x, top: rod.y,
                   width: rw, height: rh,
                   pointerEvents: 'auto',
-                  cursor: selectedId === rod.id ? 'grab' : 'grab',
+                  cursor: 'grab',
                   transform: `rotate(${rod.rotation || 0}deg)`,
                   transformOrigin: 'center center',
                   backgroundColor: rod.color,
@@ -1703,7 +1763,7 @@ export default function PdfMathReader({ libro, onBack }) {
                     : selectedId === rod.id
                       ? '0 0 0 2px #4c6ef5, 0 2px 8px rgba(76,110,245,0.35)'
                       : '0 2px 4px rgba(0,0,0,0.2)',
-                  border: `1px solid rgba(0,0,0,0.1)`,
+                  border: '1.5px solid rgba(0,0,0,0.35)',
                 }}
                 onPointerDown={(e) => handleRodPointerDown(e, rod.id)}
                 onContextMenu={(e) => handleRodContextMenu(e, rod.id)}
