@@ -33,65 +33,18 @@ async function loadLogoWatermark(watermarkSize) {
 }
 
 /**
- * Extrae el CSS de KaTeX y resuelve las rutas de fuentes contra la CDN base.
+ * Renderiza un elemento KaTeX a un canvas usando html2canvas
+ * sobre un div temporal (sin contaminar el canvas principal).
  */
-function getKatexCss() {
-  let css = '';
-  let fontBaseUrl = 'https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/';
-  for (const sheet of document.styleSheets) {
-    try {
-      if (sheet.href && sheet.href.includes('katex')) {
-        const parts = sheet.href.split('/');
-        parts.pop();
-        fontBaseUrl = parts.join('/') + '/';
-      }
-    } catch {}
-  }
-  for (const sheet of document.styleSheets) {
-    try {
-      for (const rule of sheet.cssRules) {
-        const text = rule.cssText || '';
-        if (text.includes('katex') || text.includes('KaTeX')) {
-          css += text.replace(/url\(fonts\//g, `url(${fontBaseUrl}fonts/`) + '\n';
-        }
-      }
-    } catch {}
-  }
-  return css;
-}
-
-/**
- * Renderiza un elemento KaTeX a una imagen usando SVG foreignObject
- * con el CSS de KaTeX embebido inline para que las fuentes funcionen.
- */
-async function renderKatexToImage(el) {
-  const w = el.offsetWidth;
-  const h = el.offsetHeight;
-  if (w === 0 || h === 0) return null;
-
+async function renderKatexToCanvas(el) {
   try {
-    const katexCss = getKatexCss();
-    const fo = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
-    fo.setAttribute('width', w);
-    fo.setAttribute('height', h);
-    fo.innerHTML = `<div xmlns="http://www.w3.org/1999/xhtml"><style>${katexCss}</style>${el.outerHTML}</div>`;
-
-    const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">${fo.outerHTML}</svg>`;
-    const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-
-    const img = new Image();
-    await new Promise((resolve) => { img.onload = resolve; img.onerror = resolve; img.src = url; });
-
-    const offscreen = document.createElement('canvas');
-    offscreen.width = w * 2;
-    offscreen.height = h * 2;
-    const ctx = offscreen.getContext('2d');
-    ctx.scale(2, 2);
-    ctx.drawImage(img, 0, 0, w, h);
-    URL.revokeObjectURL(url);
-
-    return { dataUrl: offscreen.toDataURL('image/png'), width: w, height: h };
+    const tmpDiv = document.createElement('div');
+    tmpDiv.style.cssText = 'position:fixed;left:-9999px;top:0;visibility:hidden;font-size:16px;line-height:1.4;padding:8px;display:inline-block;';
+    tmpDiv.innerHTML = el.outerHTML;
+    document.body.appendChild(tmpDiv);
+    const c = await html2canvas(tmpDiv, { scale: 2, backgroundColor: null, useCORS: true, logging: false });
+    document.body.removeChild(tmpDiv);
+    return c;
   } catch {
     return null;
   }
@@ -102,14 +55,13 @@ async function renderKatexToImage(el) {
  */
 export async function exportToPdf(canvasElement, studentName = 'Alumno', workspaceName = 'Diseño sin título') {
   try {
-    // 1. Capturar el lienzo
+    // 1. Capturar el lienzo (sin KaTeX)
     const mainCanvas = await html2canvas(canvasElement, {
       scale: 2,
       useCORS: true,
-      allowTaint: true,
       backgroundColor: '#f8f9fc',
       logging: false,
-      ignoreElements: (element) => element.classList?.contains('no-print'),
+      ignoreElements: (element) => element.classList?.contains('no-print') || element.classList?.contains('katex'),
     });
 
     // 2. Buscar contenedores KaTeX y renderizar cada uno encima del canvas capturado
@@ -121,16 +73,14 @@ export async function exportToPdf(canvasElement, studentName = 'Alumno', workspa
       const katexEl = container.querySelector('.katex');
       if (!katexEl) continue;
 
-      const result = await renderKatexToImage(katexEl);
-      if (!result) continue;
+      const katexCanvas = await renderKatexToCanvas(katexEl);
+      if (!katexCanvas) continue;
 
       const containerRect = container.getBoundingClientRect();
       const x = containerRect.left - canvasRect.left;
       const y = containerRect.top - canvasRect.top;
 
-      const img = new Image();
-      await new Promise((resolve) => { img.onload = resolve; img.src = result.dataUrl; });
-      mainCtx.drawImage(img, x * 2, y * 2, result.width * 2, result.height * 2);
+      mainCtx.drawImage(katexCanvas, x * 2, y * 2);
     }
 
     const imgData = mainCanvas.toDataURL('image/png');

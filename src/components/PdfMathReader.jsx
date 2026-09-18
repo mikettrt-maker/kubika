@@ -495,53 +495,17 @@ export default function PdfMathReader({ libro, onBack }) {
         ctx.fillStyle = p.fill; ctx.globalAlpha = 0.6; ctx.fill();
         ctx.globalAlpha = 1; ctx.strokeStyle = p.fill; ctx.lineWidth = 2; ctx.stroke();
       });
-      let katexCssCache = null;
-      function getKatexCssForSvg() {
-        if (katexCssCache) return katexCssCache;
-        let fontBaseUrl = 'https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/';
-        try {
-          for (const sheet of document.styleSheets) {
-            if (sheet.href && sheet.href.includes('katex')) {
-              const parts = sheet.href.split('/');
-              parts.pop();
-              fontBaseUrl = parts.join('/') + '/';
-              break;
-            }
-          }
-        } catch {}
-        let css = '';
-        try {
-          for (const sheet of document.styleSheets) {
-            try {
-              for (const rule of sheet.cssRules) {
-                const text = rule.cssText || '';
-                if (text.includes('katex') || text.includes('KaTeX')) {
-                  css += text.replace(/url\(fonts\//g, `url(${fontBaseUrl}fonts/`) + '\n';
-                }
-              }
-            } catch {}
-          }
-        } catch {}
-        katexCssCache = css;
-        return css;
-      }
       for (const mt of (saved.mathTexts || [])) {
         if (!mt.latex) continue;
         try {
-          const s = document.createElement('span');
-          s.innerHTML = katex.renderToString(mt.latex, { throwOnError: false });
           const w = mt.width || 150;
-          const h = w * 0.8;
-          const fo = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
-          fo.setAttribute('width', w); fo.setAttribute('height', h);
-          const katexCss = getKatexCssForSvg();
-          fo.innerHTML = `<div xmlns="http://www.w3.org/1999/xhtml"><style>${katexCss}</style>${s.innerHTML}</div>`;
-          const svg = new Blob([`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}">${fo.outerHTML}</svg>`], { type: 'image/svg+xml;charset=utf-8' });
-          const url = URL.createObjectURL(svg);
-          const si = new Image();
-          await new Promise(r => { si.onload = r; si.onerror = r; setTimeout(r, 3000); si.src = url; });
-          ctx.drawImage(si, mt.x, mt.y, w, h);
-          URL.revokeObjectURL(url);
+          const tmpDiv = document.createElement('div');
+          tmpDiv.style.cssText = `position:fixed;left:-9999px;top:0;visibility:hidden;font-size:16px;line-height:1.4;padding:8px;`;
+          tmpDiv.innerHTML = katex.renderToString(mt.latex, { throwOnError: false });
+          document.body.appendChild(tmpDiv);
+          const tmpCanvas = await html2canvas(tmpDiv, { scale: 2, backgroundColor: null, useCORS: true, logging: false });
+          document.body.removeChild(tmpDiv);
+          ctx.drawImage(tmpCanvas, mt.x, mt.y, w, tmpCanvas.height / tmpCanvas.width * w);
         } catch {}
       }
       (saved.freeTexts || []).forEach(ft => {
