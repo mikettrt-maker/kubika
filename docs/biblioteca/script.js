@@ -8,7 +8,7 @@ let currentUser = null;
 async function loadUsers() {
   if (cachedUsers) return cachedUsers;
   try {
-    const res = await fetch('../kubika-usuarios.csv');
+    const res = await fetch('../kubika-usuarios.csv?v=2.3');
     const text = await res.text();
     const lines = text.split('\n').slice(1);
     cachedUsers = lines.map(line => {
