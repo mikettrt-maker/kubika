@@ -522,6 +522,8 @@ export default function PdfMathReader({ libro, onBack }) {
   }, [scale, libro.id]);
 
   const exportPageToPdf = async (pageNum) => {
+    if (pageNum === currentPage) saveCanvas();
+    await new Promise(r => setTimeout(r, 50));
     const result = await renderPageToCanvas(pageNum, pdfRef.current);
     if (!result) return;
     const { canvas: c, viewport } = result;
@@ -553,6 +555,8 @@ export default function PdfMathReader({ libro, onBack }) {
     try {
       const pdf = pdfRef.current;
       if (!pdf) { console.warn('PDF not loaded'); setExporting(false); return; }
+      saveCanvas();
+      await new Promise(r => setTimeout(r, 50));
       const pages = [...selectedExportPages].sort((a, b) => a - b);
       const results = [];
       for (const p of pages) {
