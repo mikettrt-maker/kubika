@@ -21,12 +21,12 @@ async function loadUsers() {
   if (cachedUsers) return cachedUsers;
   try {
     const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-    const res = await fetch(base + '/kubika-usuarios.csv?v=2.3');
+    const res = await fetch(base + '/kubika-usuarios.csv?v=2.5');
     const text = await res.text();
     const lines = text.split('\n').slice(1);
     cachedUsers = lines.map(line => {
-      const [, username, email, password, rol, grado] = line.split(',');
-      return { username, email, password, rol: rol?.trim() || 'alumno', grado: grado ? parseInt(grado.trim(), 10) : null };
+      const [, username, email, password, rol, grado, bloqueado] = line.split(',');
+      return { username, email, password, rol: rol?.trim() || 'alumno', grado: grado ? parseInt(grado.trim(), 10) : null, blocked: bloqueado?.trim() === '1' };
     }).filter(u => u.email);
     return cachedUsers;
   } catch {
@@ -74,6 +74,12 @@ export function useAuth() {
       setError('Usuario o contraseña incorrectos');
       setLoading(false);
       return { user: null, error: 'Usuario o contraseña incorrectos' };
+    }
+
+    if (matchedUser.blocked) {
+      setError('Cuenta temporalmente suspendida');
+      setLoading(false);
+      return { user: null, error: 'Cuenta temporalmente suspendida' };
     }
 
     const localUser = {
