@@ -1571,11 +1571,7 @@ export default function PdfMathReader({ libro, onBack }) {
               cursor: isPlacingText ? 'crosshair' : activeTool === 'eraser' ? 'cell' : 'default',
             }}
             onMouseDown={(e) => {
-              if (isPlacingText) {
-                e.stopPropagation();
-                handleOverlayClick(e);
-                return;
-              }
+              if (isPlacingText) return;
               startDrawing(e);
             }}
             onMouseMove={draw}
@@ -1589,9 +1585,11 @@ export default function PdfMathReader({ libro, onBack }) {
             onTouchEnd={stopDrawing}
             onClick={(e) => {
               setShowQuadColorPicker(false);
-              if (activeTool === 'polygon') {
+              if (isPlacingText) {
+                handleOverlayClick(e);
+              } else if (activeTool === 'polygon') {
                 handlePolygonClick(e);
-              } else if (!isPlacingText) {
+              } else {
                 setSelectedId(null);
               }
             }}
