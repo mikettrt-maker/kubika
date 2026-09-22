@@ -1560,42 +1560,42 @@ export default function PdfMathReader({ libro, onBack }) {
             onDrop={handleDrop}>
           <div ref={containerRef} />
 
-          {/* Drawing canvas — always present, receives pointer events only for drawing tools */}
+          {/* Drawing canvas — always present, receives pointer events for drawing tools AND text/formula placement */}
           <canvas
             ref={drawCanvasRef}
             className="absolute inset-0"
             style={{
               touchAction: 'none',
-              pointerEvents: isDrawingTool ? 'auto' : 'none',
-              zIndex: isDrawingTool ? 20 : 5,
-              cursor: activeTool === 'eraser' ? 'cell' : 'default',
+              pointerEvents: (isDrawingTool || isPlacingText) ? 'auto' : 'none',
+              zIndex: (isDrawingTool || isPlacingText) ? 40 : 5,
+              cursor: isPlacingText ? 'crosshair' : activeTool === 'eraser' ? 'cell' : 'default',
             }}
-            onMouseDown={startDrawing}
+            onMouseDown={(e) => {
+              if (isPlacingText) {
+                e.stopPropagation();
+                handleOverlayClick(e);
+                return;
+              }
+              startDrawing(e);
+            }}
             onMouseMove={draw}
             onMouseUp={stopDrawing}
             onMouseLeave={stopDrawing}
-            onTouchStart={startDrawing}
+            onTouchStart={(e) => {
+              if (isPlacingText) return;
+              startDrawing(e);
+            }}
             onTouchMove={draw}
             onTouchEnd={stopDrawing}
             onClick={(e) => {
               setShowQuadColorPicker(false);
               if (activeTool === 'polygon') {
                 handlePolygonClick(e);
-              } else {
+              } else if (!isPlacingText) {
                 setSelectedId(null);
               }
             }}
           />
-
-          {/* Click-through layer for text/formula placement */}
-          {activeTool === 'text' || activeTool === 'formula' ? (
-            <div
-              className="absolute inset-0"
-              style={{ zIndex: 25, cursor: 'crosshair' }}
-              onMouseDown={(e) => e.stopPropagation()}
-              onClick={handleOverlayClick}
-            />
-          ) : null}
 
           {/* Math text overlays (KaTeX) */}
           {mathTexts.map(mt => (
@@ -1742,8 +1742,8 @@ export default function PdfMathReader({ libro, onBack }) {
                 style={{
                   left: rod.x, top: rod.y,
                   width: rw, height: rh,
-                  pointerEvents: 'auto',
-                  cursor: 'grab',
+                  pointerEvents: isPlacingText ? 'none' : 'auto',
+                  cursor: isPlacingText ? 'crosshair' : 'grab',
                   transform: `rotate(${rod.rotation || 0}deg)`,
                   transformOrigin: 'center center',
                   backgroundColor: rod.color,
