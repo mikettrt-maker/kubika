@@ -675,7 +675,7 @@ export default function App() {
             </svg>
             Biblioteca
           </button>
-          <span className="ml-1 px-1.5 py-0.5 text-[9px] font-bold bg-slate-200 text-slate-500 rounded-md leading-none select-none" title="Versión de la aplicación">v2.7.1</span>
+          <span className="ml-1 px-3 py-1 text-xs font-extrabold bg-gradient-to-r from-kubika-500 to-purple-600 text-white rounded-full leading-none select-none shadow-md animate-pulse-soft" title="Versión de la aplicación" style={{ letterSpacing: '0.05em' }}>v2.7.2</span>
         </div>
 
       </header>
