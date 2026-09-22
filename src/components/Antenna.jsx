@@ -70,7 +70,7 @@ export default function Antenna({
         height: totalHeight,
         cursor: isEditing ? 'text' : (isSelected ? 'grabbing' : 'grab'),
         userSelect: 'none',
-        zIndex: isSelected ? 50 : 40,
+        zIndex: isSelected ? 25 : 20,
       }}
     >
       {/* Líneas SVG de la T */}
@@ -101,14 +101,15 @@ export default function Antenna({
           onPointerDown={(e) => e.stopPropagation()}
           style={{
             position: 'absolute',
-            left: 0,
-            top: 0,
-            width: '100%',
-            height: ANTENNA_TOP_HEIGHT,
-            background: inputBg,
+            left: 2,
+            top: 2,
+            width: totalWidth - 4,
+            height: ANTENNA_TOP_HEIGHT - 4,
+            background: 'rgba(255,255,255,0.95)',
             border: 'none',
+            borderRadius: '4px',
             textAlign: 'center',
-            fontSize: 15,
+            fontSize: 18,
             fontWeight: 700,
             color: '#1e293b',
             outline: 'none',
@@ -135,7 +136,7 @@ export default function Antenna({
                 background: inputBg,
                 border: 'none',
                 textAlign: 'right',
-                fontSize: 13,
+                fontSize: 15,
                 fontWeight: 500,
                 color: '#334155',
                 outline: 'none',
@@ -154,7 +155,7 @@ export default function Antenna({
                 background: inputBg,
                 border: 'none',
                 textAlign: 'left',
-                fontSize: 13,
+                fontSize: 15,
                 fontWeight: 500,
                 color: '#334155',
                 outline: 'none',

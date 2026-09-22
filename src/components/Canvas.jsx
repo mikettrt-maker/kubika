@@ -149,33 +149,6 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
 
     const antennaEl = e.target.closest('[data-antenna-id]');
     if (antennaEl && onAntennaUpdate) {
-      if (e.target.tagName === 'INPUT') return;
-      const antennaId = antennaEl.getAttribute('data-antenna-id');
-      e.preventDefault();
-      updateSelection(antennaId);
-
-      const antenna = antennas.find(a => a.id === antennaId);
-      if (!antenna) return;
-
-      const startX = e.clientX;
-      const startY = e.clientY;
-      const origX = antenna.x;
-      const origY = antenna.y;
-
-      const handleMove = (moveEvent) => {
-        onAntennaUpdate(antennaId, {
-          x: Math.max(0, origX + moveEvent.clientX - startX),
-          y: Math.max(0, origY + moveEvent.clientY - startY),
-        });
-      };
-
-      const handleUp = () => {
-        window.removeEventListener('mousemove', handleMove);
-        window.removeEventListener('mouseup', handleUp);
-      };
-
-      window.addEventListener('mousemove', handleMove);
-      window.addEventListener('mouseup', handleUp);
       return;
     }
   };
