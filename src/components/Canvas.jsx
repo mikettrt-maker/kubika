@@ -244,11 +244,18 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
     const startY = e.clientY;
     const origX = antenna.x;
     const origY = antenna.y;
+    let dragStarted = false;
 
     const handleMove = (moveEvent) => {
+      const dx = moveEvent.clientX - startX;
+      const dy = moveEvent.clientY - startY;
+      if (!dragStarted) {
+        if (Math.abs(dx) < 4 && Math.abs(dy) < 4) return;
+        dragStarted = true;
+      }
       onAntennaUpdate(antennaId, {
-        x: Math.max(0, origX + moveEvent.clientX - startX),
-        y: Math.max(0, origY + moveEvent.clientY - startY),
+        x: Math.max(0, origX + dx),
+        y: Math.max(0, origY + dy),
       });
     };
 

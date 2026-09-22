@@ -3,6 +3,7 @@ import { ANTENNA_ROW_HEIGHT, ANTENNA_COL_WIDTH, ANTENNA_TOP_HEIGHT } from '../ut
 
 const ANT_LINE_COLOR = '#ef4444';
 const ROWS = 10;
+const LINE_GAP = 4;
 
 export default function Antenna({
   antenna,
@@ -15,6 +16,7 @@ export default function Antenna({
   const totalHeight = ANTENNA_TOP_HEIGHT + ROWS * ANTENNA_ROW_HEIGHT;
   const halfW = ANTENNA_COL_WIDTH + 4;
   const totalWidth = halfW * 2;
+  const lineY = ANTENNA_TOP_HEIGHT - 2;
 
   const [isEditing, setIsEditing] = useState(false);
   const operationInputRef = useRef(null);
@@ -45,9 +47,8 @@ export default function Antenna({
 
   const handleMouseDown = useCallback((e) => {
     if (e.button !== 0) return;
-    if (isEditing && e.target.tagName === 'INPUT') return;
     if (onMouseDown) onMouseDown(e, id);
-  }, [onMouseDown, id, isEditing]);
+  }, [onMouseDown, id]);
 
   const handleContext = useCallback((e) => {
     e.preventDefault();
@@ -72,26 +73,24 @@ export default function Antenna({
         background: 'transparent',
       }}
     >
-      {/* Líneas SVG de la T — siempre encima */}
       <svg
         style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 1 }}
         viewBox={`0 0 ${totalWidth} ${totalHeight}`}
       >
         <line
-          x1={0} y1={ANTENNA_TOP_HEIGHT / 2}
-          x2={totalWidth} y2={ANTENNA_TOP_HEIGHT / 2}
+          x1={0} y1={lineY}
+          x2={totalWidth} y2={lineY}
           stroke={ANT_LINE_COLOR}
           strokeWidth={3}
         />
         <line
-          x1={halfW} y1={ANTENNA_TOP_HEIGHT / 2}
+          x1={halfW} y1={lineY}
           x2={halfW} y2={totalHeight - 4}
           stroke={ANT_LINE_COLOR}
           strokeWidth={3}
         />
       </svg>
 
-      {/* Input de operación (arriba) */}
       {isEditing && (
         <input
           ref={operationInputRef}
@@ -103,9 +102,9 @@ export default function Antenna({
             left: 2,
             top: 2,
             width: totalWidth - 4,
-            height: ANTENNA_TOP_HEIGHT - 4,
+            height: lineY - 4,
             background: 'transparent',
-            border: '1px solid rgba(239,68,68,0.25)',
+            border: 'none',
             borderRadius: '4px',
             textAlign: 'center',
             fontSize: 18,
@@ -120,28 +119,31 @@ export default function Antenna({
         />
       )}
 
-      {/* Celdas izquierda y derecha */}
       {isEditing && Array.from({ length: ROWS }).map((_, i) => {
         const yPos = ANTENNA_TOP_HEIGHT + i * ANTENNA_ROW_HEIGHT;
         const row = rows[i] || { left: '', right: '' };
         return (
-          <div key={i} style={{ position: 'absolute', left: 0, top: yPos, width: '100%', height: ANTENNA_ROW_HEIGHT, display: 'flex', zIndex: 2 }}>
+          <div key={i} style={{ position: 'absolute', left: 0, top: yPos, width: totalWidth, height: ANTENNA_ROW_HEIGHT, zIndex: 2 }}>
             <input
               value={row.left}
               onChange={(e) => handleCellChange(i, 'left', e.target.value)}
               onPointerDown={(e) => e.stopPropagation()}
               style={{
-                width: halfW - 6,
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                width: halfW - LINE_GAP,
                 height: '100%',
                 background: 'transparent',
-                border: '1px solid rgba(239,68,68,0.25)',
+                border: 'none',
+                borderRight: 'none',
                 textAlign: 'right',
                 fontSize: 15,
                 fontWeight: 500,
                 color: '#334155',
                 outline: 'none',
                 boxShadow: 'none',
-                padding: '0 8px 0 4px',
+                padding: '0 6px 0 4px',
                 fontFamily: 'inherit',
               }}
             />
@@ -150,17 +152,20 @@ export default function Antenna({
               onChange={(e) => handleCellChange(i, 'right', e.target.value)}
               onPointerDown={(e) => e.stopPropagation()}
               style={{
-                width: halfW - 6,
+                position: 'absolute',
+                left: halfW + LINE_GAP,
+                top: 0,
+                width: halfW - LINE_GAP,
                 height: '100%',
                 background: 'transparent',
-                border: '1px solid rgba(239,68,68,0.25)',
+                border: 'none',
                 textAlign: 'left',
                 fontSize: 15,
                 fontWeight: 500,
                 color: '#334155',
                 outline: 'none',
                 boxShadow: 'none',
-                padding: '0 4px 0 8px',
+                padding: '0 4px 0 6px',
                 fontFamily: 'inherit',
               }}
             />
