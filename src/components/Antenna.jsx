@@ -55,8 +55,6 @@ export default function Antenna({
     if (onContextMenu) onContextMenu(e, id);
   }, [onContextMenu, id]);
 
-  const inputBg = isEditing ? 'rgba(255,255,255,0.9)' : 'transparent';
-
   return (
     <div
       onMouseDown={handleMouseDown}
@@ -71,11 +69,12 @@ export default function Antenna({
         cursor: isEditing ? 'text' : (isSelected ? 'grabbing' : 'grab'),
         userSelect: 'none',
         zIndex: isSelected ? 25 : 20,
+        background: 'transparent',
       }}
     >
-      {/* Líneas SVG de la T */}
+      {/* Líneas SVG de la T — siempre encima */}
       <svg
-        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 1 }}
         viewBox={`0 0 ${totalWidth} ${totalHeight}`}
       >
         <line
@@ -105,8 +104,8 @@ export default function Antenna({
             top: 2,
             width: totalWidth - 4,
             height: ANTENNA_TOP_HEIGHT - 4,
-            background: 'rgba(255,255,255,0.95)',
-            border: 'none',
+            background: 'transparent',
+            border: '1px solid rgba(239,68,68,0.25)',
             borderRadius: '4px',
             textAlign: 'center',
             fontSize: 18,
@@ -116,6 +115,7 @@ export default function Antenna({
             boxShadow: 'none',
             padding: 0,
             fontFamily: 'inherit',
+            zIndex: 2,
           }}
         />
       )}
@@ -125,7 +125,7 @@ export default function Antenna({
         const yPos = ANTENNA_TOP_HEIGHT + i * ANTENNA_ROW_HEIGHT;
         const row = rows[i] || { left: '', right: '' };
         return (
-          <div key={i} style={{ position: 'absolute', left: 0, top: yPos, width: '100%', height: ANTENNA_ROW_HEIGHT, display: 'flex' }}>
+          <div key={i} style={{ position: 'absolute', left: 0, top: yPos, width: '100%', height: ANTENNA_ROW_HEIGHT, display: 'flex', zIndex: 2 }}>
             <input
               value={row.left}
               onChange={(e) => handleCellChange(i, 'left', e.target.value)}
@@ -133,8 +133,8 @@ export default function Antenna({
               style={{
                 width: halfW - 6,
                 height: '100%',
-                background: inputBg,
-                border: 'none',
+                background: 'transparent',
+                border: '1px solid rgba(239,68,68,0.25)',
                 textAlign: 'right',
                 fontSize: 15,
                 fontWeight: 500,
@@ -152,8 +152,8 @@ export default function Antenna({
               style={{
                 width: halfW - 6,
                 height: '100%',
-                background: inputBg,
-                border: 'none',
+                background: 'transparent',
+                border: '1px solid rgba(239,68,68,0.25)',
                 textAlign: 'left',
                 fontSize: 15,
                 fontWeight: 500,
