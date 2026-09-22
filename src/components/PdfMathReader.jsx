@@ -1239,6 +1239,7 @@ export default function PdfMathReader({ libro, onBack }) {
   }, [selectedId, mathTexts, freeTexts, quads, polygons, rods]);
 
   const isDrawingTool = activeTool === 'pen' || activeTool === 'eraser' || activeTool === 'line' || activeTool === 'pivot' || activeTool === 'quad' || activeTool === 'polygon';
+  const isPlacingText = activeTool === 'text' || activeTool === 'formula';
 
   if (loading) {
     return (
@@ -1590,7 +1591,7 @@ export default function PdfMathReader({ libro, onBack }) {
           {activeTool === 'text' || activeTool === 'formula' ? (
             <div
               className="absolute inset-0"
-              style={{ zIndex: 20, cursor: 'crosshair' }}
+              style={{ zIndex: 25, cursor: 'crosshair' }}
               onMouseDown={(e) => e.stopPropagation()}
               onClick={handleOverlayClick}
             />
@@ -1600,7 +1601,7 @@ export default function PdfMathReader({ libro, onBack }) {
           {mathTexts.map(mt => (
             <div key={mt.id}
               className="absolute z-30"
-              style={{ left: mt.x, top: mt.y, pointerEvents: 'auto' }}
+              style={{ left: mt.x, top: mt.y, pointerEvents: isPlacingText ? 'none' : 'auto' }}
               onPointerDown={(e) => handlePointerDownOnMath(e, mt.id)}>
               <MathTextBox
                 id={mt.id}
@@ -1617,7 +1618,7 @@ export default function PdfMathReader({ libro, onBack }) {
           {freeTexts.map(ft => (
             <div key={ft.id}
               className="absolute z-30"
-              style={{ left: ft.x, top: ft.y, pointerEvents: 'auto' }}>
+              style={{ left: ft.x, top: ft.y, pointerEvents: isPlacingText ? 'none' : 'auto' }}>
               <FreeTextBox
                 id={ft.id}
                 initialText={ft.text}
@@ -1651,7 +1652,7 @@ export default function PdfMathReader({ libro, onBack }) {
           {quads.map(q => (
             <div key={q.id}
               className="absolute z-30"
-              style={{ left: q.x, top: q.y, width: q.width, height: q.height, pointerEvents: 'auto' }}>
+              style={{ left: q.x, top: q.y, width: q.width, height: q.height, pointerEvents: isPlacingText ? 'none' : 'auto' }}>
               {/* Main quad body — drag to move */}
               <div
                 onPointerDown={(e) => handlePointerDownOnQuad(e, q.id)}
@@ -1690,7 +1691,7 @@ export default function PdfMathReader({ libro, onBack }) {
             return (
               <div key={p.id}
                 className="absolute z-30"
-                style={{ left: bounds.minX, top: bounds.minY, width: w, height: h, pointerEvents: 'auto' }}>
+                style={{ left: bounds.minX, top: bounds.minY, width: w, height: h, pointerEvents: isPlacingText ? 'none' : 'auto' }}>
                 <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-full cursor-grab active:cursor-grabbing"
                   onPointerDown={(e) => handlePolygonDrag(e, p.id)}
                   style={{ overflow: 'visible' }}>
