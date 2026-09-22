@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { ANTENNA_ROW_HEIGHT, ANTENNA_COL_WIDTH, ANTENNA_TOP_HEIGHT } from '../utils/rods';
 
-const ANT_LINE_COLOR = '#94a3b8';
+const ANT_LINE_COLOR = '#ef4444';
 const ROWS = 10;
 
 export default function Antenna({
@@ -66,14 +66,14 @@ export default function Antenna({
           x1={0} y1={ANTENNA_TOP_HEIGHT / 2}
           x2={totalWidth} y2={ANTENNA_TOP_HEIGHT / 2}
           stroke={ANT_LINE_COLOR}
-          strokeWidth={2}
+          strokeWidth={3}
         />
         {/* Línea vertical central */}
         <line
           x1={halfW} y1={ANTENNA_TOP_HEIGHT / 2}
           x2={halfW} y2={totalHeight - 4}
           stroke={ANT_LINE_COLOR}
-          strokeWidth={2}
+          strokeWidth={3}
         />
       </svg>
 
@@ -88,7 +88,7 @@ export default function Antenna({
           top: 0,
           width: '100%',
           height: ANTENNA_TOP_HEIGHT,
-          background: 'transparent',
+          background: 'rgba(239, 68, 68, 0.08)',
           border: 'none',
           textAlign: 'center',
           fontSize: 15,
@@ -114,7 +114,7 @@ export default function Antenna({
               style={{
                 width: halfW - 6,
                 height: '100%',
-                background: 'transparent',
+                background: 'rgba(239, 68, 68, 0.08)',
                 border: 'none',
                 textAlign: 'right',
                 fontSize: 13,
@@ -133,7 +133,7 @@ export default function Antenna({
               style={{
                 width: halfW - 6,
                 height: '100%',
-                background: 'transparent',
+                background: 'rgba(239, 68, 68, 0.08)',
                 border: 'none',
                 textAlign: 'left',
                 fontSize: 13,

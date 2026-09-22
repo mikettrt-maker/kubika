@@ -4,9 +4,9 @@
 
 /* ========== Variables Globales ========== */
 :root {
-  --canvas-bg: #ffffff;
-  --grid-color: #94a3b8; /* Color de línea de cuaderno más visible */
-  --grid-size: 40px; /* Exactamente 1 unidad base */
+  --canvas-bg: #fdf6e3;
+  --grid-color: #94a3b8;
+  --grid-size: 40px;
 }
 
 /* ========== Reset & Base ========== */
@@ -30,11 +30,6 @@ body {
 /* ========== Cuadrícula del Lienzo (Estilo cuaderno) ========== */
 .canvas-grid {
   background-color: var(--canvas-bg);
-  background-image:
-    linear-gradient(rgba(148, 163, 184, 0.4) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(148, 163, 184, 0.4) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-  background-position: 0 0;
 }
 
 /* ========== Estilos 3D para Regletas (Ángulos perfectos de 90°) ========== */
