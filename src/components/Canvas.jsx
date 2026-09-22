@@ -149,6 +149,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
 
     const antennaEl = e.target.closest('[data-antenna-id]');
     if (antennaEl && onAntennaUpdate) {
+      if (e.target.tagName === 'INPUT') return;
       const antennaId = antennaEl.getAttribute('data-antenna-id');
       e.preventDefault();
       updateSelection(antennaId);
@@ -610,7 +611,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
       className="relative flex-1 overflow-auto bg-slate-100 canvas-inset-shadow"
       onDragOver={handleDragOver}
       onDrop={handleDrop}
-      onMouseDown={(e) => { handleCanvasMouseDown(e); containerRef.current?.focus(); }}
+      onMouseDown={(e) => { handleCanvasMouseDown(e); if (e.target.tagName !== 'INPUT') containerRef.current?.focus(); }}
       onClick={handleCanvasClick}
       onKeyDown={handleKeyDown}
       tabIndex={-1}

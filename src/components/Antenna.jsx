@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { ANTENNA_ROW_HEIGHT, ANTENNA_COL_WIDTH, ANTENNA_TOP_HEIGHT } from '../utils/rods';
 
 const ANT_LINE_COLOR = '#ef4444';
@@ -16,6 +16,16 @@ export default function Antenna({
   const halfW = ANTENNA_COL_WIDTH + 4;
   const totalWidth = halfW * 2;
 
+  const operationInputRef = useRef(null);
+  const mountedRef = useRef(false);
+
+  useEffect(() => {
+    if (!mountedRef.current && operationInputRef.current) {
+      mountedRef.current = true;
+      setTimeout(() => operationInputRef.current?.focus(), 50);
+    }
+  }, []);
+
   const handleCellChange = (rowIndex, side, value) => {
     const newRows = rows.map((r, i) =>
       i === rowIndex ? { ...r, [side]: value } : r
@@ -31,6 +41,7 @@ export default function Antenna({
 
   const handleMouseDown = useCallback((e) => {
     if (e.button !== 0) return;
+    if (e.target.tagName === 'INPUT') return;
     if (onMouseDown) onMouseDown(e, id);
   }, [onMouseDown, id]);
 
@@ -79,6 +90,7 @@ export default function Antenna({
 
       {/* Input de operación (arriba) */}
       <input
+        ref={operationInputRef}
         value={operation}
         onChange={handleOperationChange}
         onClick={(e) => e.stopPropagation()}
@@ -95,6 +107,9 @@ export default function Antenna({
           fontWeight: 700,
           color: '#1e293b',
           outline: 'none',
+          boxShadow: 'none',
+          WebkitAppearance: 'none',
+          MozAppearance: 'none',
           padding: 0,
           fontFamily: 'inherit',
         }}
@@ -121,6 +136,9 @@ export default function Antenna({
                 fontWeight: 500,
                 color: '#334155',
                 outline: 'none',
+                boxShadow: 'none',
+                WebkitAppearance: 'none',
+                MozAppearance: 'none',
                 padding: '0 8px 0 4px',
                 fontFamily: 'inherit',
               }}
@@ -140,6 +158,9 @@ export default function Antenna({
                 fontWeight: 500,
                 color: '#334155',
                 outline: 'none',
+                boxShadow: 'none',
+                WebkitAppearance: 'none',
+                MozAppearance: 'none',
                 padding: '0 4px 0 8px',
                 fontFamily: 'inherit',
               }}
