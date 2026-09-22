@@ -16,15 +16,21 @@ export default function Antenna({
   const halfW = ANTENNA_COL_WIDTH + 4;
   const totalWidth = halfW * 2;
 
+  const [isEditing, setIsEditing] = useState(false);
   const operationInputRef = useRef(null);
-  const mountedRef = useRef(false);
+
+  const handleDoubleClick = useCallback((e) => {
+    if (e.target.tagName === 'INPUT') return;
+    e.preventDefault();
+    e.stopPropagation();
+    setIsEditing(prev => !prev);
+  }, []);
 
   useEffect(() => {
-    if (!mountedRef.current && operationInputRef.current) {
-      mountedRef.current = true;
-      setTimeout(() => operationInputRef.current?.focus(), 50);
+    if (isEditing && operationInputRef.current) {
+      operationInputRef.current.focus();
     }
-  }, []);
+  }, [isEditing]);
 
   const handleCellChange = (rowIndex, side, value) => {
     const newRows = rows.map((r, i) =>
@@ -37,13 +43,11 @@ export default function Antenna({
     onUpdate(id, { operation: e.target.value });
   };
 
-  const dragHandleRef = useRef(null);
-
   const handleMouseDown = useCallback((e) => {
     if (e.button !== 0) return;
-    if (e.target.tagName === 'INPUT') return;
+    if (isEditing && e.target.tagName === 'INPUT') return;
     if (onMouseDown) onMouseDown(e, id);
-  }, [onMouseDown, id]);
+  }, [onMouseDown, id, isEditing]);
 
   const handleContext = useCallback((e) => {
     e.preventDefault();
@@ -51,10 +55,12 @@ export default function Antenna({
     if (onContextMenu) onContextMenu(e, id);
   }, [onContextMenu, id]);
 
+  const inputBg = isEditing ? 'rgba(255,255,255,0.9)' : 'transparent';
+
   return (
     <div
-      ref={dragHandleRef}
       onMouseDown={handleMouseDown}
+      onDoubleClick={handleDoubleClick}
       onContextMenu={handleContext}
       style={{
         position: 'absolute',
@@ -62,7 +68,7 @@ export default function Antenna({
         top: y,
         width: totalWidth,
         height: totalHeight,
-        cursor: isSelected ? 'grabbing' : 'grab',
+        cursor: isEditing ? 'text' : (isSelected ? 'grabbing' : 'grab'),
         userSelect: 'none',
         zIndex: isSelected ? 50 : 40,
       }}
@@ -72,14 +78,12 @@ export default function Antenna({
         style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
         viewBox={`0 0 ${totalWidth} ${totalHeight}`}
       >
-        {/* Línea horizontal superior */}
         <line
           x1={0} y1={ANTENNA_TOP_HEIGHT / 2}
           x2={totalWidth} y2={ANTENNA_TOP_HEIGHT / 2}
           stroke={ANT_LINE_COLOR}
           strokeWidth={3}
         />
-        {/* Línea vertical central */}
         <line
           x1={halfW} y1={ANTENNA_TOP_HEIGHT / 2}
           x2={halfW} y2={totalHeight - 4}
@@ -89,47 +93,46 @@ export default function Antenna({
       </svg>
 
       {/* Input de operación (arriba) */}
-      <input
-        ref={operationInputRef}
-        value={operation}
-        onChange={handleOperationChange}
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          position: 'absolute',
-          left: 0,
-          top: 0,
-          width: '100%',
-          height: ANTENNA_TOP_HEIGHT,
-          background: 'rgba(239, 68, 68, 0.08)',
-          border: 'none',
-          textAlign: 'center',
-          fontSize: 15,
-          fontWeight: 700,
-          color: '#1e293b',
-          outline: 'none',
-          boxShadow: 'none',
-          WebkitAppearance: 'none',
-          MozAppearance: 'none',
-          padding: 0,
-          fontFamily: 'inherit',
-        }}
-      />
+      {isEditing && (
+        <input
+          ref={operationInputRef}
+          value={operation}
+          onChange={handleOperationChange}
+          onPointerDown={(e) => e.stopPropagation()}
+          style={{
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            width: '100%',
+            height: ANTENNA_TOP_HEIGHT,
+            background: inputBg,
+            border: 'none',
+            textAlign: 'center',
+            fontSize: 15,
+            fontWeight: 700,
+            color: '#1e293b',
+            outline: 'none',
+            boxShadow: 'none',
+            padding: 0,
+            fontFamily: 'inherit',
+          }}
+        />
+      )}
 
       {/* Celdas izquierda y derecha */}
-      {Array.from({ length: ROWS }).map((_, i) => {
+      {isEditing && Array.from({ length: ROWS }).map((_, i) => {
         const yPos = ANTENNA_TOP_HEIGHT + i * ANTENNA_ROW_HEIGHT;
         const row = rows[i] || { left: '', right: '' };
         return (
           <div key={i} style={{ position: 'absolute', left: 0, top: yPos, width: '100%', height: ANTENNA_ROW_HEIGHT, display: 'flex' }}>
-            {/* Input izquierdo */}
             <input
               value={row.left}
               onChange={(e) => handleCellChange(i, 'left', e.target.value)}
-              onClick={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
               style={{
                 width: halfW - 6,
                 height: '100%',
-                background: 'rgba(239, 68, 68, 0.08)',
+                background: inputBg,
                 border: 'none',
                 textAlign: 'right',
                 fontSize: 13,
@@ -137,21 +140,18 @@ export default function Antenna({
                 color: '#334155',
                 outline: 'none',
                 boxShadow: 'none',
-                WebkitAppearance: 'none',
-                MozAppearance: 'none',
                 padding: '0 8px 0 4px',
                 fontFamily: 'inherit',
               }}
             />
-            {/* Input derecho */}
             <input
               value={row.right}
               onChange={(e) => handleCellChange(i, 'right', e.target.value)}
-              onClick={(e) => e.stopPropagation()}
+              onPointerDown={(e) => e.stopPropagation()}
               style={{
                 width: halfW - 6,
                 height: '100%',
-                background: 'rgba(239, 68, 68, 0.08)',
+                background: inputBg,
                 border: 'none',
                 textAlign: 'left',
                 fontSize: 13,
@@ -159,8 +159,6 @@ export default function Antenna({
                 color: '#334155',
                 outline: 'none',
                 boxShadow: 'none',
-                WebkitAppearance: 'none',
-                MozAppearance: 'none',
                 padding: '0 4px 0 8px',
                 fontFamily: 'inherit',
               }}
