@@ -214,6 +214,7 @@ body {
   position: relative;
   overflow: hidden;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background-size: 200% 200%;
 }
 .btn-epic::before {
   content: '';
@@ -226,6 +227,8 @@ body {
 }
 .btn-epic:hover {
   transform: translateY(-2px) scale(1.05);
+  background-size: 200% 200%;
+  animation: gradientShift 2s ease infinite;
 }
 .btn-epic:hover::before {
   opacity: 1;
@@ -235,33 +238,66 @@ body {
   transition-duration: 0.1s;
 }
 
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
 /* Colores de glow por categoría */
 .btn-epic.kubika-glow:hover {
-  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.45), 0 0 40px rgba(99, 102, 241, 0.15);
+  background: linear-gradient(135deg, #6366f1, #818cf8, #a78bfa, #818cf8, #6366f1);
+  background-size: 200% 200%;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.5), 0 0 40px rgba(99, 102, 241, 0.2);
+  color: white;
 }
 .btn-epic.purple-glow:hover {
-  box-shadow: 0 4px 20px rgba(168, 85, 247, 0.45), 0 0 40px rgba(168, 85, 247, 0.15);
+  background: linear-gradient(135deg, #9333ea, #a855f7, #c084fc, #a855f7, #9333ea);
+  background-size: 200% 200%;
+  box-shadow: 0 4px 20px rgba(168, 85, 247, 0.5), 0 0 40px rgba(168, 85, 247, 0.2);
+  color: white;
 }
 .btn-epic.orange-glow:hover {
-  box-shadow: 0 4px 20px rgba(249, 115, 22, 0.45), 0 0 40px rgba(249, 115, 22, 0.15);
+  background: linear-gradient(135deg, #ea580c, #f97316, #fb923c, #f97316, #ea580c);
+  background-size: 200% 200%;
+  box-shadow: 0 4px 20px rgba(249, 115, 22, 0.5), 0 0 40px rgba(249, 115, 22, 0.2);
+  color: white;
 }
 .btn-epic.amber-glow:hover {
-  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.45), 0 0 40px rgba(245, 158, 11, 0.15);
+  background: linear-gradient(135deg, #d97706, #f59e0b, #fbbf24, #f59e0b, #d97706);
+  background-size: 200% 200%;
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.5), 0 0 40px rgba(245, 158, 11, 0.2);
+  color: white;
 }
 .btn-epic.emerald-glow:hover {
-  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.45), 0 0 40px rgba(16, 185, 129, 0.15);
+  background: linear-gradient(135deg, #059669, #10b981, #34d399, #10b981, #059669);
+  background-size: 200% 200%;
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.5), 0 0 40px rgba(16, 185, 129, 0.2);
+  color: white;
 }
 .btn-epic.rose-glow:hover {
-  box-shadow: 0 4px 20px rgba(244, 63, 94, 0.45), 0 0 40px rgba(244, 63, 94, 0.15);
+  background: linear-gradient(135deg, #e11d48, #f43f5e, #fb7185, #f43f5e, #e11d48);
+  background-size: 200% 200%;
+  box-shadow: 0 4px 20px rgba(244, 63, 94, 0.5), 0 0 40px rgba(244, 63, 94, 0.2);
+  color: white;
 }
 .btn-epic.red-glow:hover {
-  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.45), 0 0 40px rgba(239, 68, 68, 0.15);
+  background: linear-gradient(135deg, #dc2626, #ef4444, #f87171, #ef4444, #dc2626);
+  background-size: 200% 200%;
+  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.5), 0 0 40px rgba(239, 68, 68, 0.2);
+  color: white;
 }
 .btn-epic.slate-glow:hover {
-  box-shadow: 0 4px 20px rgba(100, 116, 139, 0.35), 0 0 40px rgba(100, 116, 139, 0.1);
+  background: linear-gradient(135deg, #475569, #64748b, #94a3b8, #64748b, #475569);
+  background-size: 200% 200%;
+  box-shadow: 0 4px 20px rgba(100, 116, 139, 0.4), 0 0 40px rgba(100, 116, 139, 0.15);
+  color: white;
 }
 .btn-epic.indigo-glow:hover {
-  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.5), 0 0 40px rgba(99, 102, 241, 0.2);
+  background: linear-gradient(135deg, #4f46e5, #6366f1, #818cf8, #6366f1, #4f46e5);
+  background-size: 200% 200%;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.55), 0 0 40px rgba(99, 102, 241, 0.25);
+  color: white;
 }
 
 /* Shine sweep en hover */
@@ -272,7 +308,7 @@ body {
   left: -60%;
   width: 40%;
   height: 200%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
   transform: skewX(-20deg);
   transition: left 0.5s ease;
   pointer-events: none;
