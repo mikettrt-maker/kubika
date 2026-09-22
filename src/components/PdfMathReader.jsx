@@ -1420,7 +1420,7 @@ export default function PdfMathReader({ libro, onBack }) {
           <button onClick={() => setActiveTool('eraser')}
             className={`btn-icon btn-ripple flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-200 group ${activeTool === 'eraser' ? 'bg-red-100 text-red-700 shadow-sm ring-2 ring-red-300' : ''}`}>
             <svg className="w-6 h-6 text-red-400 group-hover:scale-125 group-hover:text-red-600 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
             </svg>
           </button>
           <span className="kubika-tooltip">Borrador</span>
@@ -1467,17 +1467,6 @@ export default function PdfMathReader({ libro, onBack }) {
             </svg>
           </button>
           <span className="kubika-tooltip">Regletas</span>
-        </div>
-
-        <div className="header-divider" />
-        <div className="kubika-tooltip-wrapper">
-          <button onClick={clearCanvas}
-            className="btn-icon btn-ripple flex items-center justify-center w-9 h-9 rounded-xl hover:bg-red-50 transition-all duration-200 group">
-            <svg className="w-6 h-6 text-red-400 group-hover:scale-125 group-hover:text-red-600 transition-all duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-            </svg>
-          </button>
-          <span className="kubika-tooltip">Limpiar todo</span>
         </div>
 
         <div className="header-divider" />
@@ -1628,8 +1617,7 @@ export default function PdfMathReader({ libro, onBack }) {
           {freeTexts.map(ft => (
             <div key={ft.id}
               className="absolute z-30"
-              style={{ left: ft.x, top: ft.y, pointerEvents: 'auto' }}
-              onPointerDown={(e) => handlePointerDownOnFreeText(e, ft.id)}>
+              style={{ left: ft.x, top: ft.y, pointerEvents: 'auto' }}>
               <FreeTextBox
                 id={ft.id}
                 initialText={ft.text}
@@ -1637,6 +1625,7 @@ export default function PdfMathReader({ libro, onBack }) {
                 initialBold={ft.bold}
                 onUpdate={handleFreeTextUpdate}
                 isSelected={selectedId === ft.id}
+                onPointerDown={(e) => handlePointerDownOnFreeText(e, ft.id)}
               />
             </div>
           ))}
