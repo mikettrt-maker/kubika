@@ -47,6 +47,14 @@ export default function Antenna({
 
   const handleMouseDown = useCallback((e) => {
     if (e.button !== 0) return;
+    if (isEditing && e.target.tagName === 'INPUT') return;
+    if (onMouseDown) onMouseDown(e, id);
+  }, [onMouseDown, id, isEditing]);
+
+  const handleDragHandleDown = useCallback((e) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
     if (onMouseDown) onMouseDown(e, id);
   }, [onMouseDown, id]);
 
@@ -73,6 +81,22 @@ export default function Antenna({
         background: 'transparent',
       }}
     >
+      {/* Barra de arrastre (siempre visible, encima de todo) */}
+      <div
+        onMouseDown={handleDragHandleDown}
+        style={{
+          position: 'absolute',
+          left: totalWidth / 2 - 16,
+          top: -10,
+          width: 32,
+          height: 10,
+          borderRadius: '4px 4px 0 0',
+          background: 'rgba(239,68,68,0.5)',
+          cursor: 'grab',
+          zIndex: 10,
+        }}
+      />
+
       <svg
         style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 1 }}
         viewBox={`0 0 ${totalWidth} ${totalHeight}`}
