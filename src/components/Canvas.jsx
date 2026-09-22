@@ -941,106 +941,135 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
                 />
               </div>
             ))}
-
-            {/* Quad preview during drag */}
-            {quadPreview && quadPreview.width > 2 && quadPreview.height > 2 && (
-              <div
-                className="absolute z-20 pointer-events-none"
-                style={{
-                  left: quadPreview.x,
-                  top: quadPreview.y,
-                  width: quadPreview.width,
-                  height: quadPreview.height,
-                  backgroundColor: quadPreview.fill,
-                  opacity: 0.6,
-                  border: `2px solid ${quadPreview.fill}`,
-                  borderRadius: '2px',
-                }}
-              />
-            )}
-
-            {/* Quad overlays */}
-            {quads.map(q => (
-              <div key={q.id}
-                data-quad-id={q.id}
-                className="absolute z-30"
-                style={{ left: q.x, top: q.y, width: q.width, height: q.height, pointerEvents: 'auto' }}>
-                <div
-                  onPointerDown={(e) => handlePointerDownOnQuad(e, q.id)}
-                  onContextMenu={(e) => handleQuadContextMenu(e, q.id)}
-                  className="w-full h-full cursor-grab active:cursor-grabbing"
-                  style={{
-                    backgroundColor: q.fill,
-                    opacity: 0.6,
-                    border: `2px solid ${q.fill}`,
-                    borderRadius: '2px',
-                  }}
-                />
-                {selectedId === q.id && (
-                  <>
-                    <div onPointerDown={(e) => handleQuadResize(e, q.id, 'nw')} className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-slate-500 rounded-sm cursor-nw-resize z-40" />
-                    <div onPointerDown={(e) => handleQuadResize(e, q.id, 'ne')} className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-slate-500 rounded-sm cursor-ne-resize z-40" />
-                    <div onPointerDown={(e) => handleQuadResize(e, q.id, 'sw')} className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-slate-500 rounded-sm cursor-sw-resize z-40" />
-                    <div onPointerDown={(e) => handleQuadResize(e, q.id, 'se')} className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-slate-500 rounded-sm cursor-se-resize z-40" />
-                    <div onPointerDown={(e) => handleQuadResize(e, q.id, 'n')} className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-8 h-3 bg-white border-2 border-slate-400 rounded-sm cursor-n-resize z-40" />
-                    <div onPointerDown={(e) => handleQuadResize(e, q.id, 's')} className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-8 h-3 bg-white border-2 border-slate-400 rounded-sm cursor-s-resize z-40" />
-                    <div onPointerDown={(e) => handleQuadResize(e, q.id, 'w')} className="absolute top-1/2 -left-1.5 -translate-y-1/2 w-3 h-8 bg-white border-2 border-slate-400 rounded-sm cursor-w-resize z-40" />
-                    <div onPointerDown={(e) => handleQuadResize(e, q.id, 'e')} className="absolute top-1/2 -right-1.5 -translate-y-1/2 w-3 h-8 bg-white border-2 border-slate-400 rounded-sm cursor-e-resize z-40" />
-                  </>
-                )}
-              </div>
-            ))}
-
-            {/* Polygon overlays */}
-            {polygons.map(p => {
-              const bounds = getPolygonBounds(p.points);
-              const w = bounds.maxX - bounds.minX;
-              const h = bounds.maxY - bounds.minY;
-              const pts = p.points.map(pt => `${pt.x - bounds.minX},${pt.y - bounds.minY}`).join(' ');
-              return (
-                <div key={p.id}
-                  data-poly-id={p.id}
-                  className="absolute z-30"
-                  style={{ left: bounds.minX, top: bounds.minY, width: w, height: h, pointerEvents: 'auto' }}>
-                  <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-full cursor-grab active:cursor-grabbing"
-                    onPointerDown={(e) => handlePointerDownOnPolygon(e, p.id)}
-                    onContextMenu={(e) => handlePolygonContextMenu(e, p.id)}
-                    style={{ overflow: 'visible' }}>
-                    <polygon points={pts}
-                      fill={p.fill} fillOpacity={0.6}
-                      stroke={p.fill} strokeWidth={2} strokeLinejoin="round" />
-                  </svg>
-                  {selectedId === p.id && (
-                    <>
-                      <div onPointerDown={(e) => handlePolygonResize(e, p.id, 'nw')} className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-slate-500 rounded-sm cursor-nw-resize z-40" />
-                      <div onPointerDown={(e) => handlePolygonResize(e, p.id, 'ne')} className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-slate-500 rounded-sm cursor-ne-resize z-40" />
-                      <div onPointerDown={(e) => handlePolygonResize(e, p.id, 'sw')} className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-slate-500 rounded-sm cursor-sw-resize z-40" />
-                      <div onPointerDown={(e) => handlePolygonResize(e, p.id, 'se')} className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-slate-500 rounded-sm cursor-se-resize z-40" />
-                      <div onPointerDown={(e) => handlePolygonResize(e, p.id, 'n')} className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-8 h-3 bg-white border-2 border-slate-400 rounded-sm cursor-n-resize z-40" />
-                      <div onPointerDown={(e) => handlePolygonResize(e, p.id, 's')} className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-8 h-3 bg-white border-2 border-slate-400 rounded-sm cursor-s-resize z-40" />
-                      <div onPointerDown={(e) => handlePolygonResize(e, p.id, 'w')} className="absolute top-1/2 -left-1.5 -translate-y-1/2 w-3 h-8 bg-white border-2 border-slate-400 rounded-sm cursor-w-resize z-40" />
-                      <div onPointerDown={(e) => handlePolygonResize(e, p.id, 'e')} className="absolute top-1/2 -right-1.5 -translate-y-1/2 w-3 h-8 bg-white border-2 border-slate-400 rounded-sm cursor-e-resize z-40" />
-                    </>
-                  )}
-                </div>
-              );
-            })}
-
-            {/* Polygon drawing preview */}
-            {activeTool === 'polygon' && polygonPoints.length > 0 && (
-              <svg className="absolute inset-0 w-full h-full z-25 pointer-events-none"
-                style={{ overflow: 'visible' }}>
-                <polyline
-                  points={polygonPoints.map(pt => `${pt.x},${pt.y}`).join(' ')}
-                  fill="none" stroke={quadFill} strokeWidth={2} strokeDasharray="6,3" />
-                {polygonPoints.map((pt, i) => (
-                  <circle key={i} cx={pt.x} cy={pt.y} r={i === 0 ? 6 : 4}
-                    fill={i === 0 ? quadFill : 'white'} stroke={quadFill} strokeWidth={2}
-                    style={i === 0 ? { cursor: 'pointer' } : {}} />
-                ))}
-              </svg>
-            )}
           </>
+        )}
+
+        {/* Modo Geoplano: pivotes + bandas */}
+        {toolMode === 'geoplano' && (
+          <GeoplanoOverlay
+            pivots={geoPivots}
+            manualPivots={manualPivots || []}
+            bands={geoBands || []}
+            selectedPivotId={selectedPivotId}
+            onPivotClick={onGeoPivotClick}
+            onBandContextMenu={onGeoBandContext}
+            onCanvasClick={handleCanvasClick}
+            isInsertingPivot={isInsertingPivot}
+            onInsertPivot={onInsertPivot}
+            onDeleteManualPivot={onDeleteManualPivot}
+          />
+        )}
+
+        {/* Antenas (visibles en todos los modos) */}
+        {antennas.map((antenna) => (
+          <div key={antenna.id} data-antenna-id={antenna.id}>
+            <Antenna
+              antenna={antenna}
+              isSelected={selectedId === antenna.id}
+              onMouseDown={handleMouseDownOnAntenna}
+              onContextMenu={handleAntennaContextMenu}
+              onUpdate={onAntennaUpdate}
+            />
+          </div>
+        ))}
+
+        {/* Quad preview during drag */}
+        {quadPreview && quadPreview.width > 2 && quadPreview.height > 2 && (
+          <div
+            className="absolute z-20 pointer-events-none"
+            style={{
+              left: quadPreview.x,
+              top: quadPreview.y,
+              width: quadPreview.width,
+              height: quadPreview.height,
+              backgroundColor: quadPreview.fill,
+              opacity: 0.6,
+              border: `2px solid ${quadPreview.fill}`,
+              borderRadius: '2px',
+            }}
+          />
+        )}
+
+        {/* Cuadrilateros (visibles en todos los modos) */}
+        {quads.map(q => (
+          <div key={q.id}
+            data-quad-id={q.id}
+            className="absolute z-30"
+            style={{ left: q.x, top: q.y, width: q.width, height: q.height, pointerEvents: 'auto' }}>
+            <div
+              onPointerDown={(e) => handlePointerDownOnQuad(e, q.id)}
+              onContextMenu={(e) => handleQuadContextMenu(e, q.id)}
+              className="w-full h-full cursor-grab active:cursor-grabbing"
+              style={{
+                backgroundColor: q.fill,
+                opacity: 0.6,
+                border: `2px solid ${q.fill}`,
+                borderRadius: '2px',
+              }}
+            />
+            {selectedId === q.id && (
+              <>
+                <div onPointerDown={(e) => handleQuadResize(e, q.id, 'nw')} className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-slate-500 rounded-sm cursor-nw-resize z-40" />
+                <div onPointerDown={(e) => handleQuadResize(e, q.id, 'ne')} className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-slate-500 rounded-sm cursor-ne-resize z-40" />
+                <div onPointerDown={(e) => handleQuadResize(e, q.id, 'sw')} className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-slate-500 rounded-sm cursor-sw-resize z-40" />
+                <div onPointerDown={(e) => handleQuadResize(e, q.id, 'se')} className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-slate-500 rounded-sm cursor-se-resize z-40" />
+                <div onPointerDown={(e) => handleQuadResize(e, q.id, 'n')} className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-8 h-3 bg-white border-2 border-slate-400 rounded-sm cursor-n-resize z-40" />
+                <div onPointerDown={(e) => handleQuadResize(e, q.id, 's')} className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-8 h-3 bg-white border-2 border-slate-400 rounded-sm cursor-s-resize z-40" />
+                <div onPointerDown={(e) => handleQuadResize(e, q.id, 'w')} className="absolute top-1/2 -left-1.5 -translate-y-1/2 w-3 h-8 bg-white border-2 border-slate-400 rounded-sm cursor-w-resize z-40" />
+                <div onPointerDown={(e) => handleQuadResize(e, q.id, 'e')} className="absolute top-1/2 -right-1.5 -translate-y-1/2 w-3 h-8 bg-white border-2 border-slate-400 rounded-sm cursor-e-resize z-40" />
+              </>
+            )}
+          </div>
+        ))}
+
+        {/* Poligonos (visibles en todos los modos) */}
+        {polygons.map(p => {
+          const bounds = getPolygonBounds(p.points);
+          const w = bounds.maxX - bounds.minX;
+          const h = bounds.maxY - bounds.minY;
+          const pts = p.points.map(pt => `${pt.x - bounds.minX},${pt.y - bounds.minY}`).join(' ');
+          return (
+            <div key={p.id}
+              data-poly-id={p.id}
+              className="absolute z-30"
+              style={{ left: bounds.minX, top: bounds.minY, width: w, height: h, pointerEvents: 'auto' }}>
+              <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-full cursor-grab active:cursor-grabbing"
+                onPointerDown={(e) => handlePointerDownOnPolygon(e, p.id)}
+                onContextMenu={(e) => handlePolygonContextMenu(e, p.id)}
+                style={{ overflow: 'visible' }}>
+                <polygon points={pts}
+                  fill={p.fill} fillOpacity={0.6}
+                  stroke={p.fill} strokeWidth={2} strokeLinejoin="round" />
+              </svg>
+              {selectedId === p.id && (
+                <>
+                  <div onPointerDown={(e) => handlePolygonResize(e, p.id, 'nw')} className="absolute -top-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-slate-500 rounded-sm cursor-nw-resize z-40" />
+                  <div onPointerDown={(e) => handlePolygonResize(e, p.id, 'ne')} className="absolute -top-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-slate-500 rounded-sm cursor-ne-resize z-40" />
+                  <div onPointerDown={(e) => handlePolygonResize(e, p.id, 'sw')} className="absolute -bottom-1.5 -left-1.5 w-3 h-3 bg-white border-2 border-slate-500 rounded-sm cursor-sw-resize z-40" />
+                  <div onPointerDown={(e) => handlePolygonResize(e, p.id, 'se')} className="absolute -bottom-1.5 -right-1.5 w-3 h-3 bg-white border-2 border-slate-500 rounded-sm cursor-se-resize z-40" />
+                  <div onPointerDown={(e) => handlePolygonResize(e, p.id, 'n')} className="absolute -top-1.5 left-1/2 -translate-x-1/2 w-8 h-3 bg-white border-2 border-slate-400 rounded-sm cursor-n-resize z-40" />
+                  <div onPointerDown={(e) => handlePolygonResize(e, p.id, 's')} className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-8 h-3 bg-white border-2 border-slate-400 rounded-sm cursor-s-resize z-40" />
+                  <div onPointerDown={(e) => handlePolygonResize(e, p.id, 'w')} className="absolute top-1/2 -left-1.5 -translate-y-1/2 w-3 h-8 bg-white border-2 border-slate-400 rounded-sm cursor-w-resize z-40" />
+                  <div onPointerDown={(e) => handlePolygonResize(e, p.id, 'e')} className="absolute top-1/2 -right-1.5 -translate-y-1/2 w-3 h-8 bg-white border-2 border-slate-400 rounded-sm cursor-e-resize z-40" />
+                </>
+              )}
+            </div>
+          );
+        })}
+
+        {/* Polygon drawing preview */}
+        {activeTool === 'polygon' && polygonPoints.length > 0 && (
+          <svg className="absolute inset-0 w-full h-full z-25 pointer-events-none"
+            style={{ overflow: 'visible' }}>
+            <polyline
+              points={polygonPoints.map(pt => `${pt.x},${pt.y}`).join(' ')}
+              fill="none" stroke={quadFill} strokeWidth={2} strokeDasharray="6,3" />
+            {polygonPoints.map((pt, i) => (
+              <circle key={i} cx={pt.x} cy={pt.y} r={i === 0 ? 6 : 4}
+                fill={i === 0 ? quadFill : 'white'} stroke={quadFill} strokeWidth={2}
+                style={i === 0 ? { cursor: 'pointer' } : {}} />
+            ))}
+          </svg>
         )}
 
         {/* Modo Geoplano: pivotes + bandas */}
@@ -1074,7 +1103,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
 
         {/* Mensaje de bienvenida según el modo activo */}
         {((toolMode === 'regletas' && rods.length === 0 && mathTexts.length === 0 && freeTexts.length === 0 && antennas.length === 0 && quads.length === 0 && polygons.length === 0) ||
-          (toolMode === 'geoplano' && geoBands.length === 0 && (manualPivots || []).length === 0 && antennas.length === 0)) && (
+          (toolMode === 'geoplano' && geoBands.length === 0 && (manualPivots || []).length === 0 && antennas.length === 0 && quads.length === 0 && polygons.length === 0)) && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="text-center animate-pulse-soft">
               {toolMode === 'geoplano' ? (
