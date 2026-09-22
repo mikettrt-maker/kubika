@@ -10,9 +10,15 @@ import SaveLoadModal from './components/SaveLoadModal';
 import SplashScreen from './components/SplashScreen';
 import Biblioteca from './components/Biblioteca';
 import PdfMathReader from './components/PdfMathReader';
-import { generateMathId, generateAntennaId, createAntennaRows } from './utils/rods';
+import { RODS, generateMathId, generateAntennaId, createAntennaRows } from './utils/rods';
 import { generatePivotId, generateBandId, generateManualPivotId, getRectPivots, getCirclePivots, BAND_COLORS } from './utils/geoplano';
 import { exportToPdf } from './utils/exportPdf';
+
+const QUAD_COLORS = RODS.map(r => ({ name: r.name, value: r.color }));
+let _quadIdCounter = 0;
+function genQuadId() { return 'qd_' + Date.now() + '_' + (++_quadIdCounter); }
+let _polyIdCounter = 0;
+function genPolyId() { return 'pg_' + Date.now() + '_' + (++_polyIdCounter); }
 
 /**
  * App - Componente raíz de Kubika.
@@ -36,6 +42,11 @@ export default function App() {
   const [mathTexts, setMathTexts] = useState([]);
   const [freeTexts, setFreeTexts] = useState([]);
   const [antennas, setAntennas] = useState([]);
+  const [quads, setQuads] = useState([]);
+  const [polygons, setPolygons] = useState([]);
+  const [activeTool, setActiveTool] = useState('pen');
+  const [quadFill, setQuadFill] = useState('#E74C3C');
+  const [showQuadColorPicker, setShowQuadColorPicker] = useState(false);
   const canvasRef = useRef(null);
   const [splashDone, setSplashDone] = useState(false);
   const [showLoginSplash, setShowLoginSplash] = useState(false);
@@ -197,6 +208,12 @@ export default function App() {
         operation: a.operation,
         rows: a.rows.map(r => ({ left: r.left, right: r.right })),
       })),
+      quads: quads.map(q => ({
+        id: q.id, x: q.x, y: q.y, width: q.width, height: q.height, fill: q.fill,
+      })),
+      polygons: polygons.map(p => ({
+        id: p.id, points: p.points, fill: p.fill,
+      })),
       geoMode: geoMode,
       manualPivots: manualPivots.map(p => ({ id: p.id, x: p.x, y: p.y })),
       geoBands: geoBands.map(b => ({
@@ -227,6 +244,8 @@ export default function App() {
       setMathTexts(state.mathTexts || []);
       setFreeTexts(state.freeTexts || []);
       setAntennas(state.antennas || []);
+      setQuads(state.quads || []);
+      setPolygons(state.polygons || []);
       if (state.geoMode) {
         setGeoMode(state.geoMode);
         setGeoPivots(state.geoMode === 'rect' ? getRectPivots() : getCirclePivots());
@@ -313,12 +332,14 @@ export default function App() {
 
   // ========== LIMPIAR LIENZO ==========
   const handleClear = () => {
-    if (rods.length === 0 && mathTexts.length === 0 && freeTexts.length === 0 && antennas.length === 0 && geoBands.length === 0 && manualPivots.length === 0) return;
+    if (rods.length === 0 && mathTexts.length === 0 && freeTexts.length === 0 && antennas.length === 0 && quads.length === 0 && polygons.length === 0 && geoBands.length === 0 && manualPivots.length === 0) return;
     if (confirm('¿Limpiar todo el lienzo? Se perderán los cambios no guardados.')) {
       setRods([]);
       setMathTexts([]);
       setFreeTexts([]);
       setAntennas([]);
+      setQuads([]);
+      setPolygons([]);
       setGeoBands([]);
       setManualPivots([]);
       setSelectedPivotId(null);
@@ -474,6 +495,54 @@ export default function App() {
             <span className="kubika-tooltip">Antena mental</span>
           </div>
 
+          {/* Cuadrilátero */}
+          <div className="kubika-tooltip-wrapper relative">
+            <button
+              onClick={() => { setActiveTool(a => a === 'quad' ? 'pen' : 'quad'); setShowQuadColorPicker(false); }}
+              className={`btn-icon btn-ripple flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-200 group ${activeTool === 'quad' ? 'bg-amber-100 text-amber-700 shadow-sm ring-2 ring-amber-300' : ''}`}
+            >
+              <svg className="w-5 h-5" fill={activeTool === 'quad' ? quadFill : 'none'} viewBox="0 0 24 24" stroke={activeTool === 'quad' ? quadFill : 'currentColor'}>
+                <rect x={3} y={5} width={18} height={14} rx={2} strokeWidth={1.5} />
+              </svg>
+            </button>
+            <span className="kubika-tooltip">Cuadrilátero</span>
+            {activeTool === 'quad' && (
+              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 flex gap-1 bg-white rounded-xl shadow-lg border border-slate-200 p-2 z-50">
+                {QUAD_COLORS.map(c => (
+                  <button key={c.value}
+                    onClick={(e) => { e.stopPropagation(); setQuadFill(c.value); setShowQuadColorPicker(false); }}
+                    className="w-6 h-6 rounded-full border-2 transition-all hover:scale-110"
+                    style={{ backgroundColor: c.value, borderColor: quadFill === c.value ? '#d97706' : '#e2e8f0' }}
+                    title={c.name} />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Polígono */}
+          <div className="kubika-tooltip-wrapper relative">
+            <button
+              onClick={() => { setActiveTool(a => a === 'polygon' ? 'pen' : 'polygon'); }}
+              className={`btn-icon btn-ripple flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-200 group ${activeTool === 'polygon' ? 'bg-emerald-100 text-emerald-700 shadow-sm ring-2 ring-emerald-300' : ''}`}
+            >
+              <svg className="w-5 h-5" fill={activeTool === 'polygon' ? quadFill : 'none'} viewBox="0 0 24 24" stroke={activeTool === 'polygon' ? quadFill : 'currentColor'}>
+                <polygon points="12,3 21,10 18,20 6,20 3,10" strokeWidth={1.5} strokeLinejoin="round" />
+              </svg>
+            </button>
+            <span className="kubika-tooltip">Polígono</span>
+            {activeTool === 'polygon' && (
+              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 flex gap-1 bg-white rounded-xl shadow-lg border border-slate-200 p-2 z-50">
+                {QUAD_COLORS.map(c => (
+                  <button key={c.value}
+                    onClick={(e) => { e.stopPropagation(); setQuadFill(c.value); setShowQuadColorPicker(false); }}
+                    className="w-6 h-6 rounded-full border-2 transition-all hover:scale-110"
+                    style={{ backgroundColor: c.value, borderColor: quadFill === c.value ? '#059669' : '#e2e8f0' }}
+                    title={c.name} />
+                ))}
+              </div>
+            )}
+          </div>
+
           {/* Separador */}
           <div className="header-divider" />
 
@@ -606,7 +675,7 @@ export default function App() {
             </svg>
             Biblioteca
           </button>
-          <span className="ml-1 px-1.5 py-0.5 text-[9px] font-bold bg-slate-200 text-slate-500 rounded-md leading-none select-none" title="Versión de la aplicación">v2.6.3</span>
+          <span className="ml-1 px-1.5 py-0.5 text-[9px] font-bold bg-slate-200 text-slate-500 rounded-md leading-none select-none" title="Versión de la aplicación">v2.7.0</span>
         </div>
 
       </header>
@@ -656,6 +725,16 @@ export default function App() {
           isInsertingPivot={isInsertingPivot}
           onInsertPivot={handleInsertPivot}
           onDeleteManualPivot={handleDeleteManualPivot}
+          quads={quads}
+          setQuads={setQuads}
+          polygons={polygons}
+          setPolygons={setPolygons}
+          activeTool={activeTool}
+          setActiveTool={setActiveTool}
+          quadFill={quadFill}
+          setQuadFill={setQuadFill}
+          genQuadId={genQuadId}
+          genPolyId={genPolyId}
         />
       </div>
 
