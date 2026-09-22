@@ -209,6 +209,78 @@ body {
          active:scale-90 transition-all duration-200;
 }
 
+/* ========== Botón épico con glow ========== */
+.btn-epic {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-epic::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.btn-epic:hover {
+  transform: translateY(-2px) scale(1.05);
+}
+.btn-epic:hover::before {
+  opacity: 1;
+}
+.btn-epic:active {
+  transform: translateY(0) scale(0.92);
+  transition-duration: 0.1s;
+}
+
+/* Colores de glow por categoría */
+.btn-epic.kubika-glow:hover {
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.45), 0 0 40px rgba(99, 102, 241, 0.15);
+}
+.btn-epic.purple-glow:hover {
+  box-shadow: 0 4px 20px rgba(168, 85, 247, 0.45), 0 0 40px rgba(168, 85, 247, 0.15);
+}
+.btn-epic.orange-glow:hover {
+  box-shadow: 0 4px 20px rgba(249, 115, 22, 0.45), 0 0 40px rgba(249, 115, 22, 0.15);
+}
+.btn-epic.amber-glow:hover {
+  box-shadow: 0 4px 20px rgba(245, 158, 11, 0.45), 0 0 40px rgba(245, 158, 11, 0.15);
+}
+.btn-epic.emerald-glow:hover {
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.45), 0 0 40px rgba(16, 185, 129, 0.15);
+}
+.btn-epic.rose-glow:hover {
+  box-shadow: 0 4px 20px rgba(244, 63, 94, 0.45), 0 0 40px rgba(244, 63, 94, 0.15);
+}
+.btn-epic.red-glow:hover {
+  box-shadow: 0 4px 20px rgba(239, 68, 68, 0.45), 0 0 40px rgba(239, 68, 68, 0.15);
+}
+.btn-epic.slate-glow:hover {
+  box-shadow: 0 4px 20px rgba(100, 116, 139, 0.35), 0 0 40px rgba(100, 116, 139, 0.1);
+}
+.btn-epic.indigo-glow:hover {
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.5), 0 0 40px rgba(99, 102, 241, 0.2);
+}
+
+/* Shine sweep en hover */
+.btn-epic::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 40%;
+  height: 200%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+  transform: skewX(-20deg);
+  transition: left 0.5s ease;
+  pointer-events: none;
+}
+.btn-epic:hover::after {
+  left: 120%;
+}
+
 /* ========== Inputs ========== */
 .input-field {
   @apply w-full px-4 py-3 rounded-xl border border-slate-200
