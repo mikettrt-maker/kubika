@@ -908,16 +908,17 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
         className="canvas-grid relative shadow-sm"
         style={{ width: '2400px', height: '1600px', minWidth: '100%', minHeight: '100%' }}
       >
-        {/* Encabezado fijo: fecha automática + materia (arriba a la izquierda) */}
+        {/* Encabezado fijo estilo libreta: fecha automática + materia (arriba a la izquierda) */}
         <div
           data-sheet-header
-          className="absolute top-1.5 left-3 flex flex-col select-none pointer-events-none"
+          className="absolute top-2 left-4 flex flex-col select-none pointer-events-none
+                     border-b-[3px] border-slate-500 pb-1.5 pr-16"
           style={{ zIndex: 1 }}
         >
-          <p className="text-[13px] font-semibold text-slate-600 leading-tight">
+          <p className="text-[26px] font-bold text-slate-800 leading-snug tracking-wide">
             {formatSheetDate()}
           </p>
-          <p className="text-[13px] font-bold text-slate-700 leading-tight">
+          <p className="text-[26px] font-extrabold text-slate-800 leading-snug tracking-wide">
             Saberes y pensamiento científico
           </p>
         </div>
