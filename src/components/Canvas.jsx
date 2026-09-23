@@ -912,13 +912,13 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
         <div
           data-sheet-header
           className="absolute top-2 left-4 flex flex-col select-none pointer-events-none
-                     border-b-[3px] border-slate-500 pb-1.5 pr-16"
+                     border-b-[3px] border-purple-300 pb-1.5 pr-16"
           style={{ zIndex: 1 }}
         >
-          <p className="text-[26px] font-bold text-slate-800 leading-snug tracking-wide">
+          <p className="font-display text-[27px] font-bold text-purple-600 leading-snug tracking-wide">
             {formatSheetDate()}
           </p>
-          <p className="text-[26px] font-extrabold text-slate-800 leading-snug tracking-wide">
+          <p className="font-handwriting text-[34px] font-bold text-pink-700 leading-tight">
             Saberes y pensamiento científico
           </p>
         </div>
