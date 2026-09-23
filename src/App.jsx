@@ -10,6 +10,7 @@ import SaveLoadModal from './components/SaveLoadModal';
 import SplashScreen from './components/SplashScreen';
 import Biblioteca from './components/Biblioteca';
 import PdfMathReader from './components/PdfMathReader';
+import Mascot from './components/Mascot';
 import { RODS, generateMathId, generateAntennaId, createAntennaRows } from './utils/rods';
 import { generatePivotId, generateBandId, generateManualPivotId, getRectPivots, getCirclePivots, BAND_COLORS } from './utils/geoplano';
 import { exportToPdf } from './utils/exportPdf';
@@ -239,6 +240,67 @@ export default function App() {
     setTimeout(() => setNotification(null), 3000);
   }, []);
 
+  // ========== MASCOTA ASISTENTE ==========
+  const [mascotMsg, setMascotMsg] = useState(null);
+  const sayMascot = useCallback((text) => setMascotMsg({ text, id: Date.now() }), []);
+  const greetedRef = useRef(false);
+  const modeTipRef = useRef(null);
+  const idleTipDoneRef = useRef(false);
+
+  // Saludo al entrar
+  useEffect(() => {
+    if (authLoading || !user || greetedRef.current) return;
+    greetedRef.current = true;
+    const t = setTimeout(() => {
+      sayMascot(`¡Hola ${displayName || 'amig@'}! 👋 ¿Qué vamos a aprender hoy?`);
+    }, 2000);
+    return () => clearTimeout(t);
+  }, [authLoading, user, displayName, sayMascot]);
+
+  // Tip al cambiar de modo
+  useEffect(() => {
+    if (!user) return;
+    if (modeTipRef.current === null) { modeTipRef.current = toolMode; return; }
+    if (modeTipRef.current === toolMode) return;
+    modeTipRef.current = toolMode;
+    const t = setTimeout(() => {
+      if (toolMode === 'geoplano') {
+        sayMascot('Clic en un pivote y luego en otro para crear bandas');
+      } else {
+        sayMascot('Arrastra regletas desde el panel para comenzar');
+      }
+    }, 900);
+    return () => clearTimeout(t);
+  }, [toolMode, user, sayMascot]);
+
+  // Tip tras 60s de inactividad (una sola vez por sesión)
+  useEffect(() => {
+    if (!user) return;
+    const tips = [
+      '¿Sabías? Puedes copiar con Ctrl+C y pegar con Ctrl+V',
+      'Doble clic en un texto para editarlo',
+      'Guarda tu trabajo para no perderlo',
+      'Teclas flecha mueven el elemento seleccionado',
+    ];
+    let timer;
+    const reset = () => {
+      clearTimeout(timer);
+      if (idleTipDoneRef.current) return;
+      timer = setTimeout(() => {
+        if (idleTipDoneRef.current) return;
+        idleTipDoneRef.current = true;
+        sayMascot(tips[Math.floor(Math.random() * tips.length)]);
+      }, 60000);
+    };
+    reset();
+    const events = ['mousemove', 'keydown', 'click'];
+    events.forEach(ev => window.addEventListener(ev, reset));
+    return () => {
+      clearTimeout(timer);
+      events.forEach(ev => window.removeEventListener(ev, reset));
+    };
+  }, [user, sayMascot]);
+
   // ========== GUARDAR WORKSPACE ==========
   const handleSave = async (nameToSave = workspaceName) => {
     const finalName = nameToSave.trim() || 'Diseño sin título';
@@ -302,6 +364,7 @@ export default function App() {
       showNotification('Error al guardar: ' + error, 'error');
     } else {
       showNotification('Trabajo guardado correctamente');
+      sayMascot('¡Buen trabajo! ✅');
     }
   };
 
@@ -406,6 +469,7 @@ export default function App() {
     try {
       await exportToPdf(canvasRef.current, displayName, workspaceName);
       showNotification('PDF descargado');
+      sayMascot('¡Listo para entregar! 📄');
     } catch {
       showNotification('Error al crear el PDF', 'error');
     }
@@ -757,7 +821,7 @@ export default function App() {
             </svg>
             Biblioteca
           </button>
-          <span className="ml-1 px-3 py-1 text-xs font-extrabold text-white rounded-full leading-none select-none shadow-md" style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7, #6366f1, #a855f7, #7c3aed)', backgroundSize: '200% 200%', animation: 'gradientShift 3s ease infinite', letterSpacing: '0.05em' }} title="Versión de la aplicación">v2.7.10</span>
+          <span className="ml-1 px-3 py-1 text-xs font-extrabold text-white rounded-full leading-none select-none shadow-md" style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7, #6366f1, #a855f7, #7c3aed)', backgroundSize: '200% 200%', animation: 'gradientShift 3s ease infinite', letterSpacing: '0.05em' }} title="Versión de la aplicación">v2.7.11</span>
         </div>
 
       </header>
@@ -843,6 +907,11 @@ export default function App() {
         workspaces={workspaces}
         loading={wsLoading}
       />
+
+      {/* ===== MASCOTA ASISTENTE ===== */}
+      {user && !selectedMathBook && !showBiblioteca && (
+        <Mascot message={mascotMsg} />
+      )}
 
       {/* ===== NOTIFICACIONES ===== */}
       {notification && (
