@@ -69,9 +69,6 @@ export default function App() {
   const [manualPivots, setManualPivots] = useState([]);
   const [isInsertingPivot, setIsInsertingPivot] = useState(false);
 
-  // Título de la hoja de trabajo (encabezado del lienzo)
-  const [headerTitle, setHeaderTitle] = useState('');
-
   // ========== AUTO-GUARDADO DEL LIENZO ==========
   const autosaveKey = user?.id ? `kubika_autosave_${user.id}` : null;
   const autosaveTimeoutRef = useRef(null);
@@ -82,7 +79,7 @@ export default function App() {
     if (!autosaveKey) return;
     const hasData = rods.length > 0 || mathTexts.length > 0 || freeTexts.length > 0 ||
                     antennas.length > 0 || quads.length > 0 || polygons.length > 0 ||
-                    geoBands.length > 0 || manualPivots.length > 0 || headerTitle !== '';
+                    geoBands.length > 0 || manualPivots.length > 0;
     if (!hasData) return;
 
     hasUnsavedChangesRef.current = true;
@@ -91,7 +88,7 @@ export default function App() {
       try {
         localStorage.setItem(autosaveKey, JSON.stringify({
           rods, mathTexts, freeTexts, antennas, quads, polygons,
-          geoMode, manualPivots, geoBands, headerTitle, _ts: Date.now(),
+          geoMode, manualPivots, geoBands, _ts: Date.now(),
         }));
         hasUnsavedChangesRef.current = false;
       } catch (e) {
@@ -99,7 +96,7 @@ export default function App() {
       }
     }, 3000);
     return () => { if (autosaveTimeoutRef.current) clearTimeout(autosaveTimeoutRef.current); };
-  }, [rods, mathTexts, freeTexts, antennas, quads, polygons, geoMode, manualPivots, geoBands, headerTitle, autosaveKey]);
+  }, [rods, mathTexts, freeTexts, antennas, quads, polygons, geoMode, manualPivots, geoBands, autosaveKey]);
 
   // Restaurar auto-guardado al cargar (si tiene menos de 7 días)
   useEffect(() => {
@@ -110,8 +107,7 @@ export default function App() {
       const saved = JSON.parse(raw);
       if (!saved?._ts || (Date.now() - saved._ts) > 7 * 24 * 60 * 60 * 1000) return;
       const hasData = (saved.rods?.length > 0) || (saved.mathTexts?.length > 0) || (saved.freeTexts?.length > 0) ||
-                      (saved.antennas?.length > 0) || (saved.quads?.length > 0) || (saved.polygons?.length > 0) ||
-                      saved.headerTitle;
+                      (saved.antennas?.length > 0) || (saved.quads?.length > 0) || (saved.polygons?.length > 0);
       if (!hasData) return;
       setRods(saved.rods || []);
       setMathTexts(saved.mathTexts || []);
@@ -122,7 +118,6 @@ export default function App() {
       setGeoBands(saved.geoBands || []);
       setManualPivots(saved.manualPivots || []);
       if (saved.geoMode) setGeoMode(saved.geoMode);
-      if (saved.headerTitle) setHeaderTitle(saved.headerTitle);
     } catch {}
   }, [autosaveKey]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -292,7 +287,6 @@ export default function App() {
       polygons: polygons.map(p => ({
         id: p.id, points: p.points, fill: p.fill, mode: p.mode,
       })),
-      headerTitle: headerTitle,
       geoMode: geoMode,
       manualPivots: manualPivots.map(p => ({ id: p.id, x: p.x, y: p.y })),
       geoBands: geoBands.map(b => ({
@@ -341,7 +335,6 @@ export default function App() {
         setManualPivots([]);
         setSelectedPivotId(null);
       }
-      setHeaderTitle(state.headerTitle || '');
       showNotification('Trabajo cargado');
     } else {
       showNotification('Error al cargar el trabajo', 'error');
@@ -764,7 +757,7 @@ export default function App() {
             </svg>
             Biblioteca
           </button>
-          <span className="ml-1 px-3 py-1 text-xs font-extrabold text-white rounded-full leading-none select-none shadow-md" style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7, #6366f1, #a855f7, #7c3aed)', backgroundSize: '200% 200%', animation: 'gradientShift 3s ease infinite', letterSpacing: '0.05em' }} title="Versión de la aplicación">v2.7.7</span>
+          <span className="ml-1 px-3 py-1 text-xs font-extrabold text-white rounded-full leading-none select-none shadow-md" style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7, #6366f1, #a855f7, #7c3aed)', backgroundSize: '200% 200%', animation: 'gradientShift 3s ease infinite', letterSpacing: '0.05em' }} title="Versión de la aplicación">v2.7.8</span>
         </div>
 
       </header>
@@ -824,8 +817,6 @@ export default function App() {
           setQuadFill={setQuadFill}
           genQuadId={genQuadId}
           genPolyId={genPolyId}
-          headerTitle={headerTitle}
-          onHeaderTitleChange={setHeaderTitle}
         />
       </div>
 

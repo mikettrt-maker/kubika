@@ -53,7 +53,7 @@ function isOverlapping(newRod, allRods) {
  * Canvas - Lienzo interactivo principal.
  * Gestiona las regletas colocadas, cajas de texto matemático y texto libre.
  */
-export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTexts, freeTexts, setFreeTexts, toolMode, geoPivots, geoBands, selectedPivotId, onGeoPivotClick, onGeoBandContext, onGeoCanvasClick, manualPivots, isInsertingPivot, onInsertPivot, onDeleteManualPivot, antennas, onAntennaUpdate, onAntennaDelete, quads, setQuads, polygons, setPolygons, activeTool, setActiveTool, quadFill, setQuadFill, genQuadId, genPolyId, headerTitle = '', onHeaderTitleChange }) {
+export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTexts, freeTexts, setFreeTexts, toolMode, geoPivots, geoBands, selectedPivotId, onGeoPivotClick, onGeoBandContext, onGeoCanvasClick, manualPivots, isInsertingPivot, onInsertPivot, onDeleteManualPivot, antennas, onAntennaUpdate, onAntennaDelete, quads, setQuads, polygons, setPolygons, activeTool, setActiveTool, quadFill, setQuadFill, genQuadId, genPolyId }) {
   // Estado del menú contextual
   const [contextMenu, setContextMenu] = useState(null);
   const [dragging, setDragging] = useState(null);
@@ -908,29 +908,16 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
         className="canvas-grid relative shadow-sm"
         style={{ width: '2400px', height: '1600px', minWidth: '100%', minHeight: '100%' }}
       >
-        {/* Encabezado de la hoja de trabajo: título, fecha automática y materia */}
+        {/* Encabezado fijo: fecha automática + materia (arriba a la izquierda) */}
         <div
           data-sheet-header
-          className="absolute top-0 left-0 right-0 flex flex-col items-center pt-4 pb-1 select-none"
-          style={{ zIndex: 1, pointerEvents: 'none' }}
+          className="absolute top-1.5 left-3 flex flex-col select-none pointer-events-none"
+          style={{ zIndex: 1 }}
         >
-          <input
-            value={headerTitle}
-            onChange={(e) => onHeaderTitleChange && onHeaderTitleChange(e.target.value)}
-            onMouseDown={(e) => e.stopPropagation()}
-            onClick={(e) => e.stopPropagation()}
-            placeholder="Título"
-            maxLength={80}
-            className="pointer-events-auto w-[560px] max-w-[80%] text-center text-2xl font-extrabold
-                       text-slate-800 bg-transparent border-0 border-b-2 border-dashed
-                       border-slate-300 focus:border-kubika-400 outline-none pb-1
-                       placeholder:text-slate-300 placeholder:font-bold"
-            style={{ pointerEvents: 'auto' }}
-          />
-          <p className="mt-2.5 text-[15px] font-semibold text-slate-600 tracking-wide">
+          <p className="text-[13px] font-semibold text-slate-600 leading-tight">
             {formatSheetDate()}
           </p>
-          <p className="text-[15px] font-bold text-slate-700 tracking-wide">
+          <p className="text-[13px] font-bold text-slate-700 leading-tight">
             Saberes y pensamiento científico
           </p>
         </div>
