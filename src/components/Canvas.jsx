@@ -875,7 +875,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
         className="canvas-grid relative shadow-sm" 
         style={{ width: '2400px', height: '1600px', minWidth: '100%', minHeight: '100%' }}
       >
-        {/* Modo Regletas: regletas + textos */}
+        {/* Modo Regletas: regletas */}
         {toolMode === 'regletas' && (
           <>
             {rods.map((rod) => (
@@ -899,50 +899,51 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
                 />
               </div>
             ))}
-
-            {mathTexts.map((mt) => (
-              <div
-                key={mt.id}
-                style={{
-                  position: 'absolute',
-                  left: `${mt.x}px`,
-                  top: `${mt.y}px`,
-                }}
-              >
-                <MathTextBox
-                  id={mt.id}
-                  initialLatex={mt.latex}
-                  isSelected={selectedId === mt.id}
-                  onPointerDown={(e) => handlePointerDownOnMath(e, mt.id)}
-                  onContextMenu={(e) => handleMathContextMenu(e, mt.id)}
-                  onUpdate={handleMathUpdate}
-                />
-              </div>
-            ))}
-
-            {freeTexts.map((ft) => (
-              <div
-                key={ft.id}
-                style={{
-                  position: 'absolute',
-                  left: `${ft.x}px`,
-                  top: `${ft.y}px`,
-                }}
-              >
-                <FreeTextBox
-                  id={ft.id}
-                  initialText={ft.text}
-                  initialColor={ft.color || '#1e293b'}
-                  initialBold={ft.bold || false}
-                  isSelected={selectedId === ft.id}
-                  onPointerDown={(e) => handlePointerDownOnFreeText(e, ft.id)}
-                  onContextMenu={(e) => handleFreeTextContextMenu(e, ft.id)}
-                  onUpdate={handleFreeTextUpdate}
-                />
-              </div>
-            ))}
           </>
         )}
+
+        {/* Textos (visibles en todos los modos) */}
+        {mathTexts.map((mt) => (
+          <div
+            key={mt.id}
+            style={{
+              position: 'absolute',
+              left: `${mt.x}px`,
+              top: `${mt.y}px`,
+            }}
+          >
+            <MathTextBox
+              id={mt.id}
+              initialLatex={mt.latex}
+              isSelected={selectedId === mt.id}
+              onPointerDown={(e) => handlePointerDownOnMath(e, mt.id)}
+              onContextMenu={(e) => handleMathContextMenu(e, mt.id)}
+              onUpdate={handleMathUpdate}
+            />
+          </div>
+        ))}
+
+        {freeTexts.map((ft) => (
+          <div
+            key={ft.id}
+            style={{
+              position: 'absolute',
+              left: `${ft.x}px`,
+              top: `${ft.y}px`,
+            }}
+          >
+            <FreeTextBox
+              id={ft.id}
+              initialText={ft.text}
+              initialColor={ft.color || '#1e293b'}
+              initialBold={ft.bold || false}
+              isSelected={selectedId === ft.id}
+              onPointerDown={(e) => handlePointerDownOnFreeText(e, ft.id)}
+              onContextMenu={(e) => handleFreeTextContextMenu(e, ft.id)}
+              onUpdate={handleFreeTextUpdate}
+            />
+          </div>
+        ))}
 
         {/* Modo Geoplano: pivotes + bandas */}
         {toolMode === 'geoplano' && (
@@ -1103,7 +1104,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
 
         {/* Mensaje de bienvenida según el modo activo */}
         {((toolMode === 'regletas' && rods.length === 0 && mathTexts.length === 0 && freeTexts.length === 0 && antennas.length === 0 && quads.length === 0 && polygons.length === 0) ||
-          (toolMode === 'geoplano' && geoBands.length === 0 && (manualPivots || []).length === 0 && antennas.length === 0 && quads.length === 0 && polygons.length === 0)) && (
+          (toolMode === 'geoplano' && geoBands.length === 0 && (manualPivots || []).length === 0 && mathTexts.length === 0 && freeTexts.length === 0 && antennas.length === 0 && quads.length === 0 && polygons.length === 0)) && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="text-center animate-pulse-soft">
               {toolMode === 'geoplano' ? (
@@ -1115,7 +1116,8 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
                     Haz clic en un pivote y luego en otro
                   </p>
                   <p className="text-slate-300 text-sm mt-1">
-                    para crear bandas elásticas entre ellos
+                    para crear bandas elásticas entre ellos, o usa la barra
+                    de herramientas para agregar texto
                   </p>
                 </>
               ) : (
