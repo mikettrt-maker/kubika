@@ -182,7 +182,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
         const qh = Math.abs(cy - y);
         if (qw > 5 && qh > 5) {
           const newId = genQuadId();
-          setQuads(prev => [...prev, { id: newId, x: Math.min(x, cx), y: Math.min(y, cy), width: qw, height: qh, fill: quadFill }]);
+          setQuads(prev => [...prev, { id: newId, x: Math.min(x, cx), y: Math.min(y, cy), width: qw, height: qh, fill: quadFill, mode: toolMode }]);
           updateSelection(newId);
         }
         setQuadPreview(null);
@@ -499,7 +499,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
         const dist = Math.sqrt((x - first.x) ** 2 + (y - first.y) ** 2);
         if (dist < 15) {
           const newId = genPolyId();
-          setPolygons(prev => [...prev, { id: newId, points: polygonPoints, fill: quadFill }]);
+          setPolygons(prev => [...prev, { id: newId, points: polygonPoints, fill: quadFill, mode: toolMode }]);
           setPolygonPoints([]);
           updateSelection(newId);
           setActiveTool('pen');
@@ -799,6 +799,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
           x: 100 + Math.random() * 200,
           y: 100 + Math.random() * 200,
           latex: text.trim(),
+          mode: toolMode,
         }]);
       } else {
         setFreeTexts(prev => [...prev, {
@@ -808,6 +809,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
           text: text.trim(),
           color: '#1e293b',
           bold: false,
+          mode: toolMode,
         }]);
       }
     };
@@ -817,7 +819,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('paste', handlePasteGlobal);
     };
-  }, [onAntennaDelete, onAntennaUpdate, antennas, mathTexts, freeTexts, rods, quads, setQuads, polygons, setPolygons, activeTool, setActiveTool, setPolygonPoints, updateSelection]);
+  }, [onAntennaDelete, onAntennaUpdate, antennas, mathTexts, freeTexts, rods, quads, setQuads, polygons, setPolygons, activeTool, setActiveTool, setPolygonPoints, updateSelection, toolMode]);
 
   const handleKeyDown = (e) => {
     if (!selectedId) return;
@@ -851,10 +853,28 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
         x: 100 + Math.random() * 200,
         y: 100 + Math.random() * 200,
         latex: text.trim(),
+        mode: toolMode,
       };
       setMathTexts(prev => [...prev, newMath]);
     }
   };
+
+  // Elementos visibles en el modo activo (los antiguos sin mode se ven en ambos)
+  const inActiveMode = (item) => !item.mode || item.mode === toolMode;
+  const visibleMathTexts = mathTexts.filter(inActiveMode);
+  const visibleFreeTexts = freeTexts.filter(inActiveMode);
+  const visibleAntennas = antennas.filter(inActiveMode);
+  const visibleQuads = quads.filter(inActiveMode);
+  const visiblePolygons = polygons.filter(inActiveMode);
+
+  // Al cambiar de modo, deseleccionar para no operar sobre un elemento oculto
+  const prevToolModeRef = useRef(toolMode);
+  useEffect(() => {
+    if (prevToolModeRef.current !== toolMode) {
+      prevToolModeRef.current = toolMode;
+      updateSelection(null);
+    }
+  }, [toolMode, updateSelection]);
 
   return (
     <div
@@ -902,8 +922,8 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
           </>
         )}
 
-        {/* Textos (visibles en todos los modos) */}
-        {mathTexts.map((mt) => (
+        {/* Textos (visibles según modo de creación) */}
+        {visibleMathTexts.map((mt) => (
           <div
             key={mt.id}
             style={{
@@ -923,7 +943,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
           </div>
         ))}
 
-        {freeTexts.map((ft) => (
+        {visibleFreeTexts.map((ft) => (
           <div
             key={ft.id}
             style={{
@@ -961,8 +981,8 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
           />
         )}
 
-        {/* Antenas (visibles en todos los modos) */}
-        {antennas.map((antenna) => (
+        {/* Antenas (visibles según modo de creación) */}
+        {visibleAntennas.map((antenna) => (
           <div key={antenna.id} data-antenna-id={antenna.id}>
             <Antenna
               antenna={antenna}
@@ -991,8 +1011,8 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
           />
         )}
 
-        {/* Cuadrilateros (visibles en todos los modos) */}
-        {quads.map(q => (
+        {/* Cuadrilateros (visibles según modo de creación) */}
+        {visibleQuads.map(q => (
           <div key={q.id}
             data-quad-id={q.id}
             className="absolute z-30"
@@ -1023,8 +1043,8 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
           </div>
         ))}
 
-        {/* Poligonos (visibles en todos los modos) */}
-        {polygons.map(p => {
+        {/* Poligonos (visibles según modo de creación) */}
+        {visiblePolygons.map(p => {
           const bounds = getPolygonBounds(p.points);
           const w = bounds.maxX - bounds.minX;
           const h = bounds.maxY - bounds.minY;
@@ -1073,38 +1093,9 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
           </svg>
         )}
 
-        {/* Modo Geoplano: pivotes + bandas */}
-        {toolMode === 'geoplano' && (
-          <GeoplanoOverlay
-            pivots={geoPivots}
-            manualPivots={manualPivots || []}
-            bands={geoBands || []}
-            selectedPivotId={selectedPivotId}
-            onPivotClick={onGeoPivotClick}
-            onBandContextMenu={onGeoBandContext}
-            onCanvasClick={handleCanvasClick}
-            isInsertingPivot={isInsertingPivot}
-            onInsertPivot={onInsertPivot}
-            onDeleteManualPivot={onDeleteManualPivot}
-          />
-        )}
-
-        {/* Antenas (visibles en todos los modos) */}
-        {antennas.map((antenna) => (
-          <div key={antenna.id} data-antenna-id={antenna.id}>
-            <Antenna
-              antenna={antenna}
-              isSelected={selectedId === antenna.id}
-              onMouseDown={handleMouseDownOnAntenna}
-              onContextMenu={handleAntennaContextMenu}
-              onUpdate={onAntennaUpdate}
-            />
-          </div>
-        ))}
-
         {/* Mensaje de bienvenida según el modo activo */}
-        {((toolMode === 'regletas' && rods.length === 0 && mathTexts.length === 0 && freeTexts.length === 0 && antennas.length === 0 && quads.length === 0 && polygons.length === 0) ||
-          (toolMode === 'geoplano' && geoBands.length === 0 && (manualPivots || []).length === 0 && mathTexts.length === 0 && freeTexts.length === 0 && antennas.length === 0 && quads.length === 0 && polygons.length === 0)) && (
+        {((toolMode === 'regletas' && rods.length === 0 && visibleMathTexts.length === 0 && visibleFreeTexts.length === 0 && visibleAntennas.length === 0 && visibleQuads.length === 0 && visiblePolygons.length === 0) ||
+          (toolMode === 'geoplano' && geoBands.length === 0 && (manualPivots || []).length === 0 && visibleMathTexts.length === 0 && visibleFreeTexts.length === 0 && visibleAntennas.length === 0 && visibleQuads.length === 0 && visiblePolygons.length === 0)) && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="text-center animate-pulse-soft">
               {toolMode === 'geoplano' ? (

@@ -352,6 +352,7 @@ export default function App() {
       x: 100 + Math.random() * 200,
       y: 100 + Math.random() * 200,
       latex: '',
+      mode: toolMode,
     };
     setMathTexts(prev => [...prev, newMath]);
   };
@@ -365,6 +366,7 @@ export default function App() {
       text: '',
       color: '#1e293b',
       bold: false,
+      mode: toolMode,
     };
     setFreeTexts(prev => [...prev, newText]);
   };
@@ -377,6 +379,7 @@ export default function App() {
       y: 150 + Math.random() * 300,
       operation: '',
       rows: createAntennaRows(10),
+      mode: toolMode,
     };
     setAntennas(prev => [...prev, newAntenna]);
   };
@@ -751,7 +754,7 @@ export default function App() {
             </svg>
             Biblioteca
           </button>
-          <span className="ml-1 px-3 py-1 text-xs font-extrabold text-white rounded-full leading-none select-none shadow-md" style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7, #6366f1, #a855f7, #7c3aed)', backgroundSize: '200% 200%', animation: 'gradientShift 3s ease infinite', letterSpacing: '0.05em' }} title="Versión de la aplicación">v2.7.5</span>
+          <span className="ml-1 px-3 py-1 text-xs font-extrabold text-white rounded-full leading-none select-none shadow-md" style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7, #6366f1, #a855f7, #7c3aed)', backgroundSize: '200% 200%', animation: 'gradientShift 3s ease infinite', letterSpacing: '0.05em' }} title="Versión de la aplicación">v2.7.6</span>
         </div>
 
       </header>
