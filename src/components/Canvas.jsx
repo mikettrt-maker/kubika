@@ -9,6 +9,18 @@ import { RODS, getRodWidth, generateRodId, generateMathId, UNIT_SIZE } from '../
 
 const GRID = 40;
 
+function formatSheetDate() {
+  try {
+    const s = new Date().toLocaleDateString('es-MX', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+    });
+    const clean = s.replace(/^([^,]+),\s*/, '$1 ');
+    return clean.charAt(0).toUpperCase() + clean.slice(1);
+  } catch {
+    return new Date().toLocaleDateString('es-MX');
+  }
+}
+
 function getBoundingBox(rod) {
   const L = rod.value;
   if (rod.rotation === 90) {
@@ -41,7 +53,7 @@ function isOverlapping(newRod, allRods) {
  * Canvas - Lienzo interactivo principal.
  * Gestiona las regletas colocadas, cajas de texto matemático y texto libre.
  */
-export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTexts, freeTexts, setFreeTexts, toolMode, geoPivots, geoBands, selectedPivotId, onGeoPivotClick, onGeoBandContext, onGeoCanvasClick, manualPivots, isInsertingPivot, onInsertPivot, onDeleteManualPivot, antennas, onAntennaUpdate, onAntennaDelete, quads, setQuads, polygons, setPolygons, activeTool, setActiveTool, quadFill, setQuadFill, genQuadId, genPolyId }) {
+export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTexts, freeTexts, setFreeTexts, toolMode, geoPivots, geoBands, selectedPivotId, onGeoPivotClick, onGeoBandContext, onGeoCanvasClick, manualPivots, isInsertingPivot, onInsertPivot, onDeleteManualPivot, antennas, onAntennaUpdate, onAntennaDelete, quads, setQuads, polygons, setPolygons, activeTool, setActiveTool, quadFill, setQuadFill, genQuadId, genPolyId, headerTitle = '', onHeaderTitleChange }) {
   // Estado del menú contextual
   const [contextMenu, setContextMenu] = useState(null);
   const [dragging, setDragging] = useState(null);
@@ -822,6 +834,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
   }, [onAntennaDelete, onAntennaUpdate, antennas, mathTexts, freeTexts, rods, quads, setQuads, polygons, setPolygons, activeTool, setActiveTool, setPolygonPoints, updateSelection, toolMode]);
 
   const handleKeyDown = (e) => {
+    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
     if (!selectedId) return;
 
     if (e.key === 'r' || e.key === 'R') {
@@ -889,12 +902,39 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
       style={{ outline: 'none', cursor: activeTool === 'quad' ? 'crosshair' : activeTool === 'polygon' ? 'crosshair' : undefined }}
     >
       {/* Contenedor interno grande para scrollear y capturar */}
-      <div 
+      <div
         ref={setCanvasRef}
         data-canvas-inner
-        className="canvas-grid relative shadow-sm" 
+        className="canvas-grid relative shadow-sm"
         style={{ width: '2400px', height: '1600px', minWidth: '100%', minHeight: '100%' }}
       >
+        {/* Encabezado de la hoja de trabajo: título, fecha automática y materia */}
+        <div
+          data-sheet-header
+          className="absolute top-0 left-0 right-0 flex flex-col items-center pt-4 pb-1 select-none"
+          style={{ zIndex: 1, pointerEvents: 'none' }}
+        >
+          <input
+            value={headerTitle}
+            onChange={(e) => onHeaderTitleChange && onHeaderTitleChange(e.target.value)}
+            onMouseDown={(e) => e.stopPropagation()}
+            onClick={(e) => e.stopPropagation()}
+            placeholder="Título"
+            maxLength={80}
+            className="pointer-events-auto w-[560px] max-w-[80%] text-center text-2xl font-extrabold
+                       text-slate-800 bg-transparent border-0 border-b-2 border-dashed
+                       border-slate-300 focus:border-kubika-400 outline-none pb-1
+                       placeholder:text-slate-300 placeholder:font-bold"
+            style={{ pointerEvents: 'auto' }}
+          />
+          <p className="mt-2.5 text-[15px] font-semibold text-slate-600 tracking-wide">
+            {formatSheetDate()}
+          </p>
+          <p className="text-[15px] font-bold text-slate-700 tracking-wide">
+            Saberes y pensamiento científico
+          </p>
+        </div>
+
         {/* Modo Regletas: regletas */}
         {toolMode === 'regletas' && (
           <>
