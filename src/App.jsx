@@ -69,6 +69,70 @@ export default function App() {
   const [manualPivots, setManualPivots] = useState([]);
   const [isInsertingPivot, setIsInsertingPivot] = useState(false);
 
+  // ========== AUTO-GUARDADO DEL LIENZO ==========
+  const autosaveKey = user?.id ? `kubika_autosave_${user.id}` : null;
+  const autosaveTimeoutRef = useRef(null);
+  const hasUnsavedChangesRef = useRef(false);
+
+  // Auto-guardar con debounce cada 3 segundos
+  useEffect(() => {
+    if (!autosaveKey) return;
+    const hasData = rods.length > 0 || mathTexts.length > 0 || freeTexts.length > 0 ||
+                    antennas.length > 0 || quads.length > 0 || polygons.length > 0 ||
+                    geoBands.length > 0 || manualPivots.length > 0;
+    if (!hasData) return;
+
+    hasUnsavedChangesRef.current = true;
+    if (autosaveTimeoutRef.current) clearTimeout(autosaveTimeoutRef.current);
+    autosaveTimeoutRef.current = setTimeout(() => {
+      try {
+        localStorage.setItem(autosaveKey, JSON.stringify({
+          rods, mathTexts, freeTexts, antennas, quads, polygons,
+          geoMode, manualPivots, geoBands, _ts: Date.now(),
+        }));
+        hasUnsavedChangesRef.current = false;
+      } catch (e) {
+        console.error('Auto-guardado falló (posible cuota llena):', e);
+      }
+    }, 3000);
+    return () => { if (autosaveTimeoutRef.current) clearTimeout(autosaveTimeoutRef.current); };
+  }, [rods, mathTexts, freeTexts, antennas, quads, polygons, geoMode, manualPivots, geoBands, autosaveKey]);
+
+  // Restaurar auto-guardado al cargar (si tiene menos de 7 días)
+  useEffect(() => {
+    if (!autosaveKey) return;
+    try {
+      const raw = localStorage.getItem(autosaveKey);
+      if (!raw) return;
+      const saved = JSON.parse(raw);
+      if (!saved?._ts || (Date.now() - saved._ts) > 7 * 24 * 60 * 60 * 1000) return;
+      const hasData = (saved.rods?.length > 0) || (saved.mathTexts?.length > 0) || (saved.freeTexts?.length > 0) ||
+                      (saved.antennas?.length > 0) || (saved.quads?.length > 0) || (saved.polygons?.length > 0);
+      if (!hasData) return;
+      setRods(saved.rods || []);
+      setMathTexts(saved.mathTexts || []);
+      setFreeTexts(saved.freeTexts || []);
+      setAntennas(saved.antennas || []);
+      setQuads(saved.quads || []);
+      setPolygons(saved.polygons || []);
+      setGeoBands(saved.geoBands || []);
+      setManualPivots(saved.manualPivots || []);
+      if (saved.geoMode) setGeoMode(saved.geoMode);
+    } catch {}
+  }, [autosaveKey]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Aviso al cerrar/recargar pestaña con cambios sin guardar
+  useEffect(() => {
+    const handler = (e) => {
+      if (hasUnsavedChangesRef.current) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, []);
+
   // Mostrar splash durante login/logout
   useEffect(() => {
     if (authLoading && splashDone && !showLoginSplash) {
@@ -87,11 +151,17 @@ export default function App() {
 
   // Cambiar modo del geoplano (rectilinear / circular)
   const handleGeoModeChange = useCallback((mode) => {
+    if (mode === geoMode) return;
+    if ((geoBands.length > 0 || manualPivots.length > 0) &&
+        !confirm('¿Cambiar de modo? Se limpiarán las bandas y pivotes del geoplano actual.')) {
+      return;
+    }
     setGeoMode(mode);
     setGeoPivots(mode === 'rect' ? getRectPivots() : getCirclePivots());
+    setGeoBands([]);
     setManualPivots([]);
     setSelectedPivotId(null);
-  }, []);
+  }, [geoMode, geoBands.length, manualPivots.length]);
 
   // Clic en un pivote o en el fondo del canvas
   const handlePivotClick = useCallback((pivotId) => {
@@ -234,6 +304,12 @@ export default function App() {
 
   // ========== CARGAR WORKSPACE ==========
   const handleLoad = async (workspaceId) => {
+    const hasCanvasData = rods.length > 0 || mathTexts.length > 0 || freeTexts.length > 0 ||
+      antennas.length > 0 || quads.length > 0 || polygons.length > 0 || geoBands.length > 0;
+    if (hasCanvasData &&
+        !confirm('¿Cargar este trabajo? Se reemplazará el contenido actual del lienzo.')) {
+      return;
+    }
     // Al cargar, buscamos el nombre del workspace para actualizar el título
     const ws = workspaces.find(w => w.id === workspaceId);
     if (ws) setWorkspaceName(ws.name);
@@ -675,7 +751,7 @@ export default function App() {
             </svg>
             Biblioteca
           </button>
-          <span className="ml-1 px-3 py-1 text-xs font-extrabold text-white rounded-full leading-none select-none shadow-md" style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7, #6366f1, #a855f7, #7c3aed)', backgroundSize: '200% 200%', animation: 'gradientShift 3s ease infinite', letterSpacing: '0.05em' }} title="Versión de la aplicación">v2.7.3</span>
+          <span className="ml-1 px-3 py-1 text-xs font-extrabold text-white rounded-full leading-none select-none shadow-md" style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7, #6366f1, #a855f7, #7c3aed)', backgroundSize: '200% 200%', animation: 'gradientShift 3s ease infinite', letterSpacing: '0.05em' }} title="Versión de la aplicación">v2.7.4</span>
         </div>
 
       </header>

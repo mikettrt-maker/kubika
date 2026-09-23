@@ -25,9 +25,7 @@ function readLocal(email) {
 }
 
 function writeLocal(email, list) {
-  try {
-    localStorage.setItem(localKey(email), JSON.stringify(list));
-  } catch (_) {}
+  localStorage.setItem(localKey(email), JSON.stringify(list));
 }
 
 export function useWorkspace(userId) {
@@ -96,6 +94,12 @@ export function useWorkspace(userId) {
         return { data: item, error: null };
       } catch (err) {
         console.error('Guardado local falló:', err);
+        setLoading(false);
+        const msg = err?.name === 'QuotaExceededError'
+          ? 'Sin espacio de almacenamiento. Elimina trabajos guardados e inténtalo de nuevo.'
+          : 'No se pudo guardar en este dispositivo.';
+        setError(msg);
+        return { data: null, error: msg };
       }
     }
 
@@ -188,10 +192,16 @@ export function useWorkspace(userId) {
     const email = extractEmail(userId);
 
     if (workspaceId && String(workspaceId).startsWith('loc-')) {
-      const list = readLocal(email || '').filter(w => w.id !== workspaceId);
-      writeLocal(email || '', list);
-      setWorkspaces(list.map(({ id, name, created_at, updated_at }) => ({ id, name, created_at, updated_at })));
-      return true;
+      try {
+        const list = readLocal(email || '').filter(w => w.id !== workspaceId);
+        writeLocal(email || '', list);
+        setWorkspaces(list.map(({ id, name, created_at, updated_at }) => ({ id, name, created_at, updated_at })));
+        return true;
+      } catch (err) {
+        console.error('Eliminación local falló:', err);
+        setError('No se pudo eliminar');
+        return false;
+      }
     }
 
     if (isSupabaseConfigured && email) {

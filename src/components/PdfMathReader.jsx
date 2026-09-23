@@ -39,11 +39,20 @@ function getUserId() {
   } catch { return 'anon'; }
 }
 
+let saveErrorShown = false;
 function savePageData(userId, bookId, page, data) {
   try {
     const key = `kubika_pdf_${userId}_${bookId}_p${page}`;
     localStorage.setItem(key, JSON.stringify(data));
-  } catch {}
+    return true;
+  } catch (e) {
+    console.error('No se pudo guardar la página (posible cuota llena):', e);
+    if (!saveErrorShown) {
+      saveErrorShown = true;
+      alert('No se pudo guardar: sin espacio de almacenamiento en este dispositivo. Libera espacio o borra trabajos guardados.');
+    }
+    return false;
+  }
 }
 
 function loadPageData(userId, bookId, page) {
@@ -245,6 +254,10 @@ export default function PdfMathReader({ libro, onBack }) {
   const isDraggingRef = useRef(false);
   const dragRafRef = useRef(null);
   const saveTimeoutRef = useRef(null);
+  const pendingPageRef = useRef(null);
+  // Página a la que pertenece realmente el contenido en memoria (evita
+  // que el auto-guardado escriba arreglos de la página vieja en la nueva)
+  const contentPageRef = useRef(1);
 
   const pdfUrl = (() => {
     const src = libro.pdf || libro.epub;
@@ -258,7 +271,7 @@ export default function PdfMathReader({ libro, onBack }) {
     const canvas = drawCanvasRef.current;
     if (!canvas) return;
     try {
-      savePageData(userId.current, libro.id, currentPage, {
+      savePageData(userId.current, libro.id, contentPageRef.current, {
         canvas: canvas.toDataURL(),
         scale,
         canvasWidth: canvas.width,
@@ -275,6 +288,7 @@ export default function PdfMathReader({ libro, onBack }) {
   const loadCanvas = useCallback(() => {
     const canvas = drawCanvasRef.current;
     if (!canvas) return;
+    contentPageRef.current = currentPage;
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     savedCanvasImage.current = null;
@@ -322,7 +336,7 @@ export default function PdfMathReader({ libro, onBack }) {
         const canvas = drawCanvasRef.current;
         if (canvas) {
           try {
-            savePageData(userId.current, libro.id, currentPage, {
+            savePageData(userId.current, libro.id, contentPageRef.current, {
               canvas: canvas.toDataURL(),
               scale,
               canvasWidth: canvas.width,
@@ -348,9 +362,9 @@ export default function PdfMathReader({ libro, onBack }) {
     return () => {
       const canvas = drawCanvasRef.current;
       if (!canvas) return;
-      const { mathTexts: mt, freeTexts: ft, quads: q, polygons: pl, rods: r, scale: s, currentPage: cp } = stateRef.current;
+      const { mathTexts: mt, freeTexts: ft, quads: q, polygons: pl, rods: r, scale: s } = stateRef.current;
       try {
-        savePageData(userId.current, libro.id, cp, {
+        savePageData(userId.current, libro.id, contentPageRef.current, {
           canvas: canvas.toDataURL(),
           scale: s,
           canvasWidth: canvas.width,
@@ -366,7 +380,8 @@ export default function PdfMathReader({ libro, onBack }) {
   }, [libro.id]);
 
   const renderPage = useCallback(async (pageNum) => {
-    if (!pdfRef.current || renderingRef.current) return;
+    if (!pdfRef.current) return;
+    if (renderingRef.current) { pendingPageRef.current = pageNum; return; }
     renderingRef.current = true;
     try {
       const pdf = pdfRef.current;
@@ -393,6 +408,13 @@ export default function PdfMathReader({ libro, onBack }) {
       console.error('Render page error:', e);
     } finally {
       renderingRef.current = false;
+      if (pendingPageRef.current !== null && pendingPageRef.current !== pageNum) {
+        const next = pendingPageRef.current;
+        pendingPageRef.current = null;
+        renderPage(next);
+      } else {
+        pendingPageRef.current = null;
+      }
     }
   }, [scale, loadCanvas]);
 

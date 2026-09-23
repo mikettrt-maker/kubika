@@ -94,6 +94,7 @@ export default function FreeTextBox({
     }
     if (e.key === 'Escape') {
       setIsEditing(false);
+      if (onUpdate) onUpdate(id, { ...stateRef.current });
     }
     if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'v')) return;
     e.stopPropagation();

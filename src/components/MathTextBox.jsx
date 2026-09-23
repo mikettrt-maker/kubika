@@ -110,7 +110,10 @@ export default function MathTextBox({
       setIsEditing(false);
       if (onUpdate) onUpdate(id, latexRef.current);
     }
-    if (e.key === 'Escape') setIsEditing(false);
+    if (e.key === 'Escape') {
+      setIsEditing(false);
+      if (onUpdate) onUpdate(id, latexRef.current);
+    }
     if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'v')) return;
     e.stopPropagation();
   };
