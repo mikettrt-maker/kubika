@@ -954,6 +954,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
         {visibleMathTexts.map((mt) => (
           <div
             key={mt.id}
+            data-math-text={mt.id}
             style={{
               position: 'absolute',
               left: `${mt.x}px`,
@@ -974,6 +975,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
         {visibleFreeTexts.map((ft) => (
           <div
             key={ft.id}
+            data-free-text={ft.id}
             style={{
               position: 'absolute',
               left: `${ft.x}px`,

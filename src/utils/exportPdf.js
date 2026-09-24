@@ -81,14 +81,60 @@ async function renderKatexToImage(el) {
   } catch { return null; }
 }
 
+/**
+ * Calcula la caja que envuelve todo el contenido dibujado en el lienzo
+ * (regletas, textos, figuras, antenas, encabezado) para capturar solo
+ * esa región y que el trabajo llene la página del PDF.
+ * Devuelve { x, y, width, height } en coordenadas del lienzo, o null.
+ */
+function computeContentBox(canvasElement) {
+  const base = canvasElement.getBoundingClientRect();
+  const selectors = '[data-sheet-header],[data-rod-id],[data-antenna-id],' +
+    '[data-quad-id],[data-poly-id],[data-math-text],[data-free-text]';
+  const candidates = canvasElement.querySelectorAll(selectors);
+
+  let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
+  const addRect = (r) => {
+    if (r.width <= 0 || r.height <= 0) return;
+    if (r.left < x1) x1 = r.left;
+    if (r.top < y1) y1 = r.top;
+    if (r.right > x2) x2 = r.right;
+    if (r.bottom > y2) y2 = r.bottom;
+  };
+
+  for (const el of candidates) {
+    addRect(el.getBoundingClientRect());
+    for (const n of el.querySelectorAll('*')) {
+      if (n.classList?.contains('no-print')) continue;
+      addRect(n.getBoundingClientRect());
+    }
+  }
+
+  if (!isFinite(x1)) return null;
+
+  const M = 36; // margen alrededor del contenido
+  const W = canvasElement.offsetWidth;
+  const H = canvasElement.offsetHeight;
+  const left = Math.max(0, Math.floor(x1 - base.left - M));
+  const top = Math.max(0, Math.floor(y1 - base.top - M));
+  const right = Math.min(W, Math.ceil(x2 - base.left + M));
+  const bottom = Math.min(H, Math.ceil(y2 - base.top + M));
+  const width = right - left;
+  const height = bottom - top;
+  if (width < 100 || height < 80) return null;
+  return { x: left, y: top, width, height };
+}
+
 export async function exportToPdf(canvasElement, studentName = 'Alumno', workspaceName = 'Diseño sin título') {
   try {
+    const area = computeContentBox(canvasElement);
     const captured = await html2canvas(canvasElement, {
       scale: 2,
       useCORS: true,
       backgroundColor: '#f8f9fc',
       logging: false,
       ignoreElements: (element) => element.classList?.contains('no-print'),
+      ...(area ? { x: area.x, y: area.y, width: area.width, height: area.height } : {}),
     });
     const imgData = captured.toDataURL('image/png');
     const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'letter' });
