@@ -58,14 +58,14 @@ export default function Mascot({ message }) {
         <button
           onClick={toggle}
           title="Mostrar asistente"
-          className="w-14 h-14 rounded-full bg-white border-2 border-purple-300 shadow-md
+          className="w-16 h-16 rounded-full bg-white border-2 border-purple-300 shadow-md
                      flex items-center justify-center hover:scale-110 transition-transform active:scale-95"
         >
           {imgOk ? (
             <img
               src="mascota.png"
               alt=""
-              className="w-10 h-10 object-contain"
+              className="w-11 h-11 object-contain"
               onError={() => setImgOk(false)}
             />
           ) : (
@@ -83,7 +83,7 @@ export default function Mascot({ message }) {
           <img
             src="mascota.png"
             alt="Asistente Kubika"
-            className="w-[120px] h-[120px] object-contain drop-shadow-xl
+            className="w-[150px] h-[150px] object-contain drop-shadow-xl
                        hover:scale-110 transition-transform"
             onError={() => setImgOk(false)}
           />
