@@ -134,6 +134,26 @@ export async function exportToPdf(canvasElement, studentName = 'Alumno', workspa
       backgroundColor: '#f8f9fc',
       logging: false,
       ignoreElements: (element) => element.classList?.contains('no-print'),
+      // En la captura se quita el brillo blanco de las regletas (pseudo-elementos
+      // y sombras inset) para que el color sólido salga fiel en el PDF.
+      onclone: (clonedDoc) => {
+        const style = clonedDoc.createElement('style');
+        style.textContent = `
+          .rod-3d::before, .rod-3d::after { content: none !important; display: none !important; }
+          .rod-3d, .rod-3d.rod-selected, .rod-3d.rod-invalid {
+            animation: none !important;
+            box-shadow: 0 3px 0 rgba(0,0,0,0.30), 0 4px 6px rgba(0,0,0,0.28) !important;
+            border: 1px solid rgba(0,0,0,0.30) !important;
+          }
+          .rod-3d.rod-selected {
+            box-shadow: 0 3px 0 rgba(0,0,0,0.30), 0 0 0 3px #4c6ef5 !important;
+          }
+          .rod-3d.rod-invalid {
+            box-shadow: 0 3px 0 rgba(0,0,0,0.30), 0 0 0 2px #ef4444 !important;
+          }
+        `;
+        clonedDoc.head.appendChild(style);
+      },
       ...(area ? { x: area.x, y: area.y, width: area.width, height: area.height } : {}),
     });
     const imgData = captured.toDataURL('image/png');
