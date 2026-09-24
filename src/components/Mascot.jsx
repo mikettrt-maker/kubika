@@ -39,15 +39,14 @@ export default function Mascot({ message }) {
 
   return (
     <div
-      className="fixed bottom-4 left-4 z-[900] no-print flex flex-col items-start gap-2 select-none"
-      style={{ pointerEvents: minimized && !bubble ? 'none' : 'auto' }}
+      className="fixed bottom-4 right-4 z-[900] no-print flex flex-col items-end gap-2 select-none"
     >
       {/* Globo de mensaje */}
       {bubble && !minimized && (
         <div
           key={bubble.id}
-          className="animate-scale-in max-w-[230px] bg-white border-2 border-purple-200
-                     rounded-2xl rounded-bl-sm px-4 py-2.5 text-sm font-semibold text-slate-700
+          className="animate-scale-in max-w-[240px] bg-white border-2 border-purple-200
+                     rounded-2xl rounded-br-sm px-4 py-2.5 text-sm font-semibold text-slate-700
                      shadow-lg shadow-purple-100/60"
         >
           {bubble.text}
@@ -59,14 +58,14 @@ export default function Mascot({ message }) {
         <button
           onClick={toggle}
           title="Mostrar asistente"
-          className="w-11 h-11 rounded-full bg-white border-2 border-purple-300 shadow-md
+          className="w-14 h-14 rounded-full bg-white border-2 border-purple-300 shadow-md
                      flex items-center justify-center hover:scale-110 transition-transform active:scale-95"
         >
           {imgOk ? (
             <img
               src="mascota.png"
               alt=""
-              className="w-8 h-8 object-contain"
+              className="w-10 h-10 object-contain"
               onError={() => setImgOk(false)}
             />
           ) : (
@@ -78,25 +77,25 @@ export default function Mascot({ message }) {
         <button
           onClick={toggle}
           title="Minimizar asistente"
-          className={`relative block ${pop ? 'animate-bounce-in' : 'animate-float'}`}
+          className={`relative block group ${pop ? 'animate-bounce-in' : 'animate-float'}`}
           style={{ animationDuration: pop ? undefined : '3s' }}
         >
           <img
             src="mascota.png"
             alt="Asistente Kubika"
-            className="w-[84px] h-[84px] object-contain drop-shadow-xl
+            className="w-[120px] h-[120px] object-contain drop-shadow-xl
                        hover:scale-110 transition-transform"
             onError={() => setImgOk(false)}
           />
           {!imgOk && (
-            <span className="text-4xl">💡</span>
+            <span className="text-5xl">💡</span>
           )}
           {/* Punto de minimizar */}
           <span
-            className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-slate-700 text-white
-                       text-[11px] font-bold flex items-center justify-center opacity-0
-                       group-hover:opacity-100 hover:opacity-100 transition-opacity shadow"
-            style={{ opacity: 0.7 }}
+            className="absolute -top-1 -right-1 w-6 h-6 rounded-full bg-slate-700 text-white
+                       text-xs font-bold items-center justify-center shadow
+                       opacity-0 group-hover:opacity-100 transition-opacity"
+            style={{ display: 'flex' }}
           >
             –
           </span>
