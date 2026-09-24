@@ -47,14 +47,6 @@ body {
     inset -5px 0 0 rgba(0, 0, 0, 0.08),
     0 3px 0 rgba(0, 0, 0, 0.32),
     0 5px 7px rgba(0, 0, 0, 0.32);
-  /* Segmentos: raya cada unidad (40px) para medir sin números */
-  background-image: repeating-linear-gradient(
-    90deg,
-    transparent 0,
-    transparent 38px,
-    rgba(0, 0, 0, 0.10) 38px,
-    rgba(0, 0, 0, 0.10) 40px
-  );
   transition: box-shadow 0.2s ease, transform 0.1s ease;
   user-select: none;
   touch-action: none;
