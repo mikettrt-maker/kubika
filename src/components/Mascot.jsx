@@ -83,7 +83,7 @@ export default function Mascot({ message }) {
           <img
             src="mascota.png"
             alt="Asistente Kubika"
-            className="w-[150px] h-[150px] object-contain drop-shadow-xl
+            className="w-[175px] h-[175px] object-contain drop-shadow-xl
                        hover:scale-110 transition-transform"
             onError={() => setImgOk(false)}
           />
