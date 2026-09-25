@@ -346,6 +346,22 @@ body {
   box-shadow: 0 4px 20px rgba(99, 102, 241, 0.55), 0 0 40px rgba(99, 102, 241, 0.25);
   color: white;
 }
+/* Candy: base degradado morado→rosa, hover animado */
+.btn-epic.candy-glow {
+  background: linear-gradient(135deg, #a855f7, #ec4899);
+  background-size: 200% 200%;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(168, 85, 247, 0.35);
+}
+.btn-epic.candy-glow:hover {
+  background: linear-gradient(135deg, #9333ea, #a855f7, #ec4899, #f472b6, #a855f7);
+  background-size: 200% 200%;
+  box-shadow: 0 4px 20px rgba(168, 85, 247, 0.55), 0 0 40px rgba(236, 72, 153, 0.3);
+  color: #fff;
+}
+.btn-epic.candy-glow.btn-active {
+  box-shadow: 0 4px 16px rgba(236, 72, 153, 0.5), 0 0 0 2px #fff, 0 0 0 4px rgba(168, 85, 247, 0.55);
+}
 
 /* Shine sweep en hover */
 .btn-epic::after {

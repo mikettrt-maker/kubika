@@ -608,9 +608,9 @@ export default function App() {
           <div className="kubika-tooltip-wrapper">
             <button
               onClick={addFreeText}
-              className="btn-icon btn-ripple btn-epic kubika-glow flex items-center justify-center w-9 h-9 rounded-xl group"
+              className="btn-icon btn-ripple btn-epic candy-glow flex items-center justify-center w-9 h-9 rounded-xl group"
             >
-              <svg className="w-6 h-6 text-kubika-500 group-hover:scale-125 group-hover:text-kubika-700 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-6 h-6 text-white group-hover:scale-125 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
               </svg>
             </button>
@@ -620,9 +620,9 @@ export default function App() {
           <div className="kubika-tooltip-wrapper">
             <button
               onClick={addMathText}
-              className="btn-icon btn-ripple btn-epic purple-glow flex items-center justify-center w-9 h-9 rounded-xl group"
+              className="btn-icon btn-ripple btn-epic candy-glow flex items-center justify-center w-9 h-9 rounded-xl group"
             >
-              <svg className="w-6 h-6 text-purple-500 group-hover:scale-125 group-hover:text-purple-700 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-6 h-6 text-white group-hover:scale-125 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
               </svg>
             </button>
@@ -632,9 +632,9 @@ export default function App() {
           <div className="kubika-tooltip-wrapper">
             <button
               onClick={addAntenna}
-              className="btn-icon btn-ripple btn-epic orange-glow flex items-center justify-center w-9 h-9 rounded-xl group"
+              className="btn-icon btn-ripple btn-epic candy-glow flex items-center justify-center w-9 h-9 rounded-xl group"
             >
-              <svg className="w-6 h-6 text-orange-500 group-hover:scale-125 group-hover:text-orange-700 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-6 h-6 text-white group-hover:scale-125 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 4h18M3 12h18M3 20h12M3 12l4-4m-4 4l4 4" />
               </svg>
             </button>
@@ -645,7 +645,7 @@ export default function App() {
           <div className="kubika-tooltip-wrapper relative">
             <button
               onClick={() => { setActiveTool(a => a === 'quad' ? 'pen' : 'quad'); setShowQuadColorPicker(false); }}
-              className={`btn-icon btn-ripple btn-epic amber-glow flex items-center justify-center w-9 h-9 rounded-xl group ${activeTool === 'quad' ? 'bg-amber-100 text-amber-700 shadow-sm ring-2 ring-amber-300' : ''}`}
+              className={`btn-icon btn-ripple btn-epic candy-glow flex items-center justify-center w-9 h-9 rounded-xl group ${activeTool === 'quad' ? 'btn-active scale-105' : ''}`}
             >
               <svg className="w-5 h-5" fill={activeTool === 'quad' ? quadFill : 'none'} viewBox="0 0 24 24" stroke={activeTool === 'quad' ? quadFill : 'currentColor'}>
                 <rect x={3} y={5} width={18} height={14} rx={2} strokeWidth={1.5} />
@@ -669,7 +669,7 @@ export default function App() {
           <div className="kubika-tooltip-wrapper relative">
             <button
               onClick={() => { setActiveTool(a => a === 'polygon' ? 'pen' : 'polygon'); }}
-              className={`btn-icon btn-ripple btn-epic emerald-glow flex items-center justify-center w-9 h-9 rounded-xl group ${activeTool === 'polygon' ? 'bg-emerald-100 text-emerald-700 shadow-sm ring-2 ring-emerald-300' : ''}`}
+              className={`btn-icon btn-ripple btn-epic candy-glow flex items-center justify-center w-9 h-9 rounded-xl group ${activeTool === 'polygon' ? 'btn-active scale-105' : ''}`}
             >
               <svg className="w-5 h-5" fill={activeTool === 'polygon' ? quadFill : 'none'} viewBox="0 0 24 24" stroke={activeTool === 'polygon' ? quadFill : 'currentColor'}>
                 <polygon points="12,3 21,10 18,20 6,20 3,10" strokeWidth={1.5} strokeLinejoin="round" />
@@ -696,9 +696,9 @@ export default function App() {
           <div className="kubika-tooltip-wrapper">
             <button
               onClick={() => handleSave()}
-              className="btn-icon btn-ripple btn-epic emerald-glow flex items-center justify-center w-9 h-9 rounded-xl group"
+              className="btn-icon btn-ripple btn-epic candy-glow flex items-center justify-center w-9 h-9 rounded-xl group"
             >
-              <svg className="w-6 h-6 text-emerald-500 group-hover:scale-125 group-hover:text-emerald-700 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-6 h-6 text-white group-hover:scale-125 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
               </svg>
             </button>
@@ -708,9 +708,9 @@ export default function App() {
           <div className="kubika-tooltip-wrapper">
             <button
               onClick={openLoadModal}
-              className="btn-icon btn-ripple btn-epic amber-glow flex items-center justify-center w-9 h-9 rounded-xl group"
+              className="btn-icon btn-ripple btn-epic candy-glow flex items-center justify-center w-9 h-9 rounded-xl group"
             >
-              <svg className="w-6 h-6 text-amber-500 group-hover:scale-125 group-hover:text-amber-700 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-6 h-6 text-white group-hover:scale-125 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
               </svg>
             </button>
@@ -721,15 +721,15 @@ export default function App() {
             <button
               onClick={handleExportPdf}
               disabled={pdfLoading}
-              className="btn-icon btn-ripple btn-epic rose-glow flex items-center justify-center w-9 h-9 rounded-xl group disabled:opacity-50"
+              className="btn-icon btn-ripple btn-epic candy-glow flex items-center justify-center w-9 h-9 rounded-xl group disabled:opacity-50"
             >
               {pdfLoading ? (
-                <svg className="animate-spin w-5 h-5 text-slate-400" fill="none" viewBox="0 0 24 24">
+                <svg className="animate-spin w-5 h-5 text-white" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
               ) : (
-                <svg className="w-6 h-6 text-rose-500 group-hover:scale-125 group-hover:text-rose-700 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-6 h-6 text-white group-hover:scale-125 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                 </svg>
               )}
@@ -744,15 +744,11 @@ export default function App() {
           <div className="kubika-tooltip-wrapper">
             <button
               onClick={() => setToolMode(m => m === 'regletas' ? 'geoplano' : 'regletas')}
-              className="btn-epic flex items-center justify-center w-9 h-9 rounded-xl active:scale-90"
-              style={{
-                background: toolMode === 'geoplano'
-                  ? 'linear-gradient(135deg, #f59e0b, #ea580c)'
-                  : '#f1f5f9',
-                color: toolMode === 'geoplano' ? '#fff' : '#64748b',
-                boxShadow: toolMode === 'geoplano'
-                  ? '0 4px 12px rgba(245, 158, 11, 0.3)'
-                  : 'none',
+              className="btn-epic candy-glow flex items-center justify-center w-9 h-9 rounded-xl active:scale-90"
+              style={toolMode === 'geoplano' ? undefined : {
+                background: '#f1f5f9',
+                color: '#64748b',
+                boxShadow: 'none',
               }}
             >
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -769,9 +765,9 @@ export default function App() {
           <div className="kubika-tooltip-wrapper">
             <button
               onClick={handleClear}
-              className="btn-icon btn-ripple btn-epic red-glow flex items-center justify-center w-9 h-9 rounded-xl group"
+              className="btn-icon btn-ripple btn-epic candy-glow flex items-center justify-center w-9 h-9 rounded-xl group"
             >
-              <svg className="w-6 h-6 text-red-400 group-hover:scale-125 group-hover:text-red-600 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-6 h-6 text-white group-hover:scale-125 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
               </svg>
             </button>
@@ -783,9 +779,9 @@ export default function App() {
             <div className="kubika-tooltip-wrapper relative">
               <button
                 onClick={() => setShowMathBooks(!showMathBooks)}
-                className={`btn-icon btn-ripple btn-epic amber-glow flex items-center justify-center w-9 h-9 rounded-xl group ${showMathBooks ? 'bg-amber-100 text-amber-700 shadow-sm ring-2 ring-amber-300' : ''}`}
+                className={`btn-icon btn-ripple btn-epic candy-glow flex items-center justify-center w-9 h-9 rounded-xl group ${showMathBooks ? 'btn-active scale-105' : ''}`}
               >
-                <svg className="w-6 h-6 text-amber-500 group-hover:scale-125 group-hover:text-amber-700 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="w-6 h-6 text-white group-hover:scale-125 transition-all duration-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                 </svg>
               </button>
@@ -813,7 +809,8 @@ export default function App() {
           )}
           <button
             onClick={() => setShowBiblioteca(true)}
-            className="btn-epic indigo-glow flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white text-sm font-semibold shadow-md hover:shadow-lg active:scale-95 transition-all duration-300"
+            className="btn-epic flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-semibold shadow-md hover:shadow-lg active:scale-95 transition-all duration-300"
+            style={{ background: 'linear-gradient(135deg, #a855f7, #ec4899)', backgroundSize: '200% 200%' }}
             title="Biblioteca virtual"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -821,7 +818,7 @@ export default function App() {
             </svg>
             Biblioteca
           </button>
-          <span className="ml-1 px-3 py-1 text-xs font-extrabold text-white rounded-full leading-none select-none shadow-md" style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7, #6366f1, #a855f7, #7c3aed)', backgroundSize: '200% 200%', animation: 'gradientShift 3s ease infinite', letterSpacing: '0.05em' }} title="Versión de la aplicación">v2.7.22</span>
+          <span className="ml-1 px-3 py-1 text-xs font-extrabold text-white rounded-full leading-none select-none shadow-md" style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7, #6366f1, #a855f7, #7c3aed)', backgroundSize: '200% 200%', animation: 'gradientShift 3s ease infinite', letterSpacing: '0.05em' }} title="Versión de la aplicación">v2.7.23</span>
         </div>
 
       </header>
