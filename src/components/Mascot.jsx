@@ -28,6 +28,17 @@ const TIPS = [
     ],
   },
   {
+    id: 'productos',
+    title: '✨ Entender los productos (guía completa)',
+    steps: [
+      'PASO 1 — De la suma al tren especial: un tren normal (3 + 2 + 1) es una suma. Si todos los vagones valen lo mismo (6 + 6 + 6), eso es multiplicación. Repetir un número es multiplicar — a esos trenes de igual valor los libros llaman trenes especiales.',
+      'PASO 2 — El producto es un área: cada tren especial se convierte en un rectángulo: 3 filas de 6 = área 18. La multiplicación no es solo decir tablas, es construir figuras con las regletas.',
+      'PASO 3 — Los factores son los lados: si conoces el área pero no los lados, buscas qué rectángulos caben exacto: 18 = 1×18, 2×9, 3×6. Cada par que funcione son los factores — encontrarlos se llama factorizar.',
+      'PASO 4 — Casos especiales del rectángulo: cuando los lados son iguales hay cuadrado: 4 × 4 = 16 → 4² (números cuadrados: 1, 4, 9, 16, 25…). Si apilas el cuadrado hay cubo: 2 × 2 × 2 = 8 → 2³ (números cúbicos: 8, 27, 64…). El 64 es especial: es 8² y 4³ al mismo tiempo.',
+      'PASO 5 — Todo conecta: tren especial → rectángulo → factores → fracciones (4 de 8 = 1/2) → cuadrados → cubos. Una sola idea lo une todo: repetir y medir.',
+    ],
+  },
+  {
     id: 'copiar',
     title: 'Copiar y pegar',
     text: 'Selecciona un texto o fórmula y usa Ctrl+C para copiar, Ctrl+V para pegar.',
