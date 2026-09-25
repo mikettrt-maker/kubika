@@ -1,4 +1,33 @@
 import { useState, useEffect, useRef } from 'react';
+import { RODS } from '../utils/rods';
+
+/** Regleta miniatura (CSS puro) para las figuras de los consejos. */
+function MiniRod({ v, unit = 8, h = 14 }) {
+  const rod = RODS[v - 1];
+  if (!rod) return null;
+  return (
+    <span
+      className="inline-block rounded-[2px] border border-black/25"
+      style={{
+        width: v * unit,
+        height: h,
+        backgroundColor: rod.color,
+        boxShadow: 'inset 0 -2px 0 rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.5)',
+      }}
+      title={rod.name}
+    />
+  );
+}
+
+/** Contenedor de figura con etiqueta. */
+function Fig({ label, children }) {
+  return (
+    <div className="flex flex-col items-center gap-1">
+      {children}
+      <span className="text-[9px] font-bold text-purple-600">{label}</span>
+    </div>
+  );
+}
 
 const TIPS = [
   {
@@ -31,11 +60,85 @@ const TIPS = [
     id: 'productos',
     title: '✨ Entender los productos (guía completa)',
     steps: [
-      'PASO 1 — De la suma al tren especial: un tren normal (3 + 2 + 1) es una suma. Si todos los vagones valen lo mismo (6 + 6 + 6), eso es multiplicación. Repetir un número es multiplicar — a esos trenes de igual valor los libros llaman trenes especiales.',
-      'PASO 2 — El producto es un área: cada tren especial se convierte en un rectángulo: 3 filas de 6 = área 18. La multiplicación no es solo decir tablas, es construir figuras con las regletas.',
-      'PASO 3 — Los factores son los lados: si conoces el área pero no los lados, buscas qué rectángulos caben exacto: 18 = 1×18, 2×9, 3×6. Cada par que funcione son los factores — encontrarlos se llama factorizar.',
-      'PASO 4 — Casos especiales del rectángulo: cuando los lados son iguales hay cuadrado: 4 × 4 = 16 → 4² (números cuadrados: 1, 4, 9, 16, 25…). Si apilas el cuadrado hay cubo: 2 × 2 × 2 = 8 → 2³ (números cúbicos: 8, 27, 64…). El 64 es especial: es 8² y 4³ al mismo tiempo.',
-      'PASO 5 — Todo conecta: tren especial → rectángulo → factores → fracciones (4 de 8 = 1/2) → cuadrados → cubos. Una sola idea lo une todo: repetir y medir.',
+      {
+        text: 'PASO 1 — De la suma al tren especial: un tren normal (3 + 2 + 1) es una suma. Si todos los vagones valen lo mismo (6 + 6 + 6), eso es multiplicación — a esos trenes de igual valor los libros llaman trenes especiales.',
+        fig: (
+          <div className="flex flex-col gap-1.5 w-full">
+            <div className="flex items-center gap-1.5">
+              <MiniRod v={3} /><MiniRod v={2} /><MiniRod v={1} />
+              <span className="text-[9px] text-slate-500 font-semibold">distintos = suma</span>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <MiniRod v={6} /><MiniRod v={6} /><MiniRod v={6} />
+              <span className="text-[9px] font-bold text-purple-700">iguales = 3 × 6</span>
+            </div>
+          </div>
+        ),
+      },
+      {
+        text: 'PASO 2 — El producto es un área: cada tren especial se convierte en un rectángulo: 3 filas de 6 = área 18. La multiplicación no es solo decir tablas, es construir figuras con las regletas.',
+        fig: (
+          <Fig label="3 filas × 6 = área 18">
+            <div className="flex flex-col gap-0.5 items-start">
+              <MiniRod v={6} /><MiniRod v={6} /><MiniRod v={6} />
+            </div>
+          </Fig>
+        ),
+      },
+      {
+        text: 'PASO 3 — Los factores son los lados: si conoces el área pero no los lados, buscas qué rectángulos caben exacto. Cada par que funcione son los factores — encontrarlos se llama factorizar.',
+        fig: (
+          <div className="flex items-end gap-4 justify-center flex-wrap">
+            <Fig label="1 × 18">
+              <div className="flex"><MiniRod v={10} /><MiniRod v={8} /></div>
+            </Fig>
+            <Fig label="2 × 9">
+              <div className="flex flex-col gap-0.5 items-start"><MiniRod v={9} /><MiniRod v={9} /></div>
+            </Fig>
+            <Fig label="3 × 6">
+              <div className="flex flex-col gap-0.5 items-start"><MiniRod v={6} /><MiniRod v={6} /><MiniRod v={6} /></div>
+            </Fig>
+          </div>
+        ),
+      },
+      {
+        text: 'PASO 4 — Casos especiales del rectángulo: cuando los lados son iguales hay cuadrado: 4 × 4 = 16 → 4² (números cuadrados: 1, 4, 9, 16, 25…). Si apilas capas del cuadrado hay cubo: 2 × 2 × 2 = 8 → 2³ (números cúbicos: 8, 27, 64…). El 64 es especial: es 8² y 4³ al mismo tiempo.',
+        fig: (
+          <div className="flex items-end gap-5 justify-center flex-wrap">
+            <Fig label="4² = 16 (cuadrado)">
+              <div className="flex flex-col gap-0.5 items-start">
+                <MiniRod v={4} unit={11} h={11} /><MiniRod v={4} unit={11} h={11} />
+                <MiniRod v={4} unit={11} h={11} /><MiniRod v={4} unit={11} h={11} />
+              </div>
+            </Fig>
+            <Fig label="2³ = 8 (2 capas de 2×2)">
+              <div className="flex flex-col gap-1">
+                {[0, 1].map(i => (
+                  <div key={i} className="grid grid-cols-2 gap-0.5 p-0.5 bg-white border border-red-300 rounded-[3px]">
+                    <span className="block w-[13px] h-[13px] bg-[#E74C3C] rounded-[1px]" />
+                    <span className="block w-[13px] h-[13px] bg-[#E74C3C] rounded-[1px]" />
+                    <span className="block w-[13px] h-[13px] bg-[#E74C3C] rounded-[1px]" />
+                    <span className="block w-[13px] h-[13px] bg-[#E74C3C] rounded-[1px]" />
+                  </div>
+                ))}
+              </div>
+            </Fig>
+          </div>
+        ),
+      },
+      {
+        text: 'PASO 5 — Todo conecta: tren especial → rectángulo → factores → fracciones → cuadrados → cubos. Una sola idea lo une todo: repetir y medir.',
+        fig: (
+          <div className="flex flex-wrap items-center justify-center gap-1 text-[9px] font-bold text-slate-600">
+            {['🚂 tren', '▭ área', '🔍 factores', '½ fracciones', '□ cuadrado', '📦 cubo'].map((s, i, arr) => (
+              <span key={s} className="flex items-center gap-1">
+                <span className="px-1.5 py-0.5 bg-purple-50 border border-purple-200 rounded-full">{s}</span>
+                {i < arr.length - 1 && <span className="text-purple-400">➜</span>}
+              </span>
+            ))}
+          </div>
+        ),
+      },
     ],
   },
   {
@@ -145,11 +248,23 @@ export default function Mascot({ message }) {
                                   border border-purple-100 text-[13px] leading-relaxed text-slate-700
                                   animate-scale-in space-y-2">
                     {tip.steps
-                      ? tip.steps.map((s, j) => (
-                          <p key={j} className={j === 0 ? 'font-semibold text-purple-800' : ''}>
-                            {s}
-                          </p>
-                        ))
+                      ? tip.steps.map((s, j) => {
+                          const txt = typeof s === 'string' ? s : s.text;
+                          const fig = typeof s === 'string' ? null : s.fig;
+                          return (
+                            <div key={j}>
+                              <p className={j === 0 ? 'font-semibold text-purple-800' : ''}>
+                                {txt}
+                              </p>
+                              {fig && (
+                                <div className="my-2 px-2 py-2.5 bg-white/80 rounded-lg border border-purple-100
+                                                flex items-center justify-center flex-wrap gap-3">
+                                  {fig}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })
                       : <p>{tip.text}</p>}
                   </div>
                 )}
