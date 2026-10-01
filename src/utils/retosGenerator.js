@@ -1,6 +1,6 @@
 // Generador de retos: 8 operaciones por (grado, operación, nivel)
 // Practica los algoritmos escritos con alineación de cifras.
-// Formato de números: dígitos puros, coma decimal (español mexicano).
+// Formato de números: dígitos puros, punto decimal (como en México).
 
 export const OPERACIONES = [
   { id: 'suma', label: 'Suma', signo: '+' },
@@ -16,9 +16,9 @@ export const nivelEtiqueta = (n) => (n <= 3 ? 'Básico' : n <= 6 ? 'Medio' : n <
 const rnd = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 const digitStr = (d) => String(rnd(Math.pow(10, d - 1), Math.pow(10, d) - 1));
 const decPart = (k) => String(rnd(0, Math.pow(10, k) - 1)).padStart(k, '0');
-const num = (intStr, k) => (k > 0 ? `${intStr},${decPart(k)}` : String(intStr));
+const num = (intStr, k) => (k > 0 ? `${intStr}.${decPart(k)}` : String(intStr));
 const val = (s) => {
-  const [i, d = ''] = String(s).split(',');
+  const [i, d = ''] = String(s).split(/[,.]/);
   return Number(i) + (d ? Number(`0.${d}`) : 0);
 };
 const gb = (grado) => (grado >= 6 ? 2 : grado === 5 ? 1 : 0);
@@ -178,7 +178,7 @@ function genResta(grado, nivel) {
     case 8: {
       let a = '', b = '';
       for (let t = 0; t < 40; t++) {
-        a = `${digitStr(d)},00`;
+        a = `${digitStr(d)}.00`;
         b = num(digitStr(rnd(3, d)), 2);
         if (val(a) > val(b)) break;
       }
@@ -192,7 +192,7 @@ function genResta(grado, nivel) {
     default: {
       const arr = digitStr(d).split('');
       arr[rnd(1, d - 2)] = '0';
-      const a = `${arr.join('')},00`;
+      const a = `${arr.join('')}.00`;
       const b = num(digitStr(Math.max(3, d - 1)), 2);
       if (val(a) > val(b)) return [`${a} − ${b}`];
       const p = restaPair(d, d, 2, 2);
@@ -289,7 +289,7 @@ function genDiv(grado, nivel) {
       break;
     case 8: {
       b = digitStr(divD);
-      a = `${digitStr(cap(5 + g))},${decPart(rnd(1, 2))}`;
+      a = `${digitStr(cap(5 + g))}.${decPart(rnd(1, 2))}`;
       break;
     }
     case 9: {
