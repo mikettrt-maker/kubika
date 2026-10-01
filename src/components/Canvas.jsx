@@ -238,7 +238,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
     };
 
     const handleUp = () => {
-      target.releasePointerCapture(e.pointerId);
+      try { target.releasePointerCapture(e.pointerId); } catch { /* ya liberado */ }
       target.removeEventListener('pointermove', handleMove);
       target.removeEventListener('pointerup', handleUp);
     };
@@ -276,7 +276,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
     };
 
     const handleUp = () => {
-      target.releasePointerCapture(e.pointerId);
+      try { target.releasePointerCapture(e.pointerId); } catch { /* ya liberado */ }
       target.removeEventListener('pointermove', handleMove);
       target.removeEventListener('pointerup', handleUp);
     };
@@ -542,7 +542,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
       setQuads(prev => prev.map(q => q.id === quadId ? { ...q, x: Math.max(0, origX + ev.clientX - startX), y: Math.max(0, origY + ev.clientY - startY) } : q));
     };
     const handleUp = () => {
-      target.releasePointerCapture(e.pointerId);
+      try { target.releasePointerCapture(e.pointerId); } catch { /* ya liberado */ }
       target.removeEventListener('pointermove', handleMove);
       target.removeEventListener('pointerup', handleUp);
     };
@@ -572,7 +572,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
       setQuads(prev => prev.map(q => q.id === quadId ? { ...q, x: newX, y: newY, width: newW, height: newH } : q));
     };
     const handleUp = () => {
-      target.releasePointerCapture(e.pointerId);
+      try { target.releasePointerCapture(e.pointerId); } catch { /* ya liberado */ }
       target.removeEventListener('pointermove', handleMove);
       target.removeEventListener('pointerup', handleUp);
     };
@@ -598,7 +598,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
       setPolygons(prev => prev.map(p => p.id === polyId ? { ...p, points: origPoints.map(pt => ({ x: Math.max(0, pt.x + dx), y: Math.max(0, pt.y + dy) })) } : p));
     };
     const handleUp = () => {
-      target.releasePointerCapture(e.pointerId);
+      try { target.releasePointerCapture(e.pointerId); } catch { /* ya liberado */ }
       target.removeEventListener('pointermove', handleMove);
       target.removeEventListener('pointerup', handleUp);
     };
@@ -643,7 +643,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
       } : p));
     };
     const handleUp = () => {
-      target.releasePointerCapture(e.pointerId);
+      try { target.releasePointerCapture(e.pointerId); } catch { /* ya liberado */ }
       target.removeEventListener('pointermove', handleMove);
       target.removeEventListener('pointerup', handleUp);
     };

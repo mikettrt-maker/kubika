@@ -155,25 +155,56 @@ export default function FreeTextBox({
   };
 
   const startResize = (e) => {
+    if (e.button !== undefined && e.button !== 0 && e.button !== -1) return;
     e.preventDefault();
     e.stopPropagation();
     isBlurBlocked.current = true;
-    setTimeout(() => { isBlurBlocked.current = false; }, 120);
+    setTimeout(() => { isBlurBlocked.current = false; }, 150);
+
+    const handle = e.currentTarget;
+    const pointerId = e.pointerId;
+    if (pointerId !== undefined) {
+      try { handle.setPointerCapture(pointerId); } catch { /* noop */ }
+    }
+
     setIsResizing(true);
     const startX = e.clientX;
     const startW = width;
     const clamp = (w) => Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, w));
-    const onMove = (mv) => {
-      setWidth(clamp(startW + (mv.clientX - startX)));
-    };
-    const onUp = (uv) => {
-      const finalW = clamp(startW + (uv.clientX - startX));
-      setWidth(finalW);
-      setIsResizing(false);
-      if (onUpdate) onUpdate(id, { ...stateRef.current, width: finalW });
+    let done = false;
+
+    const cleanup = () => {
+      if (done) return;
+      done = true;
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
+      window.removeEventListener('blur', onUp);
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('mouseup', onUp);
+      if (pointerId !== undefined) {
+        try { handle.releasePointerCapture(pointerId); } catch { /* ya liberado */ }
+      }
+      setIsResizing(false);
     };
+
+    const onMove = (ev) => {
+      if (typeof ev.clientX !== 'number') return;
+      setWidth(clamp(startW + (ev.clientX - startX)));
+    };
+
+    const onUp = (ev) => {
+      const dx = ev && typeof ev.clientX === 'number' ? ev.clientX - startX : 0;
+      const finalW = clamp(startW + dx);
+      cleanup();
+      setWidth(finalW);
+      if (onUpdate) onUpdate(id, { ...stateRef.current, width: finalW });
+    };
+
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onUp);
+    window.addEventListener('blur', onUp);
     window.addEventListener('mousemove', onMove);
     window.addEventListener('mouseup', onUp);
   };

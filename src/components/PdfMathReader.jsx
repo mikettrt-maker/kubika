@@ -812,7 +812,7 @@ export default function PdfMathReader({ libro, onBack }) {
       setMathTexts(prev => prev.map(m => m.id === mathId ? { ...m, x: Math.max(0, origX + ev.clientX - startX), y: Math.max(0, origY + ev.clientY - startY) } : m));
     };
     const handleUp = () => {
-      target.releasePointerCapture(e.pointerId);
+      try { target.releasePointerCapture(e.pointerId); } catch { /* ya liberado */ }
       target.removeEventListener('pointermove', handleMove);
       target.removeEventListener('pointerup', handleUp);
       saveCanvas();
@@ -836,7 +836,7 @@ export default function PdfMathReader({ libro, onBack }) {
       setFreeTexts(prev => prev.map(t => t.id === textId ? { ...t, x: Math.max(0, origX + ev.clientX - startX), y: Math.max(0, origY + ev.clientY - startY) } : t));
     };
     const handleUp = () => {
-      target.releasePointerCapture(e.pointerId);
+      try { target.releasePointerCapture(e.pointerId); } catch { /* ya liberado */ }
       target.removeEventListener('pointermove', handleMove);
       target.removeEventListener('pointerup', handleUp);
       saveCanvas();
@@ -860,7 +860,7 @@ export default function PdfMathReader({ libro, onBack }) {
       setQuads(prev => prev.map(q => q.id === quadId ? { ...q, x: Math.max(0, origX + ev.clientX - startX), y: Math.max(0, origY + ev.clientY - startY) } : q));
     };
     const handleUp = () => {
-      target.releasePointerCapture(e.pointerId);
+      try { target.releasePointerCapture(e.pointerId); } catch { /* ya liberado */ }
       target.removeEventListener('pointermove', handleMove);
       target.removeEventListener('pointerup', handleUp);
       saveCanvas();
@@ -890,7 +890,7 @@ export default function PdfMathReader({ libro, onBack }) {
       setQuads(prev => prev.map(q => q.id === quadId ? { ...q, x: newX, y: newY, width: newW, height: newH } : q));
     };
     const handleUp = () => {
-      target.releasePointerCapture(e.pointerId);
+      try { target.releasePointerCapture(e.pointerId); } catch { /* ya liberado */ }
       target.removeEventListener('pointermove', handleMove);
       target.removeEventListener('pointerup', handleUp);
       saveCanvas();
@@ -939,7 +939,7 @@ export default function PdfMathReader({ libro, onBack }) {
       setPolygons(prev => prev.map(p => p.id === polyId ? { ...p, points: origPoints.map(pt => ({ x: Math.max(0, pt.x + dx), y: Math.max(0, pt.y + dy) })) } : p));
     };
     const handleUp = () => {
-      target.releasePointerCapture(e.pointerId);
+      try { target.releasePointerCapture(e.pointerId); } catch { /* ya liberado */ }
       target.removeEventListener('pointermove', handleMove);
       target.removeEventListener('pointerup', handleUp);
       saveCanvas();
@@ -984,7 +984,7 @@ export default function PdfMathReader({ libro, onBack }) {
       } : p));
     };
     const handleUp = () => {
-      target.releasePointerCapture(e.pointerId);
+      try { target.releasePointerCapture(e.pointerId); } catch { /* ya liberado */ }
       target.removeEventListener('pointermove', handleMove);
       target.removeEventListener('pointerup', handleUp);
       saveCanvas();
@@ -1095,7 +1095,7 @@ export default function PdfMathReader({ libro, onBack }) {
         if (isRodOverlapping(temp, prev)) return { ...r, x: origX, y: origY, isInvalid: false };
         return { ...temp, isInvalid: false };
       }));
-      target.releasePointerCapture(e.pointerId);
+      try { target.releasePointerCapture(e.pointerId); } catch { /* ya liberado */ }
       target.removeEventListener('pointermove', handleMove);
       target.removeEventListener('pointerup', handleUp);
       saveCanvas();
