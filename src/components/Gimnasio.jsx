@@ -1,12 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { exportToPdf } from '../utils/exportPdf';
 
-const CELL_H = 44;
-const CELL_W = 56;
+const CELL_H = 36;
+const CELL_W = 46;
 const DARK = '2px solid #0f172a';
 const LIGHT = '1px solid #e2e8f0';
 const TRANSPARENT = '1px solid transparent';
-const SIGN_RE = /^[+\-−×÷=]+$/;
+const DEFAULT_COLOR = '#1e293b';
+const TEXT_COLORS = ['#1e293b', '#dc2626', '#2563eb', '#16a34a', '#ea580c', '#9333ea', '#db2777', '#64748b'];
 
 const norm = (s) => ({
   r1: Math.min(s.r1, s.r2),
@@ -68,6 +69,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
   const cols = value.cols || 12;
   const cells = value.cells || {};
   const borders = value.borders || {};
+  const colors = value.colors || {};
 
   const focusGrid = () => { try { rootRef.current?.focus(); } catch {} };
 
@@ -191,6 +193,20 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
     focusGrid();
   };
 
+  // ===== Color del número (aplicado al rango seleccionado) =====
+  const applyColor = (hex) => {
+    if (!sel) { onNotify('Primero selecciona celdas', 'error'); return; }
+    onChange(prev => {
+      const cm = { ...(prev.colors || {}) };
+      forEachSelected(k => {
+        if (hex === DEFAULT_COLOR) delete cm[k];
+        else cm[k] = hex;
+      });
+      return { ...prev, colors: cm };
+    });
+    focusGrid();
+  };
+
   // ===== Galera de división larga (vertical + barra superior) =====
   const drawGalera = () => {
     if (!sel) { onNotify('Selecciona el divisor y el dividendo', 'error'); return; }
@@ -275,12 +291,16 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
   const handlePdf = async () => {
     if (!sheetRef.current || pdfLoading) return;
     setPdfLoading(true);
+    const prevSel = sel;
+    setSel(null);
     try {
+      await new Promise(r => setTimeout(r, 80));
       await exportToPdf(sheetRef.current, displayName || 'Alumno', workspaceName || 'Gimnasio Matemático');
       onNotify('PDF descargado');
     } catch {
       onNotify('Error al crear el PDF', 'error');
     }
+    setSel(prevSel);
     setPdfLoading(false);
     focusGrid();
   };
@@ -383,6 +403,25 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
         <div className="w-px h-6 bg-slate-200" />
 
         <div className="flex items-center gap-1.5">
+          <GroupLabel>Color</GroupLabel>
+          {TEXT_COLORS.map(hex => (
+            <button
+              key={hex}
+              onClick={() => applyColor(hex)}
+              title="Poner el color del número en las celdas seleccionadas"
+              className="w-5 h-5 rounded-full border-2 transition-all hover:scale-110"
+              style={{
+                backgroundColor: hex,
+                borderColor: (colors[anchorKey] || DEFAULT_COLOR) === hex ? '#0f172a' : 'transparent',
+                boxShadow: '0 0 0 1px #cbd5e1',
+              }}
+            />
+          ))}
+        </div>
+
+        <div className="w-px h-6 bg-slate-200" />
+
+        <div className="flex items-center gap-1.5">
           <GroupLabel>Edición</GroupLabel>
           <ToolBtn onClick={clearSelectionContent} title="Borrar el texto de las celdas seleccionadas (Supr)">Borrar</ToolBtn>
           <ToolBtn onClick={clearAll} title="Vaciar toda la cuadrícula" danger>Limpiar todo</ToolBtn>
@@ -444,7 +483,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
                   const isEditing = editing && editing.r === r && editing.c === c;
                   const selected = inRange(r, c);
                   const isAnchor = sel && sel.r1 === r && sel.c1 === c;
-                  const isSign = SIGN_RE.test(text);
+                  const cellColor = colors[key] || DEFAULT_COLOR;
                   return (
                     <div
                       key={key}
@@ -484,13 +523,13 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
                               selectCell(r, e.shiftKey ? Math.max(0, c - 1) : Math.min(cols - 1, c + 1));
                             }
                           }}
-                          className="absolute inset-0 w-full h-full px-1.5 text-right text-lg font-bold outline-none bg-white"
-                          style={{ color: '#1e293b', caretColor: '#6366f1', boxShadow: 'inset 0 0 0 2px #6366f1' }}
+                          className="absolute inset-0 w-full h-full px-1 text-center text-base font-bold outline-none bg-white"
+                          style={{ color: cellColor, caretColor: '#6366f1', boxShadow: 'inset 0 0 0 2px #6366f1' }}
                         />
                       ) : text ? (
                         <span
-                          className="w-full truncate text-lg font-bold"
-                          style={{ color: '#1e293b', textAlign: isSign ? 'center' : 'right' }}
+                          className="w-full whitespace-nowrap text-base font-bold overflow-visible"
+                          style={{ color: cellColor, textAlign: 'center' }}
                         >
                           {text}
                         </span>
