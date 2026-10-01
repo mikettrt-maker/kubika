@@ -9,6 +9,7 @@ import Antenna from './components/Antenna';
 import SaveLoadModal from './components/SaveLoadModal';
 import SplashScreen from './components/SplashScreen';
 import Biblioteca from './components/Biblioteca';
+import Gimnasio from './components/Gimnasio';
 import PdfMathReader from './components/PdfMathReader';
 import Mascot from './components/Mascot';
 import { RODS, generateMathId, generateAntennaId, createAntennaRows } from './utils/rods';
@@ -52,6 +53,8 @@ export default function App() {
   const [splashDone, setSplashDone] = useState(false);
   const [showLoginSplash, setShowLoginSplash] = useState(false);
   const [showBiblioteca, setShowBiblioteca] = useState(false);
+  const [showGimnasio, setShowGimnasio] = useState(false);
+  const [gimnasio, setGimnasio] = useState(null);
   const [showMathBooks, setShowMathBooks] = useState(false);
   const [selectedMathBook, setSelectedMathBook] = useState(null);
   const [mathBooks, setMathBooks] = useState([]);
@@ -76,11 +79,12 @@ export default function App() {
   const hasUnsavedChangesRef = useRef(false);
 
   // Auto-guardar con debounce cada 3 segundos
+  const gimHasData = !!(gimnasio && (Object.keys(gimnasio.cells || {}).length > 0 || Object.keys(gimnasio.borders || {}).length > 0));
   useEffect(() => {
     if (!autosaveKey) return;
     const hasData = rods.length > 0 || mathTexts.length > 0 || freeTexts.length > 0 ||
                     antennas.length > 0 || quads.length > 0 || polygons.length > 0 ||
-                    geoBands.length > 0 || manualPivots.length > 0;
+                    geoBands.length > 0 || manualPivots.length > 0 || gimHasData;
     if (!hasData) return;
 
     hasUnsavedChangesRef.current = true;
@@ -89,7 +93,7 @@ export default function App() {
       try {
         localStorage.setItem(autosaveKey, JSON.stringify({
           rods, mathTexts, freeTexts, antennas, quads, polygons,
-          geoMode, manualPivots, geoBands, _ts: Date.now(),
+          geoMode, manualPivots, geoBands, gimnasio: gimnasio || null, _ts: Date.now(),
         }));
         hasUnsavedChangesRef.current = false;
       } catch (e) {
@@ -97,7 +101,7 @@ export default function App() {
       }
     }, 3000);
     return () => { if (autosaveTimeoutRef.current) clearTimeout(autosaveTimeoutRef.current); };
-  }, [rods, mathTexts, freeTexts, antennas, quads, polygons, geoMode, manualPivots, geoBands, autosaveKey]);
+  }, [rods, mathTexts, freeTexts, antennas, quads, polygons, geoMode, manualPivots, geoBands, gimnasio, gimHasData, autosaveKey]);
 
   // Restaurar auto-guardado al cargar (si tiene menos de 7 días)
   useEffect(() => {
@@ -108,7 +112,8 @@ export default function App() {
       const saved = JSON.parse(raw);
       if (!saved?._ts || (Date.now() - saved._ts) > 7 * 24 * 60 * 60 * 1000) return;
       const hasData = (saved.rods?.length > 0) || (saved.mathTexts?.length > 0) || (saved.freeTexts?.length > 0) ||
-                      (saved.antennas?.length > 0) || (saved.quads?.length > 0) || (saved.polygons?.length > 0);
+                      (saved.antennas?.length > 0) || (saved.quads?.length > 0) || (saved.polygons?.length > 0) ||
+                      !!(saved.gimnasio && (Object.keys(saved.gimnasio.cells || {}).length > 0 || Object.keys(saved.gimnasio.borders || {}).length > 0));
       if (!hasData) return;
       setRods(saved.rods || []);
       setMathTexts(saved.mathTexts || []);
@@ -118,6 +123,7 @@ export default function App() {
       setPolygons(saved.polygons || []);
       setGeoBands(saved.geoBands || []);
       setManualPivots(saved.manualPivots || []);
+      if (saved.gimnasio) setGimnasio(saved.gimnasio);
       if (saved.geoMode) setGeoMode(saved.geoMode);
     } catch {}
   }, [autosaveKey]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -359,6 +365,7 @@ export default function App() {
         pivotId2: b.pivotId2,
         color: b.color,
       })),
+      gimnasio: gimnasio || null,
     };
 
     const { error } = await saveWorkspace(finalName, canvasState);
@@ -373,7 +380,8 @@ export default function App() {
   // ========== CARGAR WORKSPACE ==========
   const handleLoad = async (workspaceId) => {
     const hasCanvasData = rods.length > 0 || mathTexts.length > 0 || freeTexts.length > 0 ||
-      antennas.length > 0 || quads.length > 0 || polygons.length > 0 || geoBands.length > 0;
+      antennas.length > 0 || quads.length > 0 || polygons.length > 0 || geoBands.length > 0 ||
+      gimHasData;
     if (hasCanvasData &&
         !confirm('¿Cargar este trabajo? Se reemplazará el contenido actual del lienzo.')) {
       return;
@@ -390,6 +398,7 @@ export default function App() {
       setAntennas(state.antennas || []);
       setQuads(state.quads || []);
       setPolygons(state.polygons || []);
+      setGimnasio(state.gimnasio || null);
       if (state.geoMode) {
         setGeoMode(state.geoMode);
         setGeoPivots(state.geoMode === 'rect' ? getRectPivots() : getCirclePivots());
@@ -812,6 +821,17 @@ export default function App() {
             </div>
           )}
           <button
+            onClick={() => { setGimnasio(g => g || { rows: 10, cols: 12, cells: {}, borders: {} }); setShowGimnasio(true); }}
+            className="btn-epic flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-semibold shadow-md hover:shadow-lg active:scale-95 transition-all duration-300"
+            style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', backgroundSize: '200% 200%' }}
+            title="Gimnasio Matemático"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v4H4zM14 15h6v4h-6z" />
+            </svg>
+            Gimnasio
+          </button>
+          <button
             onClick={() => setShowBiblioteca(true)}
             className="btn-epic flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-semibold shadow-md hover:shadow-lg active:scale-95 transition-all duration-300"
             style={{ background: 'linear-gradient(135deg, #a855f7, #ec4899)', backgroundSize: '200% 200%' }}
@@ -822,7 +842,7 @@ export default function App() {
             </svg>
             Biblioteca
           </button>
-          <span className="ml-1 px-3 py-1 text-xs font-extrabold text-white rounded-full leading-none select-none shadow-md" style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7, #6366f1, #a855f7, #7c3aed)', backgroundSize: '200% 200%', animation: 'gradientShift 3s ease infinite', letterSpacing: '0.05em' }} title="Versión de la aplicación">v3.3.0</span>
+          <span className="ml-1 px-3 py-1 text-xs font-extrabold text-white rounded-full leading-none select-none shadow-md" style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7, #6366f1, #a855f7, #7c3aed)', backgroundSize: '200% 200%', animation: 'gradientShift 3s ease infinite', letterSpacing: '0.05em' }} title="Versión de la aplicación">v3.4.0</span>
         </div>
 
       </header>
@@ -890,6 +910,18 @@ export default function App() {
         <Biblioteca onClose={() => setShowBiblioteca(false)} userGrado={userGrado} />
       )}
 
+      {/* ===== GIMNASIO MATEMÁTICO ===== */}
+      {showGimnasio && gimnasio && (
+        <Gimnasio
+          value={gimnasio}
+          onChange={setGimnasio}
+          onClose={() => setShowGimnasio(false)}
+          displayName={displayName}
+          workspaceName={workspaceName}
+          onNotify={showNotification}
+        />
+      )}
+
       {/* ===== LIBRO MATEMÁTICAS ===== */}
       {selectedMathBook && (
         <div className="fixed inset-0 z-[9999]">
@@ -910,7 +942,7 @@ export default function App() {
       />
 
       {/* ===== MASCOTA ASISTENTE ===== */}
-      {user && !selectedMathBook && !showBiblioteca && (
+      {user && !selectedMathBook && !showBiblioteca && !showGimnasio && (
         <Mascot message={mascotMsg} />
       )}
 
