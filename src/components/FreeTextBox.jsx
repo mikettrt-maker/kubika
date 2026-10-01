@@ -91,6 +91,7 @@ export default function FreeTextBox({
   const [align, setAlign] = useState(initialAlign || 'left');
   const [isEditing, setIsEditing] = useState(!initialText);
   const [hovered, setHovered] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
   const inputRef = useRef(null);
   const stateRef = useRef({ text, color, bold, width, align });
   const isBlurBlocked = useRef(false);
@@ -156,14 +157,19 @@ export default function FreeTextBox({
   const startResize = (e) => {
     e.preventDefault();
     e.stopPropagation();
+    isBlurBlocked.current = true;
+    setTimeout(() => { isBlurBlocked.current = false; }, 120);
+    setIsResizing(true);
     const startX = e.clientX;
     const startW = width;
+    const clamp = (w) => Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, w));
     const onMove = (mv) => {
-      setWidth(Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startW + (mv.clientX - startX))));
+      setWidth(clamp(startW + (mv.clientX - startX)));
     };
     const onUp = (uv) => {
-      const finalW = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, startW + (uv.clientX - startX)));
+      const finalW = clamp(startW + (uv.clientX - startX));
       setWidth(finalW);
+      setIsResizing(false);
       if (onUpdate) onUpdate(id, { ...stateRef.current, width: finalW });
       window.removeEventListener('mousemove', onMove);
       window.removeEventListener('mouseup', onUp);
@@ -172,22 +178,24 @@ export default function FreeTextBox({
     window.addEventListener('mouseup', onUp);
   };
 
-  const showResize = !isEditing && (isSelected || hovered);
+  const showResize = isEditing || isSelected || hovered || isResizing;
 
   return (
     <div
       className={`absolute ${isEditing ? 'cursor-text' : 'cursor-grab'}
-                 ${isSelected ? 'ring-2 ring-kubika-400 ring-offset-2' : ''}
+                 ${isResizing ? 'ring-2 ring-purple-500 ring-offset-2 shadow-2xl' : isSelected ? 'ring-2 ring-kubika-400 ring-offset-2' : ''}
                  transition-all duration-200
                  ${isEditing
                    ? 'border border-dashed border-kubika-400 bg-white/50 backdrop-blur-sm p-2 rounded-lg'
                    : 'border border-transparent p-2 hover:border-slate-200/50 rounded-lg'
                  }`}
       style={{
-        zIndex: isSelected ? 100 : 2,
+        zIndex: isResizing ? 120 : isSelected ? 100 : 2,
         width: `${width}px`,
         boxSizing: 'border-box',
         minHeight: '40px',
+        cursor: isResizing ? 'ew-resize' : undefined,
+        borderColor: isResizing ? '#d8b4fe' : undefined,
       }}
       onPointerDown={isEditing ? undefined : onPointerDown}
       onContextMenu={onContextMenu}
@@ -261,18 +269,44 @@ export default function FreeTextBox({
         </div>
       )}
       {showResize && (
-        <div
-          className="absolute -right-1.5 -bottom-1.5 w-4 h-4 rounded-br-md border border-kubika-400 bg-white shadow-sm cursor-nwse-resize no-print flex items-end justify-end p-0.5"
-          style={{ background: 'radial-gradient(circle at 70% 70%, #a855f7 0 3px, #fff 3px)' }}
-          onPointerDown={startResize}
-          title="Arrastra para ajustar el ancho"
-        >
-          <svg className="w-2.5 h-2.5 text-kubika-600" viewBox="0 0 10 10" fill="currentColor">
-            <rect x="0" y="7" width="3" height="3" rx="0.5" />
-            <rect x="4" y="5" width="3" height="3" rx="0.5" />
-            <rect x="4" y="9" width="3" height="1" rx="0.5" />
-          </svg>
-        </div>
+        <>
+          {/* Manija central del borde derecho: estirar ancho */}
+          <div
+            className="absolute right-[-7px] top-1/2 -translate-y-1/2 w-3 h-10 rounded-full border-2 border-white shadow-md cursor-ew-resize no-print flex items-center justify-center transition-all hover:scale-110"
+            style={{
+              background: 'linear-gradient(135deg, #a855f7, #ec4899)',
+              transform: isResizing ? 'translateY(-50%) scale(1.25)' : undefined,
+            }}
+            onPointerDown={startResize}
+            title="Arrastra para estirar el ancho"
+          >
+            <div className="w-0.5 h-5 bg-white/90 rounded-full" />
+          </div>
+
+          {/* Esquina inferior derecha */}
+          <div
+            className="absolute -right-2 -bottom-2 w-5 h-5 rounded-md border-2 border-white shadow-md cursor-nwse-resize no-print transition-all hover:scale-110"
+            style={{
+              backgroundImage: 'repeating-linear-gradient(-45deg, #a855f7 0 3px, #f0abfc 3px 6px)',
+              transform: isResizing ? 'scale(1.3)' : undefined,
+            }}
+            onPointerDown={startResize}
+            title="Arrastra para ajustar el ancho"
+          />
+
+          {/* Guía o indicador de ancho */}
+          <div className="absolute left-full top-full mt-1.5 ml-1 pointer-events-none no-print whitespace-nowrap">
+            {isResizing ? (
+              <span className="px-2 py-1 text-xs font-extrabold text-white bg-purple-600 rounded-md shadow-lg">
+                {Math.round(width)} px
+              </span>
+            ) : !isEditing && (
+              <span className="px-2 py-0.5 text-[10px] font-semibold text-purple-600 bg-purple-50 border border-purple-200 rounded-full shadow-sm">
+                ↔ arrastra para estirar
+              </span>
+            )}
+          </div>
+        </>
       )}
     </div>
   );
