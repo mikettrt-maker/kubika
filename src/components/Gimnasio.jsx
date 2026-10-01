@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { exportToPdf } from '../utils/exportPdf';
 
-const CELL_H = 36;
-const CELL_W = 46;
+const CELL_H = 30;
+const CELL_W = 38;
 const DARK = '2px solid #0f172a';
 const LIGHT = '1px solid #e2e8f0';
 const TRANSPARENT = '1px solid transparent';
@@ -66,7 +66,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
   const sheetRef = useRef(null);
 
   const rows = value.rows || 10;
-  const cols = value.cols || 12;
+  const cols = value.cols || 16;
   const cells = value.cells || {};
   const borders = value.borders || {};
   const colors = value.colors || {};
@@ -246,7 +246,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
   };
 
   const setDim = (key, delta) => {
-    const min = 4, max = key === 'rows' ? 30 : 16;
+    const min = 4, max = key === 'rows' ? 30 : 24;
     onChange(prev => ({ ...prev, [key]: Math.max(min, Math.min(max, (prev[key] || 0) + delta)) }));
     focusGrid();
   };
@@ -451,7 +451,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
           <div className="flex">
             {/* Guías de fila */}
             <div className="flex flex-col shrink-0 no-print" style={{ width: 28 }}>
-              <div style={{ height: 22 }} />
+              <div style={{ height: 18 }} />
               {Array.from({ length: rows }, (_, r) => (
                 <div key={r} className="flex items-center justify-center text-[10px] font-bold text-slate-400" style={{ height: CELL_H }}>
                   {r + 1}
@@ -461,7 +461,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
 
             <div className="flex flex-col">
               {/* Guías de columna */}
-              <div className="flex no-print" style={{ height: 22 }}>
+              <div className="flex no-print" style={{ height: 18 }}>
                 {Array.from({ length: cols }, (_, c) => (
                   <div key={c} className="flex items-center justify-center text-[10px] font-bold text-slate-400" style={{ width: CELL_W }}>
                     {String.fromCharCode(65 + c)}
@@ -523,12 +523,12 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
                               selectCell(r, e.shiftKey ? Math.max(0, c - 1) : Math.min(cols - 1, c + 1));
                             }
                           }}
-                          className="absolute inset-0 w-full h-full px-1 text-center text-base font-bold outline-none bg-white"
+                          className="absolute inset-0 w-full h-full px-1 text-center text-sm font-bold outline-none bg-white"
                           style={{ color: cellColor, caretColor: '#6366f1', boxShadow: 'inset 0 0 0 2px #6366f1' }}
                         />
                       ) : text ? (
                         <span
-                          className="w-full whitespace-nowrap text-base font-bold overflow-visible"
+                          className="w-full whitespace-nowrap text-sm font-bold overflow-visible"
                           style={{ color: cellColor, textAlign: 'center' }}
                         >
                           {text}

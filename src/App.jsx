@@ -821,7 +821,7 @@ export default function App() {
             </div>
           )}
           <button
-            onClick={() => { setGimnasio(g => g || { rows: 10, cols: 12, cells: {}, borders: {} }); setShowGimnasio(true); }}
+            onClick={() => { setGimnasio(g => g || { rows: 10, cols: 16, cells: {}, borders: {} }); setShowGimnasio(true); }}
             className="btn-epic flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-semibold shadow-md hover:shadow-lg active:scale-95 transition-all duration-300"
             style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', backgroundSize: '200% 200%' }}
             title="Gimnasio Matemático"
@@ -842,7 +842,7 @@ export default function App() {
             </svg>
             Biblioteca
           </button>
-          <span className="ml-1 px-3 py-1 text-xs font-extrabold text-white rounded-full leading-none select-none shadow-md" style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7, #6366f1, #a855f7, #7c3aed)', backgroundSize: '200% 200%', animation: 'gradientShift 3s ease infinite', letterSpacing: '0.05em' }} title="Versión de la aplicación">v3.5.0</span>
+          <span className="ml-1 px-3 py-1 text-xs font-extrabold text-white rounded-full leading-none select-none shadow-md" style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7, #6366f1, #a855f7, #7c3aed)', backgroundSize: '200% 200%', animation: 'gradientShift 3s ease infinite', letterSpacing: '0.05em' }} title="Versión de la aplicación">v3.5.1</span>
         </div>
 
       </header>
