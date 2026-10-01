@@ -113,6 +113,25 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
     };
   }, []);
 
+  // Flechas del teclado aunque el foco haya quedado en el body (tras editar, clic en zona no enfocable, etc.)
+  useEffect(() => {
+    const onKey = (e) => {
+      const ae = document.activeElement;
+      const tag = ae && ae.tagName;
+      if (tag && tag !== 'BODY' && tag !== 'HTML') return;
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (!e.key.startsWith('Arrow')) return;
+      e.preventDefault();
+      if (e.key === 'ArrowUp') moveSel(-1, 0);
+      else if (e.key === 'ArrowDown') moveSel(1, 0);
+      else if (e.key === 'ArrowLeft') moveSel(0, -1);
+      else if (e.key === 'ArrowRight') moveSel(0, 1);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sel, rows, cols]);
+
   const selectCell = (r, c) => setSel({ r1: r, c1: c, r2: r, c2: c });
 
   const startEdit = (r, c, initial) => {
@@ -130,6 +149,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
     const { r, c, draft: d } = ed;
     onChange(prev => ({ ...prev, cells: { ...(prev.cells || {}), [`${r},${c}`]: d } }));
     setEditing(null);
+    focusGrid();
   };
 
   const cancelEdit = () => { editRef.current = null; setEditing(null); focusGrid(); };
@@ -277,10 +297,11 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
   const handleGridKeyDown = (e) => {
     e.stopPropagation();
     const tag = e.target && e.target.tagName;
-    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'BUTTON' || tag === 'SELECT') return;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
     if (editing) return;
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     const { key } = e;
+    if (tag === 'BUTTON' && !key.startsWith('Arrow')) return;
     if (key.length === 1) {
       e.preventDefault();
       const n = sel ? norm(sel) : { r1: 0, c1: 0 };
@@ -598,7 +619,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
           </div>
 
           <p className="text-xs text-slate-400 mt-4 text-center no-print" style={{ maxWidth: cols * CELL_W + 60 }}>
-            Clic para seleccionar · arrastra para elegir un rango · escribe para responder · doble clic para editar · Enter baja, Tab pasa a la siguiente · guías A-L o de valor posicional en la barra
+            Clic para seleccionar · arrastra para elegir un rango · escribe para responder · doble clic para editar · Enter baja, Tab pasa a la siguiente · flechas para moverte entre celdas · guías A-L o de valor posicional en la barra
           </p>
         </div>
       </div>
