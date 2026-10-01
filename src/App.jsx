@@ -10,6 +10,8 @@ import SaveLoadModal from './components/SaveLoadModal';
 import SplashScreen from './components/SplashScreen';
 import Biblioteca from './components/Biblioteca';
 import Gimnasio from './components/Gimnasio';
+import Retos, { RetoPanel } from './components/Retos';
+import { getChallenge } from './utils/retosGenerator';
 import PdfMathReader from './components/PdfMathReader';
 import Mascot from './components/Mascot';
 import { RODS, generateMathId, generateAntennaId, createAntennaRows } from './utils/rods';
@@ -55,6 +57,8 @@ export default function App() {
   const [showBiblioteca, setShowBiblioteca] = useState(false);
   const [showGimnasio, setShowGimnasio] = useState(false);
   const [gimnasio, setGimnasio] = useState(null);
+  const [showRetos, setShowRetos] = useState(false);
+  const [retoActivo, setRetoActivo] = useState(null);
   const [showMathBooks, setShowMathBooks] = useState(false);
   const [selectedMathBook, setSelectedMathBook] = useState(null);
   const [mathBooks, setMathBooks] = useState([]);
@@ -84,7 +88,7 @@ export default function App() {
     if (!autosaveKey) return;
     const hasData = rods.length > 0 || mathTexts.length > 0 || freeTexts.length > 0 ||
                     antennas.length > 0 || quads.length > 0 || polygons.length > 0 ||
-                    geoBands.length > 0 || manualPivots.length > 0 || gimHasData;
+                    geoBands.length > 0 || manualPivots.length > 0 || gimHasData || !!retoActivo;
     if (!hasData) return;
 
     hasUnsavedChangesRef.current = true;
@@ -93,7 +97,7 @@ export default function App() {
       try {
         localStorage.setItem(autosaveKey, JSON.stringify({
           rods, mathTexts, freeTexts, antennas, quads, polygons,
-          geoMode, manualPivots, geoBands, gimnasio: gimnasio || null, _ts: Date.now(),
+          geoMode, manualPivots, geoBands, gimnasio: gimnasio || null, retoActivo: retoActivo || null, _ts: Date.now(),
         }));
         hasUnsavedChangesRef.current = false;
       } catch (e) {
@@ -101,7 +105,7 @@ export default function App() {
       }
     }, 3000);
     return () => { if (autosaveTimeoutRef.current) clearTimeout(autosaveTimeoutRef.current); };
-  }, [rods, mathTexts, freeTexts, antennas, quads, polygons, geoMode, manualPivots, geoBands, gimnasio, gimHasData, autosaveKey]);
+  }, [rods, mathTexts, freeTexts, antennas, quads, polygons, geoMode, manualPivots, geoBands, gimnasio, gimHasData, retoActivo, autosaveKey]);
 
   // Restaurar auto-guardado al cargar (si tiene menos de 7 días)
   useEffect(() => {
@@ -113,7 +117,8 @@ export default function App() {
       if (!saved?._ts || (Date.now() - saved._ts) > 7 * 24 * 60 * 60 * 1000) return;
       const hasData = (saved.rods?.length > 0) || (saved.mathTexts?.length > 0) || (saved.freeTexts?.length > 0) ||
                       (saved.antennas?.length > 0) || (saved.quads?.length > 0) || (saved.polygons?.length > 0) ||
-                      !!(saved.gimnasio && (Object.keys(saved.gimnasio.cells || {}).length > 0 || Object.keys(saved.gimnasio.borders || {}).length > 0));
+                      !!(saved.gimnasio && (Object.keys(saved.gimnasio.cells || {}).length > 0 || Object.keys(saved.gimnasio.borders || {}).length > 0)) ||
+                      !!saved.retoActivo;
       if (!hasData) return;
       setRods(saved.rods || []);
       setMathTexts(saved.mathTexts || []);
@@ -124,6 +129,7 @@ export default function App() {
       setGeoBands(saved.geoBands || []);
       setManualPivots(saved.manualPivots || []);
       if (saved.gimnasio) setGimnasio(saved.gimnasio);
+      if (saved.retoActivo) setRetoActivo(saved.retoActivo);
       if (saved.geoMode) setGeoMode(saved.geoMode);
     } catch {}
   }, [autosaveKey]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -366,6 +372,7 @@ export default function App() {
         color: b.color,
       })),
       gimnasio: gimnasio || null,
+      retoActivo: retoActivo || null,
     };
 
     const { error } = await saveWorkspace(finalName, canvasState);
@@ -381,7 +388,7 @@ export default function App() {
   const handleLoad = async (workspaceId) => {
     const hasCanvasData = rods.length > 0 || mathTexts.length > 0 || freeTexts.length > 0 ||
       antennas.length > 0 || quads.length > 0 || polygons.length > 0 || geoBands.length > 0 ||
-      gimHasData;
+      gimHasData || !!retoActivo;
     if (hasCanvasData &&
         !confirm('¿Cargar este trabajo? Se reemplazará el contenido actual del lienzo.')) {
       return;
@@ -399,6 +406,7 @@ export default function App() {
       setQuads(state.quads || []);
       setPolygons(state.polygons || []);
       setGimnasio(state.gimnasio || null);
+      setRetoActivo(state.retoActivo || null);
       if (state.geoMode) {
         setGeoMode(state.geoMode);
         setGeoPivots(state.geoMode === 'rect' ? getRectPivots() : getCirclePivots());
@@ -413,6 +421,23 @@ export default function App() {
     } else {
       showNotification('Error al cargar el trabajo', 'error');
     }
+  };
+
+  // ========== LANZAR RETO ==========
+  const launchReto = (grado, op, nivel) => {
+    let limpiar = false;
+    if (gimHasData) {
+      limpiar = confirm('¿Limpiar la cuadrícula para este reto?\n\nAceptar: limpiar todo · Cancelar: conservar lo actual.');
+    }
+    setGimnasio(g => {
+      const base = g || { rows: 10, cols: 16, cells: {}, borders: {} };
+      if (!limpiar) return base;
+      return { ...base, cells: {}, borders: {}, colors: {} };
+    });
+    setRetoActivo({ grado, op, nivel, ejercicios: getChallenge(grado, op, nivel) });
+    setShowGimnasio(true);
+    setShowRetos(false);
+    showNotification(`Reto lanzado: ${grado}° · nivel ${nivel}`);
   };
 
   // ========== ABRIR MODAL DE CARGAR ==========
@@ -821,6 +846,19 @@ export default function App() {
             </div>
           )}
           <button
+            onClick={() => setShowRetos(true)}
+            className="btn-epic flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-semibold shadow-md hover:shadow-lg active:scale-95 transition-all duration-300"
+            style={{ background: 'linear-gradient(135deg, #f59e0b, #f97316)', backgroundSize: '200% 200%' }}
+            title="Retos Matemáticos"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <circle cx="12" cy="12" r="9" strokeWidth={1.8} />
+              <circle cx="12" cy="12" r="5" strokeWidth={1.8} />
+              <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+            </svg>
+            Retos
+          </button>
+          <button
             onClick={() => { setGimnasio(g => g || { rows: 10, cols: 16, cells: {}, borders: {} }); setShowGimnasio(true); }}
             className="btn-epic flex items-center gap-2 px-4 py-2 rounded-xl text-white text-sm font-semibold shadow-md hover:shadow-lg active:scale-95 transition-all duration-300"
             style={{ background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', backgroundSize: '200% 200%' }}
@@ -842,7 +880,7 @@ export default function App() {
             </svg>
             Biblioteca
           </button>
-          <span className="ml-1 px-3 py-1 text-xs font-extrabold text-white rounded-full leading-none select-none shadow-md" style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7, #6366f1, #a855f7, #7c3aed)', backgroundSize: '200% 200%', animation: 'gradientShift 3s ease infinite', letterSpacing: '0.05em' }} title="Versión de la aplicación">v3.5.1</span>
+          <span className="ml-1 px-3 py-1 text-xs font-extrabold text-white rounded-full leading-none select-none shadow-md" style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7, #6366f1, #a855f7, #7c3aed)', backgroundSize: '200% 200%', animation: 'gradientShift 3s ease infinite', letterSpacing: '0.05em' }} title="Versión de la aplicación">v3.6.0</span>
         </div>
 
       </header>
@@ -919,6 +957,27 @@ export default function App() {
           displayName={displayName}
           workspaceName={workspaceName}
           onNotify={showNotification}
+          reto={retoActivo}
+          onOpenRetos={() => setShowRetos(true)}
+        />
+      )}
+
+      {/* ===== RETOS MATEMÁTICOS ===== */}
+      {showRetos && (
+        <Retos
+          onClose={() => setShowRetos(false)}
+          onLaunch={launchReto}
+          userGrado={userGrado}
+          retoActivo={retoActivo}
+        />
+      )}
+
+      {/* ===== PANEL DEL RETO ACTIVO ===== */}
+      {retoActivo && (
+        <RetoPanel
+          reto={retoActivo}
+          onTerminate={() => setRetoActivo(null)}
+          onNew={() => setShowRetos(true)}
         />
       )}
 
@@ -942,7 +1001,7 @@ export default function App() {
       />
 
       {/* ===== MASCOTA ASISTENTE ===== */}
-      {user && !selectedMathBook && !showBiblioteca && !showGimnasio && (
+      {user && !selectedMathBook && !showBiblioteca && !showGimnasio && !showRetos && (
         <Mascot message={mascotMsg} />
       )}
 

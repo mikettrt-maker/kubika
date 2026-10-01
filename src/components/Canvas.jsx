@@ -759,7 +759,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
   // ========== TECLADO ==========
   useEffect(() => {
     const handleKeyDown = async (e) => {
-      if (document.querySelector('[data-pdf-reader-open],[data-gimnasio-open]')) return;
+      if (document.querySelector('[data-pdf-reader-open],[data-gimnasio-open],[data-retos-open]')) return;
       const isEditingText = (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
       if (isEditingText) return;
 
@@ -920,7 +920,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
       }
     };
     const handlePasteGlobal = (e) => {
-      if (document.querySelector('[data-pdf-reader-open],[data-gimnasio-open]')) return;
+      if (document.querySelector('[data-pdf-reader-open],[data-gimnasio-open],[data-retos-open]')) return;
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
       // Imagen del portapapeles (captura de pantalla, copiar imagen, etc.)
       const items = e.clipboardData && e.clipboardData.items;

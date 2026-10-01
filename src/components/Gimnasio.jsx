@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { exportToPdf } from '../utils/exportPdf';
+import { opLabel } from '../utils/retosGenerator';
 
 const CELL_H = 30;
 const CELL_W = 38;
@@ -8,6 +9,8 @@ const LIGHT = '1px solid #e2e8f0';
 const TRANSPARENT = '1px solid transparent';
 const DEFAULT_COLOR = '#1e293b';
 const TEXT_COLORS = ['#1e293b', '#dc2626', '#2563eb', '#16a34a', '#ea580c', '#9333ea', '#db2777', '#64748b'];
+const INT_LABELS = ['U', 'D', 'C', 'UM', 'DM', 'CM', 'UMM', 'CMM'];
+const DEC_LABELS = ['', 'd', 'c', 'm', 'mm'];
 
 const norm = (s) => ({
   r1: Math.min(s.r1, s.r2),
@@ -53,7 +56,7 @@ function GroupLabel({ children }) {
   return <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider select-none">{children}</span>;
 }
 
-export default function Gimnasio({ value, onChange, onClose, displayName, workspaceName, onNotify }) {
+export default function Gimnasio({ value, onChange, onClose, displayName, workspaceName, onNotify, reto, onOpenRetos }) {
   const [sel, setSel] = useState(null);
   const [editing, setEditing] = useState(null);
   const [draft, setDraft] = useState('');
@@ -70,6 +73,16 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
   const cells = value.cells || {};
   const borders = value.borders || {};
   const colors = value.colors || {};
+  const guideMode = value.guides === 'valor' ? 'valor' : 'letters';
+  const unitsCol = Number.isInteger(value.unitsCol) ? Math.max(0, Math.min(cols - 1, value.unitsCol)) : cols - 1;
+
+  const colLabel = (c) => {
+    if (guideMode !== 'valor') return String.fromCharCode(65 + c);
+    const pos = c - unitsCol;
+    if (pos === 0) return 'U';
+    if (pos < 0) return INT_LABELS[-pos - 1] || '·';
+    return DEC_LABELS[pos] || '·';
+  };
 
   const focusGrid = () => { try { rootRef.current?.focus(); } catch {} };
 
@@ -345,6 +358,20 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
           </div>
         </div>
         <div className="flex-1" />
+        {onOpenRetos && (
+          <button
+            onClick={onOpenRetos}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold bg-white/15 hover:bg-white/25 border border-white/30 transition-all"
+            title="Elegir un reto matemático"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <circle cx="12" cy="12" r="9" />
+              <circle cx="12" cy="12" r="5" />
+              <circle cx="12" cy="12" r="1.4" fill="currentColor" />
+            </svg>
+            Retos
+          </button>
+        )}
         <button
           onClick={handlePdf}
           disabled={pdfLoading}
@@ -422,6 +449,19 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
         <div className="w-px h-6 bg-slate-200" />
 
         <div className="flex items-center gap-1.5">
+          <GroupLabel>Guías</GroupLabel>
+          <ToolBtn
+            onClick={() => onChange(prev => ({ ...prev, guides: (prev.guides || 'letters') === 'letters' ? 'valor' : 'letters' }))}
+            active={guideMode === 'valor'}
+            title="Guías de columna: letras (A, B, C…) o valores posicionales (UM, C, DM, U, D, C, d, c). En modo valor, clic sobre la guía para marcar la columna de UNIDADES"
+          >
+            {guideMode === 'valor' ? 'U·D·C' : 'A·B·C'}
+          </ToolBtn>
+        </div>
+
+        <div className="w-px h-6 bg-slate-200" />
+
+        <div className="flex items-center gap-1.5">
           <GroupLabel>Edición</GroupLabel>
           <ToolBtn onClick={clearSelectionContent} title="Borrar el texto de las celdas seleccionadas (Supr)">Borrar</ToolBtn>
           <ToolBtn onClick={clearAll} title="Vaciar toda la cuadrícula" danger>Limpiar todo</ToolBtn>
@@ -463,18 +503,33 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
               {/* Guías de columna */}
               <div className="flex no-print" style={{ height: 18 }}>
                 {Array.from({ length: cols }, (_, c) => (
-                  <div key={c} className="flex items-center justify-center text-[10px] font-bold text-slate-400" style={{ width: CELL_W }}>
-                    {String.fromCharCode(65 + c)}
+                  <div
+                    key={c}
+                    onClick={guideMode === 'valor' ? () => onChange(prev => ({ ...prev, unitsCol: c })) : undefined}
+                    title={guideMode === 'valor' ? 'Clic: marcar esta columna como UNIDADES' : undefined}
+                    className={`flex items-center justify-center text-[10px] font-bold select-none ${
+                      guideMode === 'valor' ? 'text-slate-500 cursor-pointer hover:text-indigo-600' : 'text-slate-400'
+                    }`}
+                    style={{ width: CELL_W, color: guideMode === 'valor' && c === unitsCol ? '#6366f1' : undefined }}
+                  >
+                    {colLabel(c)}
                   </div>
                 ))}
               </div>
 
               {/* Hoja */}
-              <div
-                ref={sheetRef}
-                className="bg-white rounded-lg shadow-xl"
-                style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, ${CELL_W}px)` }}
-              >
+              <div ref={sheetRef} className="bg-white rounded-lg shadow-xl p-2">
+                {reto && (
+                  <div className="mb-1.5 pb-1 border-b border-slate-200 flex items-center justify-between gap-4 text-[11px] font-bold text-slate-700">
+                    <span>Reto: {reto.grado}° · {opLabel(reto.op)} · Nivel {reto.nivel}</span>
+                    <span className="font-semibold text-slate-500">
+                      Nombre: {displayName || '____________'} · Fecha: {new Date().toLocaleDateString('es-MX')}
+                    </span>
+                  </div>
+                )}
+                <div
+                  style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, ${CELL_W}px)` }}
+                >
                 {Array.from({ length: rows * cols }, (_, i) => {
                   const r = Math.floor(i / cols);
                   const c = i % cols;
@@ -537,12 +592,13 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
                     </div>
                   );
                 })}
+                </div>
               </div>
             </div>
           </div>
 
           <p className="text-xs text-slate-400 mt-4 text-center no-print" style={{ maxWidth: cols * CELL_W + 60 }}>
-            Clic para seleccionar · arrastra para elegir un rango · escribe para responder · doble clic para editar · Enter baja, Tab pasa a la siguiente
+            Clic para seleccionar · arrastra para elegir un rango · escribe para responder · doble clic para editar · Enter baja, Tab pasa a la siguiente · guías A-L o de valor posicional en la barra
           </p>
         </div>
       </div>
