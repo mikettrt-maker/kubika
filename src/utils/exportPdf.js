@@ -90,7 +90,7 @@ async function renderKatexToImage(el) {
 function computeContentBox(canvasElement) {
   const base = canvasElement.getBoundingClientRect();
   const selectors = '[data-sheet-header],[data-rod-id],[data-antenna-id],' +
-    '[data-quad-id],[data-poly-id],[data-math-text],[data-free-text]';
+    '[data-quad-id],[data-poly-id],[data-math-text],[data-free-text],[data-canvas-image]';
   const candidates = canvasElement.querySelectorAll(selectors);
 
   let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;

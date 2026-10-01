@@ -65,6 +65,8 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
   const quadStart = useRef(null);
   const [quadPreview, setQuadPreview] = useState(null);
   const [polygonPoints, setPolygonPoints] = useState([]);
+  // Imágenes pegadas del portapapeles (solo sesión, NO se guardan)
+  const [images, setImages] = useState([]);
 
   const updateSelection = useCallback((id) => {
     setSelectedId(id);
@@ -424,6 +426,108 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
     });
   };
 
+  // ========== IMÁGENES PEGADAS ==========
+  const removeImage = (imgId) => {
+    setImages(prev => {
+      const t = prev.find(i => i.id === imgId);
+      if (t) URL.revokeObjectURL(t.src);
+      return prev.filter(i => i.id !== imgId);
+    });
+  };
+
+  const handleImageContextMenu = (e, imgId) => {
+    e.preventDefault();
+    e.stopPropagation();
+    updateSelection(imgId);
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      options: [
+        {
+          icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>,
+          label: 'Eliminar imagen',
+          shortcut: 'Del',
+          danger: true,
+          action: () => {
+            removeImage(imgId);
+            updateSelection(null);
+          },
+        },
+      ],
+    });
+  };
+
+  const handleImagePointerDown = (e, imgId) => {
+    if (e.button !== 0) return;
+    e.preventDefault();
+    e.stopPropagation();
+    updateSelection(imgId);
+    const img = images.find(i => i.id === imgId);
+    if (!img) return;
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const origX = img.x;
+    const origY = img.y;
+    const target = e.currentTarget;
+    try { target.setPointerCapture(e.pointerId); } catch { /* noop */ }
+    let done = false;
+    const onMove = (ev) => {
+      setImages(prev => prev.map(i => i.id === imgId
+        ? { ...i, x: Math.max(0, origX + ev.clientX - startX), y: Math.max(0, origY + ev.clientY - startY) }
+        : i));
+    };
+    const onUp = () => {
+      if (done) return;
+      done = true;
+      try { target.releasePointerCapture(e.pointerId); } catch { /* ya liberado */ }
+      target.removeEventListener('pointermove', onMove);
+      target.removeEventListener('pointerup', onUp);
+      target.removeEventListener('pointercancel', onUp);
+    };
+    target.addEventListener('pointermove', onMove);
+    target.addEventListener('pointerup', onUp);
+    target.addEventListener('pointercancel', onUp);
+  };
+
+  const startImageResize = (e, imgId) => {
+    if (e.button !== undefined && e.button !== 0 && e.button !== -1) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const img = images.find(i => i.id === imgId);
+    if (!img) return;
+    const handle = e.currentTarget;
+    try { handle.setPointerCapture(e.pointerId); } catch { /* noop */ }
+    const startX = e.clientX;
+    const startW = img.w;
+    const ratio = img.w > 0 ? img.h / img.w : 0.75;
+    const clamp = (w) => Math.min(1600, Math.max(48, w));
+    let done = false;
+    const cleanup = () => {
+      if (done) return;
+      done = true;
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      window.removeEventListener('pointercancel', onUp);
+      window.removeEventListener('blur', onUp);
+      try { handle.releasePointerCapture(e.pointerId); } catch { /* ya liberado */ }
+    };
+    const onMove = (ev) => {
+      if (typeof ev.clientX !== 'number') return;
+      const w = clamp(startW + (ev.clientX - startX));
+      setImages(prev => prev.map(i => i.id === imgId ? { ...i, w, h: Math.round(w * ratio) } : i));
+    };
+    const onUp = (ev) => {
+      const dx = ev && typeof ev.clientX === 'number' ? ev.clientX - startX : 0;
+      const w = clamp(startW + dx);
+      cleanup();
+      setImages(prev => prev.map(i => i.id === imgId ? { ...i, w, h: Math.round(w * ratio) } : i));
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onUp);
+    window.addEventListener('blur', onUp);
+  };
+
   const handleAntennaContextMenu = (e, antennaId) => {
     e.preventDefault();
     e.stopPropagation();
@@ -499,6 +603,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
     if (e.target.closest('[data-antenna-id]')) return;
     if (e.target.closest('[data-quad-id]')) return;
     if (e.target.closest('[data-poly-id]')) return;
+    if (e.target.closest('[data-canvas-image]')) return;
 
     if (activeTool === 'polygon') {
       const rect = innerRef.current?.getBoundingClientRect();
@@ -724,6 +829,11 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
         setFreeTexts(prev => prev.filter(t => t.id !== id));
         setQuads(prev => prev.filter(q => q.id !== id));
         setPolygons(prev => prev.filter(p => p.id !== id));
+        setImages(prev => {
+          const t = prev.find(i => i.id === id);
+          if (t) URL.revokeObjectURL(t.src);
+          return prev.filter(i => i.id !== id);
+        });
         if (onAntennaDelete) onAntennaDelete(id);
         updateSelection(null);
         return;
@@ -797,11 +907,52 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
           if (e.key === 'ArrowDown') dy = 40;
           return { ...p, points: p.points.map(pt => ({ x: Math.max(0, pt.x + dx), y: Math.max(0, pt.y + dy) })) };
         }));
+
+        setImages(prev => prev.map(i => {
+          if (i.id !== id) return i;
+          let dx = 0, dy = 0;
+          if (e.key === 'ArrowLeft') dx = -40;
+          if (e.key === 'ArrowRight') dx = 40;
+          if (e.key === 'ArrowUp') dy = -40;
+          if (e.key === 'ArrowDown') dy = 40;
+          return { ...i, x: Math.max(0, i.x + dx), y: Math.max(0, i.y + dy) };
+        }));
       }
     };
     const handlePasteGlobal = (e) => {
       if (document.querySelector('[data-pdf-reader-open]')) return;
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      // Imagen del portapapeles (captura de pantalla, copiar imagen, etc.)
+      const items = e.clipboardData && e.clipboardData.items;
+      if (items) {
+        for (const item of items) {
+          if (item.kind === 'file' && item.type.indexOf('image/') === 0) {
+            const file = item.getAsFile();
+            if (file) {
+              e.preventDefault();
+              const url = URL.createObjectURL(file);
+              const probe = new Image();
+              probe.onload = () => {
+                const maxDim = 360;
+                const scale = Math.min(1, maxDim / Math.max(probe.naturalWidth, probe.naturalHeight));
+                const w = Math.max(48, Math.round(probe.naturalWidth * scale));
+                const h = Math.max(48, Math.round(probe.naturalHeight * scale));
+                const newId = generateMathId();
+                setImages(prev => [...prev, {
+                  id: newId,
+                  x: 280 + Math.random() * 160,
+                  y: 200 + Math.random() * 120,
+                  w, h, src: url,
+                }]);
+                updateSelection(newId);
+              };
+              probe.onerror = () => URL.revokeObjectURL(url);
+              probe.src = url;
+              return;
+            }
+          }
+        }
+      }
       const text = e.clipboardData.getData('text');
       if (!text || !text.trim()) return;
       e.preventDefault();
@@ -999,6 +1150,59 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
           </div>
         ))}
 
+        {/* Imágenes pegadas del portapapeles */}
+        {images.map((im) => (
+          <div
+            key={im.id}
+            data-canvas-image={im.id}
+            style={{
+              position: 'absolute',
+              left: `${im.x}px`,
+              top: `${im.y}px`,
+              zIndex: selectedId === im.id ? 100 : 4,
+            }}
+            onClick={(e) => e.stopPropagation()}
+            onContextMenu={(e) => handleImageContextMenu(e, im.id)}
+          >
+            <div
+              className={`relative group ${selectedId === im.id ? 'ring-2 ring-kubika-400 ring-offset-2 rounded-lg' : ''}`}
+              onPointerDown={(e) => handleImagePointerDown(e, im.id)}
+            >
+              <img
+                src={im.src}
+                alt=""
+                draggable={false}
+                style={{
+                  display: 'block',
+                  width: `${im.w}px`,
+                  height: `${im.h}px`,
+                  borderRadius: 8,
+                  boxShadow: '0 3px 10px rgba(0,0,0,0.2)',
+                  userSelect: 'none',
+                  pointerEvents: 'none',
+                }}
+              />
+              {selectedId === im.id && (
+                <>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); removeImage(im.id); updateSelection(null); }}
+                    className="absolute -top-2.5 -right-2.5 w-5 h-5 bg-red-500 hover:bg-red-600 text-white rounded-full text-[11px] leading-none shadow flex items-center justify-center no-print"
+                    title="Eliminar imagen"
+                  >
+                    ✕
+                  </button>
+                  <div
+                    onPointerDown={(e) => startImageResize(e, im.id)}
+                    className="absolute -right-2 -bottom-2 w-5 h-5 rounded-md border-2 border-white shadow-md cursor-nwse-resize no-print"
+                    style={{ backgroundImage: 'repeating-linear-gradient(-45deg, #a855f7 0 3px, #f0abfc 3px 6px)' }}
+                    title="Arrastra para redimensionar"
+                  />
+                </>
+              )}
+            </div>
+          </div>
+        ))}
+
         {/* Modo Geoplano: pivotes + bandas */}
         {toolMode === 'geoplano' && (
           <GeoplanoOverlay
@@ -1128,8 +1332,8 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
         )}
 
         {/* Mensaje de bienvenida según el modo activo */}
-        {((toolMode === 'regletas' && rods.length === 0 && visibleMathTexts.length === 0 && visibleFreeTexts.length === 0 && visibleAntennas.length === 0 && visibleQuads.length === 0 && visiblePolygons.length === 0) ||
-          (toolMode === 'geoplano' && geoBands.length === 0 && (manualPivots || []).length === 0 && visibleMathTexts.length === 0 && visibleFreeTexts.length === 0 && visibleAntennas.length === 0 && visibleQuads.length === 0 && visiblePolygons.length === 0)) && (
+        {((toolMode === 'regletas' && rods.length === 0 && visibleMathTexts.length === 0 && visibleFreeTexts.length === 0 && visibleAntennas.length === 0 && visibleQuads.length === 0 && visiblePolygons.length === 0 && images.length === 0) ||
+          (toolMode === 'geoplano' && geoBands.length === 0 && (manualPivots || []).length === 0 && visibleMathTexts.length === 0 && visibleFreeTexts.length === 0 && visibleAntennas.length === 0 && visibleQuads.length === 0 && visiblePolygons.length === 0 && images.length === 0)) && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div className="text-center animate-pulse-soft">
               {toolMode === 'geoplano' ? (
