@@ -615,7 +615,7 @@ export default function PdfMathReader({ libro, onBack }) {
       const point = getCanvasPoint(e);
       if (!point) return;
       const newId = genId();
-      setFreeTexts(prev => [...prev, { id: newId, x: point.x, y: point.y, text: '', color: '#1e293b', bold: false }]);
+      setFreeTexts(prev => [...prev, { id: newId, x: point.x, y: point.y, text: '', color: '#1e293b', bold: false, width: 260, align: 'left' }]);
       setActiveTool('pen');
       setSelectedId(newId);
     } else {
@@ -1248,6 +1248,8 @@ export default function PdfMathReader({ libro, onBack }) {
           text: text.trim(),
           color: '#1e293b',
           bold: false,
+          width: 260,
+          align: 'left',
         };
         setFreeTexts(prev => [...prev, newFree]);
       }
@@ -1644,6 +1646,8 @@ export default function PdfMathReader({ libro, onBack }) {
                 initialText={ft.text}
                 initialColor={ft.color}
                 initialBold={ft.bold}
+                initialWidth={ft.width || 260}
+                initialAlign={ft.align || 'left'}
                 onUpdate={handleFreeTextUpdate}
                 isSelected={selectedId === ft.id}
                 onPointerDown={(e) => handlePointerDownOnFreeText(e, ft.id)}

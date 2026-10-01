@@ -333,6 +333,8 @@ export default function App() {
         text: t.text,
         color: t.color,
         bold: t.bold,
+        width: t.width || 260,
+        align: t.align || 'left',
         mode: t.mode,
       })),
       antennas: antennas.map(a => ({
@@ -432,6 +434,8 @@ export default function App() {
       text: '',
       color: '#1e293b',
       bold: false,
+      width: 260,
+      align: 'left',
       mode: toolMode,
     };
     setFreeTexts(prev => [...prev, newText]);
@@ -818,7 +822,7 @@ export default function App() {
             </svg>
             Biblioteca
           </button>
-          <span className="ml-1 px-3 py-1 text-xs font-extrabold text-white rounded-full leading-none select-none shadow-md" style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7, #6366f1, #a855f7, #7c3aed)', backgroundSize: '200% 200%', animation: 'gradientShift 3s ease infinite', letterSpacing: '0.05em' }} title="Versión de la aplicación">v3.0.0</span>
+          <span className="ml-1 px-3 py-1 text-xs font-extrabold text-white rounded-full leading-none select-none shadow-md" style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7, #6366f1, #a855f7, #7c3aed)', backgroundSize: '200% 200%', animation: 'gradientShift 3s ease infinite', letterSpacing: '0.05em' }} title="Versión de la aplicación">v3.1.0</span>
         </div>
 
       </header>

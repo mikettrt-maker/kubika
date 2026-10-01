@@ -821,6 +821,8 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
           text: text.trim(),
           color: '#1e293b',
           bold: false,
+          width: 260,
+          align: 'left',
           mode: toolMode,
         }]);
       }
@@ -987,6 +989,8 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
               initialText={ft.text}
               initialColor={ft.color || '#1e293b'}
               initialBold={ft.bold || false}
+              initialWidth={ft.width || 260}
+              initialAlign={ft.align || 'left'}
               isSelected={selectedId === ft.id}
               onPointerDown={(e) => handlePointerDownOnFreeText(e, ft.id)}
               onContextMenu={(e) => handleFreeTextContextMenu(e, ft.id)}
