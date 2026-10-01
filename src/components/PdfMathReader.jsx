@@ -237,6 +237,11 @@ export default function PdfMathReader({ libro, onBack }) {
   const [rods, setRods] = useState([]);
   const [showRodPalette, setShowRodPalette] = useState(true);
   const [contextMenu, setContextMenu] = useState(null);
+  // Giro de la hoja por página (0/90/180/270) — sólo vista, las coordenadas
+  // guardadas siguen en el espacio de la página
+  const [rotationMap, setRotationMap] = useState({});
+  const [pageDims, setPageDims] = useState({ w: 0, h: 0 });
+  const pageRot = rotationMap[currentPage] || 0;
 
   const containerRef = useRef(null);
   const viewerRef = useRef(null);
@@ -403,6 +408,7 @@ export default function PdfMathReader({ libro, onBack }) {
         dc.style.width = viewport.width + 'px';
         dc.style.height = viewport.height + 'px';
       }
+      setPageDims({ w: viewport.width, h: viewport.height });
       loadCanvas();
     } catch (e) {
       console.error('Render page error:', e);
@@ -471,9 +477,30 @@ export default function PdfMathReader({ libro, onBack }) {
     const canvas = drawCanvasRef.current;
     if (!canvas) return null;
     const rect = canvas.getBoundingClientRect();
+    const cssW = parseFloat(canvas.style.width) || canvas.clientWidth || rect.width;
+    const cssH = parseFloat(canvas.style.height) || canvas.clientHeight || rect.height;
+    // El centro visual coincide con el centro de la hoja aunque esté girada
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const vx = e.clientX - cx;
+    const vy = e.clientY - cy;
+    const r = (pageRot * Math.PI) / 180;
+    const lx = vx * Math.cos(r) + vy * Math.sin(r);
+    const ly = -vx * Math.sin(r) + vy * Math.cos(r);
+    const cssX = lx + cssW / 2;
+    const cssY = ly + cssH / 2;
     return {
-      x: (e.clientX - rect.left) * (canvas.width / rect.width),
-      y: (e.clientY - rect.top) * (canvas.height / rect.height),
+      x: cssX * (canvas.width / cssW),
+      y: cssY * (canvas.height / cssH),
+    };
+  };
+
+  // Delta de pantalla → delta en coordenadas de página (invierte el giro)
+  const invDelta = (dx, dy) => {
+    const r = (pageRot * Math.PI) / 180;
+    return {
+      x: dx * Math.cos(r) + dy * Math.sin(r),
+      y: -dx * Math.sin(r) + dy * Math.cos(r),
     };
   };
 
@@ -809,7 +836,8 @@ export default function PdfMathReader({ libro, onBack }) {
     const target = e.currentTarget;
     target.setPointerCapture(e.pointerId);
     const handleMove = (ev) => {
-      setMathTexts(prev => prev.map(m => m.id === mathId ? { ...m, x: Math.max(0, origX + ev.clientX - startX), y: Math.max(0, origY + ev.clientY - startY) } : m));
+      const d = invDelta(ev.clientX - startX, ev.clientY - startY);
+      setMathTexts(prev => prev.map(m => m.id === mathId ? { ...m, x: Math.max(0, origX + d.x), y: Math.max(0, origY + d.y) } : m));
     };
     const handleUp = () => {
       try { target.releasePointerCapture(e.pointerId); } catch { /* ya liberado */ }
@@ -833,7 +861,8 @@ export default function PdfMathReader({ libro, onBack }) {
     const target = e.currentTarget;
     target.setPointerCapture(e.pointerId);
     const handleMove = (ev) => {
-      setFreeTexts(prev => prev.map(t => t.id === textId ? { ...t, x: Math.max(0, origX + ev.clientX - startX), y: Math.max(0, origY + ev.clientY - startY) } : t));
+      const d = invDelta(ev.clientX - startX, ev.clientY - startY);
+      setFreeTexts(prev => prev.map(t => t.id === textId ? { ...t, x: Math.max(0, origX + d.x), y: Math.max(0, origY + d.y) } : t));
     };
     const handleUp = () => {
       try { target.releasePointerCapture(e.pointerId); } catch { /* ya liberado */ }
@@ -857,7 +886,8 @@ export default function PdfMathReader({ libro, onBack }) {
     const target = e.currentTarget;
     target.setPointerCapture(e.pointerId);
     const handleMove = (ev) => {
-      setQuads(prev => prev.map(q => q.id === quadId ? { ...q, x: Math.max(0, origX + ev.clientX - startX), y: Math.max(0, origY + ev.clientY - startY) } : q));
+      const d = invDelta(ev.clientX - startX, ev.clientY - startY);
+      setQuads(prev => prev.map(q => q.id === quadId ? { ...q, x: Math.max(0, origX + d.x), y: Math.max(0, origY + d.y) } : q));
     };
     const handleUp = () => {
       try { target.releasePointerCapture(e.pointerId); } catch { /* ya liberado */ }
@@ -880,8 +910,9 @@ export default function PdfMathReader({ libro, onBack }) {
     const target = e.currentTarget;
     target.setPointerCapture(e.pointerId);
     const handleMove = (ev) => {
-      const dx = ev.clientX - startX;
-      const dy = ev.clientY - startY;
+      const d = invDelta(ev.clientX - startX, ev.clientY - startY);
+      const dx = d.x;
+      const dy = d.y;
       let newX = orig.x, newY = orig.y, newW = orig.width, newH = orig.height;
       if (handle.includes('e')) { newW = Math.max(20, orig.width + dx); }
       if (handle.includes('w')) { newW = Math.max(20, orig.width - dx); newX = orig.x + orig.width - newW; }
@@ -934,8 +965,9 @@ export default function PdfMathReader({ libro, onBack }) {
     const target = e.currentTarget;
     target.setPointerCapture(e.pointerId);
     const handleMove = (ev) => {
-      const dx = ev.clientX - startX;
-      const dy = ev.clientY - startY;
+      const d = invDelta(ev.clientX - startX, ev.clientY - startY);
+      const dx = d.x;
+      const dy = d.y;
       setPolygons(prev => prev.map(p => p.id === polyId ? { ...p, points: origPoints.map(pt => ({ x: Math.max(0, pt.x + dx), y: Math.max(0, pt.y + dy) })) } : p));
     };
     const handleUp = () => {
@@ -968,8 +1000,9 @@ export default function PdfMathReader({ libro, onBack }) {
     const target = e.currentTarget;
     target.setPointerCapture(e.pointerId);
     const handleMove = (ev) => {
-      const dx = ev.clientX - startX;
-      const dy = ev.clientY - startY;
+      const d = invDelta(ev.clientX - startX, ev.clientY - startY);
+      const dx = d.x;
+      const dy = d.y;
       let scaleX = 1, scaleY = 1, offsetX = 0, offsetY = 0;
       if (handle.includes('e')) { scaleX = Math.max(0.2, (origW + dx) / origW); }
       if (handle.includes('w')) { scaleX = Math.max(0.2, (origW - dx) / origW); offsetX = origW - origW * scaleX; }
@@ -1001,9 +1034,10 @@ export default function PdfMathReader({ libro, onBack }) {
     if (!data) return;
     try {
       const rodDef = JSON.parse(data);
-      const rect = viewerRef.current.getBoundingClientRect();
-      const rawX = e.clientX - rect.left - (rodDef.value * PDF_ROD_UNIT / 2);
-      const rawY = e.clientY - rect.top - (PDF_ROD_HEIGHT / 2);
+      const point = getCanvasPoint(e);
+      if (!point) return;
+      const rawX = point.x - (rodDef.value * PDF_ROD_UNIT / 2);
+      const rawY = point.y - (PDF_ROD_HEIGHT / 2);
       const snappedX = Math.round(Math.max(0, rawX) / PDF_ROD_UNIT) * PDF_ROD_UNIT;
       const snappedY = Math.round(Math.max(0, rawY) / PDF_ROD_UNIT) * PDF_ROD_UNIT;
       const newRod = { id: generateRodId(), ...rodDef, x: snappedX, y: snappedY, rotation: 0 };
@@ -1067,8 +1101,9 @@ export default function PdfMathReader({ libro, onBack }) {
     }
 
     const handleMove = (ev) => {
-      const rawX = Math.max(0, origX + ev.clientX - startX);
-      const rawY = Math.max(0, origY + ev.clientY - startY);
+      const d = invDelta(ev.clientX - startX, ev.clientY - startY);
+      const rawX = Math.max(0, origX + d.x);
+      const rawY = Math.max(0, origY + d.y);
       const snappedX = Math.round(rawX / PDF_ROD_UNIT) * PDF_ROD_UNIT;
       const snappedY = Math.round(rawY / PDF_ROD_UNIT) * PDF_ROD_UNIT;
       if (dragRafRef.current) cancelAnimationFrame(dragRafRef.current);
@@ -1578,8 +1613,23 @@ export default function PdfMathReader({ libro, onBack }) {
         )}
 
         <div className="flex-1 overflow-auto flex justify-center">
+          <div
+            className="relative my-4 shadow-lg"
+            style={{
+              width: pageRot % 180 !== 0 ? pageDims.h : pageDims.w,
+              height: pageRot % 180 !== 0 ? pageDims.w : pageDims.h,
+            }}
+          >
           <div ref={viewerRef}
-            className="relative inline-block my-4 shadow-lg"
+            className="absolute"
+            style={{
+              left: '50%',
+              top: '50%',
+              width: pageDims.w || undefined,
+              height: pageDims.h || undefined,
+              transform: `translate(-50%, -50%) rotate(${pageRot}deg)`,
+              transformOrigin: 'center center',
+            }}
             onDragOver={handleDragOver}
             onDrop={handleDrop}>
           <div ref={containerRef} />
@@ -1632,6 +1682,7 @@ export default function PdfMathReader({ libro, onBack }) {
                 onUpdate={handleMathUpdate}
                 onResize={handleMathResize}
                 isSelected={selectedId === mt.id}
+                rotation={pageRot}
               />
             </div>
           ))}
@@ -1651,6 +1702,7 @@ export default function PdfMathReader({ libro, onBack }) {
                 onUpdate={handleFreeTextUpdate}
                 isSelected={selectedId === ft.id}
                 onPointerDown={(e) => handlePointerDownOnFreeText(e, ft.id)}
+                rotation={pageRot}
               />
             </div>
           ))}
@@ -1786,6 +1838,7 @@ export default function PdfMathReader({ libro, onBack }) {
             );
           })}
         </div>
+          </div>
         </div>
       </div>
 
@@ -1800,6 +1853,16 @@ export default function PdfMathReader({ libro, onBack }) {
         <div className="w-full mx-4 h-1.5 bg-slate-200 rounded-full overflow-hidden">
           <div className="h-full bg-indigo-500 rounded-full transition-all" style={{ width: `${(currentPage / totalPages) * 100}%` }} />
         </div>
+        <button
+          onClick={() => setRotationMap(prev => ({ ...prev, [currentPage]: (((prev[currentPage] || 0) + 90) % 360) }))}
+          title="Girar la hoja 90°"
+          className={`p-2 flex items-center gap-0.5 transition-colors ${pageRot ? 'text-indigo-600' : 'text-slate-400'} hover:text-slate-700`}
+        >
+          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          {pageRot > 0 && <span className="text-[10px] font-black">{pageRot}°</span>}
+        </button>
         <button onClick={goNext} disabled={currentPage >= totalPages}
           className="p-2 text-slate-400 hover:text-slate-700 transition-colors disabled:opacity-30">
           <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

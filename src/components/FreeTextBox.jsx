@@ -83,6 +83,7 @@ export default function FreeTextBox({
   onContextMenu,
   onUpdate,
   isSelected,
+  rotation = 0,
 }) {
   const [text, setText] = useState(initialText);
   const [color, setColor] = useState(initialColor);
@@ -169,7 +170,9 @@ export default function FreeTextBox({
 
     setIsResizing(true);
     const startX = e.clientX;
+    const startY = e.clientY;
     const startW = width;
+    const rr = (rotation * Math.PI) / 180;
     const clamp = (w) => Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, w));
     let done = false;
 
@@ -190,12 +193,16 @@ export default function FreeTextBox({
 
     const onMove = (ev) => {
       if (typeof ev.clientX !== 'number') return;
-      setWidth(clamp(startW + (ev.clientX - startX)));
+      const dx = ev.clientX - startX;
+      const dy = typeof ev.clientY === 'number' ? ev.clientY - startY : 0;
+      setWidth(clamp(startW + dx * Math.cos(rr) + dy * Math.sin(rr)));
     };
 
     const onUp = (ev) => {
-      const dx = ev && typeof ev.clientX === 'number' ? ev.clientX - startX : 0;
-      const finalW = clamp(startW + dx);
+      const hasCoords = ev && typeof ev.clientX === 'number';
+      const finalW = hasCoords
+        ? clamp(startW + (ev.clientX - startX) * Math.cos(rr) + (ev.clientY - startY) * Math.sin(rr))
+        : stateRef.current.width;
       cleanup();
       setWidth(finalW);
       if (onUpdate) onUpdate(id, { ...stateRef.current, width: finalW });

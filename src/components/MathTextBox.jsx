@@ -57,6 +57,7 @@ export default function MathTextBox({
   onUpdate,
   onResize,
   isSelected,
+  rotation = 0,
 }) {
   const [latex, setLatex] = useState(initialLatex);
   const [isEditing, setIsEditing] = useState(!initialLatex);
@@ -157,9 +158,13 @@ export default function MathTextBox({
     e.preventDefault();
     e.stopPropagation();
     const startX = e.clientX;
+    const startY = e.clientY;
     const startWidth = widthRef.current;
+    const rr = (rotation * Math.PI) / 180;
     const onMove = (ev) => {
-      const delta = ev.clientX - startX;
+      const dx = ev.clientX - startX;
+      const dy = ev.clientY - startY;
+      const delta = dx * Math.cos(rr) + dy * Math.sin(rr);
       const newW = Math.max(80, startWidth + delta);
       setWidth(newW);
       widthRef.current = newW;
