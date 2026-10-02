@@ -1,9 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { exportToPdf } from '../utils/exportPdf';
 import { opLabel } from '../utils/retosGenerator';
+import EscrituraPanel from './EscrituraPanel';
 
 const CELL_H = 30;
 const CELL_W = 38;
+const MAX_COLS = 20; // columna T: la herramienta de escritura va a la derecha
 const DARK = '2px solid #0f172a';
 const LIGHT = '1px solid #e2e8f0';
 const TRANSPARENT = '1px solid transparent';
@@ -56,7 +58,7 @@ function GroupLabel({ children }) {
   return <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider select-none">{children}</span>;
 }
 
-export default function Gimnasio({ value, onChange, onClose, displayName, workspaceName, onNotify, reto, onOpenRetos }) {
+export default function Gimnasio({ value, onChange, onClose, displayName, workspaceName, onNotify, reto, onOpenRetos, userGrado }) {
   const [sel, setSel] = useState(null);
   const [editing, setEditing] = useState(null);
   const [draft, setDraft] = useState('');
@@ -69,7 +71,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
   const sheetRef = useRef(null);
 
   const rows = value.rows || 10;
-  const cols = value.cols || 16;
+  const cols = Math.min(value.cols || 16, MAX_COLS);
   const cells = value.cells || {};
   const borders = value.borders || {};
   const colors = value.colors || {};
@@ -279,7 +281,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
   };
 
   const setDim = (key, delta) => {
-    const min = 4, max = key === 'rows' ? 30 : 24;
+    const min = 4, max = key === 'rows' ? 30 : MAX_COLS;
     onChange(prev => ({ ...prev, [key]: Math.max(min, Math.min(max, (prev[key] || 0) + delta)) }));
     focusGrid();
   };
@@ -375,7 +377,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
           </div>
           <div>
             <h1 className="text-lg font-extrabold leading-tight">Gimnasio Matemático</h1>
-            <p className="text-[11px] text-white/80">Mecaniza sumas, restas, multiplicaciones y divisiones · 4°, 5° y 6°</p>
+            <p className="text-[11px] text-white/80">Mecaniza operaciones y escribe números con letra · 4°, 5° y 6°</p>
           </div>
         </div>
         <div className="flex-1" />
@@ -506,10 +508,11 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
         </div>
       </div>
 
-      {/* Cuadrícula */}
-      <div className="flex-1 overflow-auto p-6">
+      {/* Cuadrícula + herramienta de escritura */}
+      <div className="flex-1 overflow-auto pt-6 px-6 pb-[240px]">
         <div className="inline-flex flex-col items-start mx-auto">
-          <div className="flex">
+          <div ref={sheetRef} className="flex gap-4 items-start">
+            <div className="flex">
             {/* Guías de fila */}
             <div className="flex flex-col shrink-0 no-print" style={{ width: 28 }}>
               <div style={{ height: 18 }} />
@@ -539,7 +542,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
               </div>
 
               {/* Hoja */}
-              <div ref={sheetRef} className="bg-white rounded-lg shadow-xl p-2">
+              <div className="bg-white rounded-lg shadow-xl p-2">
                 {reto && (
                   <div className="mb-1.5 pb-1 border-b border-slate-200 flex items-center justify-between gap-4 text-[11px] font-bold text-slate-700">
                     <span>Reto: {reto.grado}° · {opLabel(reto.op)} · Nivel {reto.nivel}</span>
@@ -586,6 +589,10 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
                           value={draft}
                           onChange={(e) => { setDraft(e.target.value); if (editRef.current) editRef.current.draft = e.target.value; }}
                           onBlur={commit}
+                          spellCheck={false}
+                          autoCorrect="off"
+                          autoCapitalize="off"
+                          autoComplete="off"
                           onKeyDown={(e) => {
                             e.stopPropagation();
                             if (e.key === 'Escape') { e.preventDefault(); cancelEdit(); }
@@ -618,8 +625,11 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
             </div>
           </div>
 
-          <p className="text-xs text-slate-400 mt-4 text-center no-print" style={{ maxWidth: cols * CELL_W + 60 }}>
-            Clic para seleccionar · arrastra para elegir un rango · escribe para responder · doble clic para editar · Enter baja, Tab pasa a la siguiente · flechas para moverte entre celdas · guías A-L o de valor posicional en la barra
+          <EscrituraPanel value={value} onChange={onChange} reto={reto} onOpenRetos={onOpenRetos} defaultGrado={userGrado} />
+          </div>
+
+          <p className="text-xs text-slate-400 mt-4 text-center no-print" style={{ maxWidth: cols * CELL_W + 440 }}>
+            Clic para seleccionar · arrastra para elegir un rango · escribe para responder · doble clic para editar · Enter baja, Tab pasa a la siguiente · flechas para moverte entre celdas · guías A-T o de valor posicional · a la derecha escribe números con letra
           </p>
         </div>
       </div>

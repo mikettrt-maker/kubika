@@ -153,6 +153,17 @@ export async function exportToPdf(canvasElement, studentName = 'Alumno', workspa
           }
         `;
         clonedDoc.head.appendChild(style);
+        // Los textareas del panel de escritura se convierten en divs para
+        // que las respuestas del alumno se vean en el PDF.
+        clonedDoc.querySelectorAll('textarea[data-escritura-input]').forEach(t => {
+          const d = clonedDoc.createElement('div');
+          d.className = t.className;
+          d.textContent = t.value || '';
+          d.style.whiteSpace = 'pre-wrap';
+          d.style.wordBreak = 'break-word';
+          d.style.minHeight = `${t.getBoundingClientRect().height}px`;
+          if (t.parentNode) t.parentNode.replaceChild(d, t);
+        });
       },
       ...(area ? { x: area.x, y: area.y, width: area.width, height: area.height } : {}),
     });

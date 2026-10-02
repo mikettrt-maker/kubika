@@ -7,6 +7,7 @@ export const OPERACIONES = [
   { id: 'resta', label: 'Resta', signo: '−' },
   { id: 'multiplicacion', label: 'Multiplicación', signo: '×' },
   { id: 'division', label: 'División', signo: '÷' },
+  { id: 'escritura', label: 'Escritura', signo: '✎' },
 ];
 
 export const opLabel = (id) => (OPERACIONES.find(o => o.id === id) || {}).label || id;
@@ -305,7 +306,41 @@ function genDiv(grado, nivel) {
   return [`${a} ÷ ${b}`];
 }
 
-const GENS = { suma: genSuma, resta: genResta, multiplicacion: genMult, division: genDiv };
+// ===== ESCRITURA DE NÚMEROS =====
+// Números (hasta 12 cifras) para escribirlos con letra en el panel del Gimnasio.
+// Separadores: coma para millares y punto decimal (formato mexicano).
+// Decimales: 4°/5° hasta milésimos (3) en niveles altos; 6° hasta millonésimos (6) en los últimos niveles.
+const E_D = { 1: 3, 2: 4, 3: 5, 4: 6, 5: 7, 6: 9, 7: 10, 8: 11, 9: 12, 10: 12 };
+function escrituraDecK(grado, nivel) {
+  if (nivel <= 6) return 0;
+  if (grado === 6) return ({ 7: 2, 8: 3, 9: 6, 10: 6 })[nivel];
+  return ({ 7: 1, 8: 2, 9: 3, 10: 3 })[nivel];
+}
+function genEscritura(grado, nivel) {
+  const n = clampNivel(nivel);
+  const k = escrituraDecK(grado, n);
+  const d = Math.min(E_D[n] + gb(grado), 12);
+  let intStr = digitStr(d);
+  // Un cero interior para practicar grupos con ceros (45,730,008)
+  if (d >= 5 && rnd(0, 1) === 1) {
+    const arr = intStr.split('');
+    arr[rnd(1, d - 2)] = '0';
+    intStr = arr.join('');
+  }
+  let dec = '';
+  if (k > 0) {
+    for (let t = 0; t < 12; t++) {
+      dec = decPart(k);
+      if (!/0$/.test(dec)) break; // sin ceros finales: 0.750 sería ambiguo
+    }
+    if (dec && k >= 2 && rnd(0, 1) === 1) dec = '0' + dec.slice(1); // cero inicial: 0.045
+    if (/0$/.test(dec)) dec = dec.replace(/0+$/, '') || dec;
+  }
+  const grouped = intStr.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return [dec ? `${grouped}.${dec}` : grouped];
+}
+
+const GENS = { suma: genSuma, resta: genResta, multiplicacion: genMult, division: genDiv, escritura: genEscritura };
 
 export function getChallenge(grado, op, nivel) {
   const gen = GENS[op] || genSuma;

@@ -131,7 +131,7 @@ export default function Retos({ onClose, onLaunch, userGrado, retoActivo }) {
           </div>
           <div>
             <h1 className="text-lg font-extrabold leading-tight">Retos Matemáticos</h1>
-            <p className="text-[11px] text-white/80">8 operaciones por nivel · practica los algoritmos de 4°, 5° y 6°</p>
+            <p className="text-[11px] text-white/80">8 ejercicios por nivel · algoritmos y escritura de números · 4°, 5° y 6°</p>
           </div>
         </div>
         <div className="flex-1" />
@@ -184,7 +184,7 @@ export default function Retos({ onClose, onLaunch, userGrado, retoActivo }) {
 
           {/* 2. Operación */}
           <StepTitle n="2">Operación</StepTitle>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-7">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-7">
             {OPERACIONES.map(o => (
               <button
                 key={o.id}
@@ -208,7 +208,7 @@ export default function Retos({ onClose, onLaunch, userGrado, retoActivo }) {
               <button
                 key={n}
                 onClick={() => pickLevel(n)}
-                title={`${nivelEtiqueta(n)} — 8 operaciones`}
+                title={`${nivelEtiqueta(n)} — 8 ejercicios`}
                 className={`aspect-square rounded-xl border-2 flex flex-col items-center justify-center transition-all active:scale-95 ${
                   op
                     ? 'bg-white border-slate-200 hover:border-amber-500 hover:bg-amber-50'

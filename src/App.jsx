@@ -88,7 +88,8 @@ export default function App() {
     if (!autosaveKey) return;
     const hasData = rods.length > 0 || mathTexts.length > 0 || freeTexts.length > 0 ||
                     antennas.length > 0 || quads.length > 0 || polygons.length > 0 ||
-                    geoBands.length > 0 || manualPivots.length > 0 || gimHasData || !!retoActivo;
+                    geoBands.length > 0 || manualPivots.length > 0 || gimHasData || !!retoActivo ||
+                    !!(gimnasio?.escritura?.texts?.some(t => t && t.trim()));
     if (!hasData) return;
 
     hasUnsavedChangesRef.current = true;
@@ -115,10 +116,11 @@ export default function App() {
       if (!raw) return;
       const saved = JSON.parse(raw);
       if (!saved?._ts || (Date.now() - saved._ts) > 7 * 24 * 60 * 60 * 1000) return;
-      const hasData = (saved.rods?.length > 0) || (saved.mathTexts?.length > 0) || (saved.freeTexts?.length > 0) ||
-                      (saved.antennas?.length > 0) || (saved.quads?.length > 0) || (saved.polygons?.length > 0) ||
-                      !!(saved.gimnasio && (Object.keys(saved.gimnasio.cells || {}).length > 0 || Object.keys(saved.gimnasio.borders || {}).length > 0)) ||
-                      !!saved.retoActivo;
+        const hasData = (saved.rods?.length > 0) || (saved.mathTexts?.length > 0) || (saved.freeTexts?.length > 0) ||
+                        (saved.antennas?.length > 0) || (saved.quads?.length > 0) || (saved.polygons?.length > 0) ||
+                        !!(saved.gimnasio && (Object.keys(saved.gimnasio.cells || {}).length > 0 || Object.keys(saved.gimnasio.borders || {}).length > 0)) ||
+                        !!(saved.gimnasio?.escritura?.texts?.some(t => t && t.trim())) ||
+                        !!saved.retoActivo;
       if (!hasData) return;
       setRods(saved.rods || []);
       setMathTexts(saved.mathTexts || []);
@@ -264,7 +266,7 @@ export default function App() {
     if (authLoading || !user || greetedRef.current) return;
     greetedRef.current = true;
     const t = setTimeout(() => {
-      sayMascot(`¡Hola ${displayName || 'amig@'}! 👋 ¿Qué vamos a aprender hoy?`);
+      sayMascot(`¡Hola ${displayName || 'amig@'}! 👋 Soy Kubi, ¿qué vamos a aprender hoy?`);
     }, 2000);
     return () => clearTimeout(t);
   }, [authLoading, user, displayName, sayMascot]);
@@ -284,6 +286,17 @@ export default function App() {
     }, 900);
     return () => clearTimeout(t);
   }, [toolMode, user, sayMascot]);
+
+  // Tip al abrir el Gimnasio
+  const prevGimRef = useRef(false);
+  useEffect(() => {
+    if (!showGimnasio || prevGimRef.current) { prevGimRef.current = showGimnasio; return; }
+    prevGimRef.current = true;
+    const t = setTimeout(() => {
+      sayMascot('¡Al gimnasio! 🏋️ Pídeme consejos para escribir números con letra');
+    }, 900);
+    return () => clearTimeout(t);
+  }, [showGimnasio, sayMascot]);
 
   // Tip tras 60s de inactividad (una sola vez por sesión)
   useEffect(() => {
@@ -867,7 +880,7 @@ export default function App() {
             </svg>
             Biblioteca
           </button>
-          <span className="ml-1 px-3 py-1 text-xs font-extrabold text-white rounded-full leading-none select-none shadow-md" style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7, #6366f1, #a855f7, #7c3aed)', backgroundSize: '200% 200%', animation: 'gradientShift 3s ease infinite', letterSpacing: '0.05em' }} title="Versión de la aplicación">v3.6.4</span>
+          <span className="ml-1 px-3 py-1 text-xs font-extrabold text-white rounded-full leading-none select-none shadow-md" style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7, #6366f1, #a855f7, #7c3aed)', backgroundSize: '200% 200%', animation: 'gradientShift 3s ease infinite', letterSpacing: '0.05em' }} title="Versión de la aplicación">v3.7.0</span>
         </div>
 
       </header>
@@ -946,6 +959,7 @@ export default function App() {
           onNotify={showNotification}
           reto={retoActivo}
           onOpenRetos={() => setShowRetos(true)}
+          userGrado={userGrado}
         />
       )}
 
@@ -959,8 +973,8 @@ export default function App() {
         />
       )}
 
-      {/* ===== PANEL DEL RETO ACTIVO ===== */}
-      {retoActivo && (
+      {/* ===== PANEL DEL RETO ACTIVO (los de escritura usan el panel del Gimnasio) ===== */}
+      {retoActivo && retoActivo.op !== 'escritura' && (
         <RetoPanel
           reto={retoActivo}
           onTerminate={() => setRetoActivo(null)}
@@ -987,14 +1001,14 @@ export default function App() {
         loading={wsLoading}
       />
 
-      {/* ===== MASCOTA ASISTENTE ===== */}
-      {user && !selectedMathBook && !showBiblioteca && !showGimnasio && !showRetos && (
-        <Mascot message={mascotMsg} />
+      {/* ===== MASCOTA ASISTENTE (Kubi) ===== */}
+      {user && !selectedMathBook && !showBiblioteca && !showRetos && (
+        <Mascot message={mascotMsg} context={showGimnasio ? 'gimnasio' : undefined} />
       )}
 
       {/* ===== NOTIFICACIONES ===== */}
       {notification && (
-        <div className={`notification-toast fixed bottom-56 right-6 z-[10000] px-5 py-3 rounded-xl shadow-2xl text-sm font-semibold
+        <div className={`notification-toast fixed bottom-56 right-6 z-[10002] px-5 py-3 rounded-xl shadow-2xl text-sm font-semibold
           flex items-center gap-2.5
           ${notification.type === 'error'
             ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-red-500/20'

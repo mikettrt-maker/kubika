@@ -163,12 +163,52 @@ const TIPS = [
   },
 ];
 
+// ===== Consejos del Gimnasio: técnicas de escritura de números =====
+const GIMNASIO_TIPS = [
+  {
+    id: 'gim-herramienta',
+    title: '✍️ La herramienta de escritura',
+    steps: [
+      'A la derecha de la cuadrícula está "Escritura de números": te muestra 8 números y tú los escribes con letra en cada recuadro.',
+      'El autocorrector está apagado a propósito: escribe exactamente como te enseñó tu maestra, sin que el sistema te cambie palabras.',
+      'Cambia grado (4°, 5°, 6°) y nivel para que aparezcan cifras más largas y decimales más difíciles.',
+      'Cuando termines, descarga el PDF: tus respuestas viajan en la hoja para que el profe las revise.',
+    ],
+  },
+  {
+    id: 'gim-12cifras',
+    title: '🔢 Ortografía: números de hasta 12 cifras',
+    steps: [
+      'Agrupa las cifras de 3 en 3: 45,730,008 → 45 | 730 | 008. Los grupos se llaman unidades, millares, millones y mil millones.',
+      'Lee grupo por grupo y agrega el nombre del grupo: 45 → «cuarenta y cinco», 730 → «setecientos treinta» + mil, 008 → «ocho».',
+      'Regla de oro: entre decenas y unidades va «y» → cuarenta Y cinco. Los ceros del grupo no se leen: 008 = «ocho».',
+      '«cien» va antes de mil, millones o de: cien mil · cien pesos. «ciento» va con cifra: ciento uno, ciento veinte.',
+      '«mil» nunca lleva «uno» delante: 1,000 es «mil» (no «uno mil») y 2,000 es «dos mil».',
+      'Los cientos raros: doscientos, trescientos, cuatrocientos, quinientos, seiscientos, setecientos, ochocientos, novecientos.',
+      'Con 12 cifras llegas hasta mil millones: 999,999,999,999 → «novecientos noventa y nueve mil millones novecientos noventa y nueve mil novecientos noventa y nueve».',
+    ],
+  },
+  {
+    id: 'gim-decimales',
+    title: '🔚 Números decimales con letra',
+    steps: [
+      'Separa la parte entera de la parte decimal y únelas con «con»: 45.045 → «cuarenta y cinco CON cuarenta y cinco milésimas».',
+      'La orden depende de CUántos decimales traiga en total: 1 → décimas · 2 → centésimas · 3 → milésimas · 6 → millonésimas.',
+      'Los ceros iniciales no se leen: .045 se lee «cuarenta y cinco» (¡pero son 3 cifras decimales, por eso milésimas!).',
+      'Ejemplos: 12.08 → «doce con ocho centésimas» · 3.7 → «tres con siete décimas» · 0.075 → «setenta y cinco milésimas».',
+      '4° y 5° practican hasta milésimas (3 decimales); 6° llega hasta millonésimas (6 decimales) en los últimos niveles.',
+      'La parte decimal se escribe como número normal: lees los dígitos juntos y agregas la orden que corresponda.',
+    ],
+  },
+];
+
 /**
- * Asistente flotante (esquina inferior derecha).
+ * Asistente flotante (esquina inferior derecha) — su nombre es Kubi.
  * Recibe `message` = { text, id } y muestra el globo 5 segundos.
+ * Recibe `context` — con 'gimnasio' antepone los consejos de escritura de números.
  * Clic → mini menú flotante de consejos (acordeón).
  */
-export default function Mascot({ message }) {
+export default function Mascot({ message, context }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [expanded, setExpanded] = useState(null);
   const [bubble, setBubble] = useState(null);
@@ -195,9 +235,11 @@ export default function Mascot({ message }) {
     setBubble(null);
   };
 
+  const tips = context === 'gimnasio' ? [...GIMNASIO_TIPS, ...TIPS] : TIPS;
+
   return (
     <div
-      className="fixed bottom-4 right-4 z-[900] no-print flex flex-col items-end gap-2 select-none"
+      className="fixed bottom-4 right-4 z-[10001] no-print flex flex-col items-end gap-2 select-none"
     >
       {/* ===== MINI MENÚ DE CONSEJOS ===== */}
       {menuOpen && (
@@ -212,7 +254,7 @@ export default function Mascot({ message }) {
                           bg-gradient-to-r from-purple-50 to-pink-50
                           border-b border-purple-100 rounded-t-2xl">
             <span className="font-display font-bold text-purple-700 text-sm">
-              💡 Consejos de tu asistente
+              💡 Consejos de Kubi
             </span>
             <button
               onClick={toggleMenu}
@@ -227,7 +269,7 @@ export default function Mascot({ message }) {
 
           {/* Lista de consejos */}
           <ul className="p-2 space-y-1.5">
-            {TIPS.map((tip, i) => (
+            {tips.map((tip, i) => (
               <li key={tip.id}>
                 <button
                   onClick={() => setExpanded(e => e === tip.id ? null : tip.id)}
@@ -289,13 +331,13 @@ export default function Mascot({ message }) {
       {/* Mascota */}
       <button
         onClick={toggleMenu}
-        title={menuOpen ? 'Cerrar consejos' : 'Abrir consejos'}
+        title={menuOpen ? 'Cerrar consejos' : 'Hablar con Kubi'}
         className={`relative block ${pop ? 'animate-bounce-in' : 'animate-float'}`}
         style={{ animationDuration: pop ? undefined : '3s' }}
       >
         <img
           src="mascota.png"
-          alt="Asistente Kubika"
+          alt="Kubi, asistente de Kubika"
           className={`w-[175px] h-[175px] object-contain drop-shadow-xl transition-transform
                      ${menuOpen ? 'scale-105' : 'hover:scale-110'}`}
           onError={() => setImgOk(false)}
