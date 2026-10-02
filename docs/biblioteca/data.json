@@ -396,17 +396,6 @@
     "pregunta": "¿Crees que a veces perdemos el tiempo en cosas que no son importantes?"
   },
   {
-    "id": 38,
-    "titulo": "El asesinato del profesor de matemáticas",
-    "autor": "Jordi Sierra i Fabra",
-    "categoria": "Infantil",
-    "edad": "11+ años",
-    "portada": "biblioteca/portadas/El asesinato del profesor de matemáticas.svg",
-    "epub": "biblioteca/libros/El_asesinato_del_profesor_de_matematicas_Jordi_Sierra_i_Fabra.epub",
-    "descripcion": "Un profesor de matemáticas aparece asesinado y deja un misterioso mensaje: sus tres alumnos deberán resolver una serie de enigmas matemáticos para descubrir al culpable. Una emocionante aventura que demuestra que las matemáticas pueden salvar vidas.",
-    "pregunta": "¿Crees que las matemáticas pueden ser divertidas o solo son útiles para resolver problemas como este?"
-  },
-  {
     "id": 39,
     "titulo": "El pirata Garrapata",
     "autor": "Juan Muñoz Martín",
