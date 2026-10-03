@@ -1,0 +1,306 @@
+import { useState, useRef, useEffect } from 'react';
+import { getChallenge, nivelEtiqueta, opLabel } from '../utils/retosGenerator';
+import { comparaRespuesta } from '../utils/validacion';
+import { comparaLetras, numeroALetras } from '../utils/numeroALetras';
+
+const GRADOS = [4, 5, 6];
+const EMPTY = ['', '', '', '', '', '', '', ''];
+const N = 8;
+
+const estadoEsc = (num, txt) => (!txt || !txt.trim() ? 'falta' : (comparaLetras(num, txt) ? 'ok' : 'mal'));
+
+function Mark({ estado }) {
+  if (estado === 'ok') return <span className="text-emerald-600 font-black text-sm leading-none">✓</span>;
+  if (estado === 'mal') return <span className="text-red-500 font-black text-sm leading-none">✗</span>;
+  return <span className="text-amber-500 font-black text-sm leading-none">?</span>;
+}
+
+/**
+ * Panel derecho unificado del Gimnasio (v3.8.0).
+ * Modo reto de operaciones: 8 recuadros de respuesta con validación automática.
+ * Modo escritura (reto o libre): 8 números con letra, también con validación.
+ * La validación se lanza con el botón Validar (solo con las 8 respuestas
+ * llenas); después las marcas y el resultado se recalculan en vivo y las
+ * respuestas correctas se revelan debajo de cada fallo (y van al PDF).
+ */
+export default function PanelReto({ value, onChange, reto, onOpenRetos, defaultGrado, onPatchReto, onTerminate }) {
+  const state = value.escritura;
+  const esRetoEsc = reto?.op === 'escritura';
+  const esOps = !!(reto && reto.op && !esRetoEsc);
+  const inpRefs = useRef([]);
+
+  // Sincronizar escritura con el reto del profe o generar una tanda inicial
+  useEffect(() => {
+    if (esRetoEsc) {
+      if (!state || JSON.stringify(state.nums) !== JSON.stringify(reto.ejercicios)) {
+        onChange(prev => ({
+          ...prev,
+          escritura: { grado: reto.grado, nivel: reto.nivel, nums: reto.ejercicios, texts: [...EMPTY], validado: false },
+        }));
+      }
+    } else if (!reto && !state) {
+      const g = GRADOS.includes(defaultGrado) ? defaultGrado : 4;
+      onChange(prev => prev.escritura ? prev : ({
+        ...prev,
+        escritura: { grado: g, nivel: 1, nums: getChallenge(g, 'escritura', 1), texts: [...EMPTY], validado: false },
+      }));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state, reto, esRetoEsc, defaultGrado]);
+
+  const ej = (reto?.ejercicios || []).slice(0, N);
+  const resp = esOps ? (reto.respuestas && reto.respuestas.length ? reto.respuestas : [...EMPTY]) : [];
+  const texts = (state?.texts || []).length ? state.texts : EMPTY;
+  const nums = state?.nums || [];
+  const validado = esOps ? !!reto.validado : !!state?.validado;
+
+  const faltan = esOps
+    ? ej.slice(0, N).filter((_, i) => !(resp[i] || '').trim()).length
+    : nums.slice(0, N).filter((_, i) => !(texts[i] || '').trim()).length;
+  const total = esOps ? ej.length : nums.length;
+  const complete = total === N && faltan === 0;
+
+  let okCount = 0;
+  if (validado) {
+    if (esOps) ej.forEach((e, i) => { if (comparaRespuesta(e, resp[i] || '').estado === 'ok') okCount++; });
+    else nums.forEach((n, i) => { if (estadoEsc(n, texts[i]) === 'ok') okCount++; });
+  }
+
+  const validar = () => {
+    if (!complete) return;
+    if (esOps) onPatchReto?.({ validado: true });
+    else onChange(prev => ({ ...prev, escritura: { ...prev.escritura, validado: true } }));
+  };
+
+  const setResp = (i, v) => {
+    const next = resp.slice(0, N);
+    while (next.length < N) next.push('');
+    next[i] = v;
+    onPatchReto?.({ respuestas: next });
+  };
+
+  const setText = (i, v) => {
+    onChange(prev => {
+      const st = prev.escritura;
+      if (!st) return prev;
+      const t = (st.texts || []).slice();
+      while (t.length <= i) t.push('');
+      t[i] = v;
+      return { ...prev, escritura: { ...st, texts: t, validado: st.validado || false } };
+    });
+  };
+
+  const clearAnswers = () => {
+    if (faltan === total) return;
+    if (!confirm('¿Borrar tus respuestas?')) return;
+    if (esOps) onPatchReto?.({ respuestas: [...EMPTY], validado: false });
+    else onChange(prev => ({ ...prev, escritura: { ...prev.escritura, texts: [...EMPTY], validado: false } }));
+  };
+
+  const regen = (grado, nivel) => {
+    const hasText = texts.some(t => t && t.trim());
+    if (hasText && !confirm('¿Generar otros números? Se borrarán tus respuestas de escritura.')) return;
+    onChange(prev => ({
+      ...prev,
+      escritura: { grado, nivel, nums: getChallenge(grado, 'escritura', nivel), texts: [...EMPTY], validado: false },
+    }));
+  };
+
+  if (!esOps && !state) return null;
+
+  const titulo = esOps
+    ? `${reto.grado}° · ${opLabel(reto.op)} · Nivel ${reto.nivel}`
+    : esRetoEsc
+      ? `Escritura · ${state.grado}° · Nivel ${state.nivel}`
+      : 'Escritura de números';
+
+  const hint = esOps
+    ? (reto.op === 'division'
+      ? 'Escribe el cociente hasta décimos (1 decimal): 100 ÷ 3 = 33.3.'
+      : 'Escribe solo el resultado en el recuadro. Usa punto para los decimales.')
+    : 'Escribe cada número con letra. El autocorrector está apagado: escribe tal cual lo lees.';
+
+  const btn = (onClick, title, children) => (
+    <button
+      onClick={onClick}
+      title={title}
+      className="h-6 px-2 rounded-md bg-white hover:bg-slate-50 border border-slate-200 text-[10px] font-black text-slate-500 transition-all"
+    >
+      {children}
+    </button>
+  );
+
+  return (
+    <aside
+      className="w-[336px] shrink-0 bg-white rounded-lg shadow-xl p-3 self-start"
+      data-panel-reto
+    >
+      {/* Fila 1: título + Validar (fuera del PDF) */}
+      <div className="no-print mb-2.5 pb-2.5 border-b border-slate-200 flex items-center gap-2">
+        <span className="text-base leading-none">{esOps ? '📝' : '✍️'}</span>
+        <span className="text-[13px] font-black text-slate-700 leading-tight">{titulo}</span>
+        <div className="flex-1" />
+        {faltan > 0 && (
+          <span className="px-1.5 py-0.5 rounded-md bg-amber-100 border border-amber-300 text-[10px] font-black text-amber-700">
+            faltan {faltan}
+          </span>
+        )}
+        <button
+          onClick={validar}
+          disabled={!complete || validado}
+          title={complete ? 'Revisar las 8 respuestas' : 'Faltan respuestas por escribir'}
+          className={`h-7 px-3 rounded-lg border text-[11px] font-black transition-all ${
+            validado
+              ? 'bg-emerald-50 border-emerald-300 text-emerald-600'
+              : complete
+                ? 'bg-indigo-600 border-indigo-600 text-white hover:bg-indigo-700 shadow-md'
+                : 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
+          }`}
+        >
+          {validado ? '✓ Validado' : 'Validar'}
+        </button>
+      </div>
+
+      {/* Fila 2: controles del modo (fuera del PDF) */}
+      <div className="no-print mb-2 flex items-center gap-1.5 flex-wrap">
+        {reto ? (
+          <>
+            {onOpenRetos && btn(onOpenRetos, 'Elegir otro reto', 'Otro reto')}
+            {onTerminate && btn(onTerminate, 'Terminar el reto', 'Terminar')}
+            {btn(clearAnswers, 'Borrar todas las respuestas', 'Limpiar')}
+          </>
+        ) : (
+          <>
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Grado</span>
+              {GRADOS.map(g => (
+                <button
+                  key={g}
+                  onClick={() => regen(g, state.nivel)}
+                  className={`h-6 min-w-[30px] px-1 rounded-md border text-[11px] font-black transition-all ${
+                    state.grado === g
+                      ? 'bg-indigo-600 border-indigo-600 text-white'
+                      : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-300'
+                  }`}
+                >
+                  {g}°
+                </button>
+              ))}
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Nivel</span>
+              <select
+                value={state.nivel}
+                onChange={(e) => regen(state.grado, Number(e.target.value))}
+                className="h-6 rounded-md border border-slate-200 bg-white px-1 text-[11px] font-bold text-slate-600 outline-none focus:border-indigo-400"
+                title="Nivel del reto de escritura"
+              >
+                {Array.from({ length: 10 }, (_, i) => i + 1).map(n => (
+                  <option key={n} value={n}>{n} · {nivelEtiqueta(n)}</option>
+                ))}
+              </select>
+            </div>
+            <div className="flex-1" />
+            {btn(() => regen(state.grado, state.nivel), 'Generar otros 8 números', 'Nuevo')}
+            {btn(clearAnswers, 'Borrar todas las respuestas', 'Limpiar')}
+          </>
+        )}
+      </div>
+
+      {/* Fila 3: resumen (imprimible) o pista (no imprime) */}
+      {validado ? (
+        <div className="mb-2 px-2 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-[11px] font-black text-emerald-700">
+          Resultado: {okCount}/{total} correctas
+        </div>
+      ) : (
+        <p className="no-print mb-2 text-[10px] leading-snug text-slate-400">{hint}</p>
+      )}
+
+      {/* Ejercicios (sí van al PDF) */}
+      {esOps ? (
+        ej.length === 0 ? (
+          <p className="text-[11px] text-slate-400">Este reto no tiene ejercicios. Pulsa Terminar.</p>
+        ) : (
+          <ol className="space-y-1.5">
+            {ej.map((expr, i) => {
+              const r = comparaRespuesta(expr, resp[i] || '');
+              return (
+                <li key={i}>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-4 h-4 rounded-full bg-indigo-100 text-indigo-700 text-[9px] font-black flex items-center justify-center shrink-0">
+                      {i + 1}
+                    </span>
+                    <span className="text-[11px] font-black text-slate-800 tracking-wide whitespace-nowrap flex-1 overflow-hidden text-ellipsis">{expr}</span>
+                    <span className="text-slate-400 font-bold text-[11px]">=</span>
+                    <input
+                      data-answer-input
+                      ref={(el) => { inpRefs.current[i] = el; }}
+                      value={resp[i] || ''}
+                      onChange={(e) => setResp(i, e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          const nx = inpRefs.current[i + 1];
+                          if (nx) nx.focus();
+                        }
+                      }}
+                      inputMode="decimal"
+                      placeholder="…"
+                      spellCheck={false}
+                      autoCorrect="off"
+                      autoCapitalize="off"
+                      autoComplete="off"
+                      className="w-[74px] shrink-0 rounded-md border border-slate-200 px-1 py-0.5 text-[12px] font-bold text-slate-800 text-center outline-none focus:border-indigo-400 placeholder:text-slate-300"
+                      style={{ background: '#fff' }}
+                    />
+                    {validado && <span className="w-3.5 flex justify-center shrink-0"><Mark estado={r.estado} /></span>}
+                  </div>
+                  {validado && r.estado !== 'ok' && (
+                    <div className="text-[10px] font-bold text-red-500" style={{ paddingLeft: 22 }}>
+                      → {r.esperado}
+                    </div>
+                  )}
+                </li>
+              );
+            })}
+          </ol>
+        )
+      ) : (
+        <ol className="space-y-2">
+          {nums.slice(0, N).map((n, i) => {
+            const estado = estadoEsc(n, texts[i]);
+            return (
+              <li key={i}>
+                <div className="flex items-baseline gap-1.5">
+                  <span className="w-4 h-4 rounded-full bg-indigo-100 text-indigo-700 text-[9px] font-black flex items-center justify-center shrink-0">
+                    {i + 1}
+                  </span>
+                  <span className="text-[13px] font-black text-slate-800 tracking-wide">{n}</span>
+                  {validado && <span className="ml-auto shrink-0"><Mark estado={estado} /></span>}
+                </div>
+                <textarea
+                  data-answer-input
+                  rows={3}
+                  value={texts[i] || ''}
+                  onChange={(e) => setText(i, e.target.value)}
+                  placeholder="Escríbelo con letra…"
+                  spellCheck={false}
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  autoComplete="off"
+                  className="mt-0.5 w-full rounded-md border border-slate-200 px-1.5 py-1 text-[12px] leading-snug text-slate-800 outline-none focus:border-indigo-400 resize-none placeholder:text-slate-300"
+                  style={{ background: '#fff' }}
+                />
+                {validado && estado !== 'ok' && (
+                  <div className="text-[10px] font-bold text-red-500 leading-snug">
+                    → {numeroALetras(n)}
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ol>
+      )}
+    </aside>
+  );
+}

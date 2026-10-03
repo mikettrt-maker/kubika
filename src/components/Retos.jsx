@@ -13,88 +13,6 @@ function StepTitle({ n, children }) {
   );
 }
 
-// ===== Panel flotante con las 8 operaciones del reto activo =====
-export function RetoPanel({ reto, onTerminate, onNew }) {
-  const [min, setMin] = useState(false);
-  const [pos, setPos] = useState(() => ({
-    x: Math.max(12, (typeof window !== 'undefined' ? window.innerWidth : 1200) - 350),
-    y: 84,
-  }));
-  const dragRef = useRef(null);
-
-  useEffect(() => {
-    const move = (e) => {
-      if (!dragRef.current) return;
-      const { dx, dy } = dragRef.current;
-      setPos({
-        x: Math.max(4, Math.min(window.innerWidth - 140, e.clientX - dx)),
-        y: Math.max(4, Math.min(window.innerHeight - 48, e.clientY - dy)),
-      });
-    };
-    const up = () => { dragRef.current = null; };
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up);
-    window.addEventListener('pointercancel', up);
-    return () => {
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
-      window.removeEventListener('pointercancel', up);
-    };
-  }, []);
-
-  const headDown = (e) => {
-    dragRef.current = { dx: e.clientX - pos.x, dy: e.clientY - pos.y };
-  };
-
-  const headBtn = (fn, title, children) => (
-    <button
-      onPointerDown={(e) => e.stopPropagation()}
-      onClick={fn}
-      title={title}
-      className="h-6 min-w-[26px] px-1.5 rounded-md bg-white/20 hover:bg-white/35 border border-white/40 text-white text-xs font-bold transition-all"
-    >
-      {children}
-    </button>
-  );
-
-  return (
-    <div
-      className="fixed z-[9999] w-[318px] bg-white rounded-2xl shadow-2xl border border-amber-200 overflow-hidden select-none"
-      style={{ left: pos.x, top: pos.y }}
-      data-reto-panel
-    >
-      <div
-        onPointerDown={headDown}
-        className="flex items-center gap-2 px-3 py-2 cursor-grab active:cursor-grabbing text-white"
-        style={{ background: 'linear-gradient(135deg, #f59e0b, #f97316)' }}
-      >
-        <span className="text-sm font-black whitespace-nowrap">
-          {reto.grado}° · {opLabel(reto.op)} · Nivel {reto.nivel}
-        </span>
-        <div className="flex-1" />
-        {headBtn(onNew, 'Elegir otro reto', 'Otro')}
-        {headBtn(() => setMin(m => !m), min ? 'Mostrar operaciones' : 'Minimizar', min ? '▲' : '−')}
-        {headBtn(onTerminate, 'Terminar el reto', '×')}
-      </div>
-      {!min && (
-        <div className="p-3 max-h-[52vh] overflow-auto">
-          <p className="text-[11px] text-slate-500 mb-2 leading-snug">
-            Copia cada operación en la cuadrícula, respeta la alineación de las cifras y resuélvela a tu ritmo.
-          </p>
-          <ol className="space-y-1.5">
-            {(reto.ejercicios || []).map((t, i) => (
-              <li key={i} className="flex items-baseline gap-2 text-sm">
-                <span className="text-amber-600 font-black w-4 text-right shrink-0">{i + 1}</span>
-                <span className="font-bold text-slate-800 whitespace-nowrap tracking-wide">{t}</span>
-              </li>
-            ))}
-          </ol>
-        </div>
-      )}
-    </div>
-  );
-}
-
 // ===== Selector de reto: grado → operación → nivel =====
 export default function Retos({ onClose, onLaunch, userGrado, retoActivo }) {
   const [grado, setGrado] = useState(GRADOS.includes(userGrado) ? userGrado : 4);
@@ -222,8 +140,8 @@ export default function Retos({ onClose, onLaunch, userGrado, retoActivo }) {
           </div>
 
           <p className="mt-6 text-xs text-slate-400 text-center leading-relaxed">
-            Al lanzar un nivel se te preguntará si limpiar la cuadrícula · resuelve a tu ritmo y descarga el PDF
-            para que el profe revise tu trabajo.
+            Al lanzar un nivel se te preguntará si limpiar la cuadrícula · copia cada operación, pon tus respuestas
+            en el panel derecho y pulsa Validar · descarga el PDF con tu calificación para el profe.
           </p>
         </div>
       </div>

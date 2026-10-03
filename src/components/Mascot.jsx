@@ -169,10 +169,21 @@ const GIMNASIO_TIPS = [
     id: 'gim-herramienta',
     title: '✍️ La herramienta de escritura',
     steps: [
-      'A la derecha de la cuadrícula está "Escritura de números": te muestra 8 números y tú los escribes con letra en cada recuadro.',
+      'A la derecha de la cuadrícula está el panel de respuestas: te muestra 8 ejercicios y tú escribes la respuesta en cada recuadro.',
       'El autocorrector está apagado a propósito: escribe exactamente como te enseñó tu maestra, sin que el sistema te cambie palabras.',
       'Cambia grado (4°, 5°, 6°) y nivel para que aparezcan cifras más largas y decimales más difíciles.',
-      'Cuando termines, descarga el PDF: tus respuestas viajan en la hoja para que el profe las revise.',
+      'Cuando tengas las 8 respuestas se activa el botón Validar: salen ✓ o ✗ y, debajo de cada fallo, la respuesta correcta.',
+      'Después descarga el PDF: tus respuestas, marcas y resultado viajan en la hoja.',
+    ],
+  },
+  {
+    id: 'gim-division',
+    title: '➗ Divisiones hasta décimos',
+    steps: [
+      'En los retos de división el cociente se escribe con 1 decimal (décimos): 100 ÷ 3 = 33.3.',
+      'Si la división sobra, redondea: lo que venga después del primer decimal 5 o más sube un décimo (28.57 → 28.6).',
+      'Si la división acaba exacta, va sin decimales: 3,000 ÷ 6 = 500 (también vale 500.0).',
+      'Validar solo acepta el cociente redondeado a décimos: 33 y 33.4 se marcan ✗.',
     ],
   },
   {

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { exportToPdf } from '../utils/exportPdf';
 import { opLabel } from '../utils/retosGenerator';
-import EscrituraPanel from './EscrituraPanel';
+import PanelReto from './PanelReto';
 
 const CELL_H = 30;
 const CELL_W = 38;
@@ -58,7 +58,7 @@ function GroupLabel({ children }) {
   return <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider select-none">{children}</span>;
 }
 
-export default function Gimnasio({ value, onChange, onClose, displayName, workspaceName, onNotify, reto, onOpenRetos, userGrado }) {
+export default function Gimnasio({ value, onChange, onClose, displayName, workspaceName, onNotify, reto, onOpenRetos, userGrado, onPatchReto, onTerminate }) {
   const [sel, setSel] = useState(null);
   const [editing, setEditing] = useState(null);
   const [draft, setDraft] = useState('');
@@ -377,7 +377,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
           </div>
           <div>
             <h1 className="text-lg font-extrabold leading-tight">Gimnasio Matemático</h1>
-            <p className="text-[11px] text-white/80">Mecaniza operaciones y escribe números con letra · 4°, 5° y 6°</p>
+            <p className="text-[11px] text-white/80">Mecaniza operaciones, escribe números con letra y valida · 4°, 5° y 6°</p>
           </div>
         </div>
         <div className="flex-1" />
@@ -625,11 +625,19 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
             </div>
           </div>
 
-          <EscrituraPanel value={value} onChange={onChange} reto={reto} onOpenRetos={onOpenRetos} defaultGrado={userGrado} />
+          <PanelReto
+            value={value}
+            onChange={onChange}
+            reto={reto}
+            onOpenRetos={onOpenRetos}
+            defaultGrado={userGrado}
+            onPatchReto={onPatchReto}
+            onTerminate={onTerminate}
+          />
           </div>
 
           <p className="text-xs text-slate-400 mt-4 text-center no-print" style={{ maxWidth: cols * CELL_W + 440 }}>
-            Clic para seleccionar · arrastra para elegir un rango · escribe para responder · doble clic para editar · Enter baja, Tab pasa a la siguiente · flechas para moverte entre celdas · guías A-T o de valor posicional · a la derecha escribe números con letra
+            Clic para seleccionar · arrastra para elegir un rango · escribe para responder · doble clic para editar · Enter baja, Tab pasa a la siguiente · flechas para moverte entre celdas · guías A-T o de valor posicional · a la derecha pon tus respuestas y pulsa Validar
           </p>
         </div>
       </div>

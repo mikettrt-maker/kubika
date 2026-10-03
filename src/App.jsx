@@ -10,7 +10,7 @@ import SaveLoadModal from './components/SaveLoadModal';
 import SplashScreen from './components/SplashScreen';
 import Biblioteca from './components/Biblioteca';
 import Gimnasio from './components/Gimnasio';
-import Retos, { RetoPanel } from './components/Retos';
+import Retos from './components/Retos';
 import { getChallenge } from './utils/retosGenerator';
 import PdfMathReader from './components/PdfMathReader';
 import Mascot from './components/Mascot';
@@ -447,7 +447,7 @@ export default function App() {
       if (!limpiar) return base;
       return { ...base, cells: {}, borders: {}, colors: {} };
     });
-    setRetoActivo({ grado, op, nivel, ejercicios: getChallenge(grado, op, nivel) });
+    setRetoActivo({ grado, op, nivel, ejercicios: getChallenge(grado, op, nivel), respuestas: Array(8).fill(''), validado: false });
     setShowGimnasio(true);
     setShowRetos(false);
     showNotification(`Reto lanzado: ${grado}° · nivel ${nivel}`);
@@ -880,7 +880,7 @@ export default function App() {
             </svg>
             Biblioteca
           </button>
-          <span className="ml-1 px-3 py-1 text-xs font-extrabold text-white rounded-full leading-none select-none shadow-md" style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7, #6366f1, #a855f7, #7c3aed)', backgroundSize: '200% 200%', animation: 'gradientShift 3s ease infinite', letterSpacing: '0.05em' }} title="Versión de la aplicación">v3.7.0</span>
+          <span className="ml-1 px-3 py-1 text-xs font-extrabold text-white rounded-full leading-none select-none shadow-md" style={{ background: 'linear-gradient(135deg, #7c3aed, #a855f7, #6366f1, #a855f7, #7c3aed)', backgroundSize: '200% 200%', animation: 'gradientShift 3s ease infinite', letterSpacing: '0.05em' }} title="Versión de la aplicación">v3.8.0</span>
         </div>
 
       </header>
@@ -960,6 +960,8 @@ export default function App() {
           reto={retoActivo}
           onOpenRetos={() => setShowRetos(true)}
           userGrado={userGrado}
+          onPatchReto={(patch) => setRetoActivo(r => (r ? { ...r, ...patch } : r))}
+          onTerminate={() => setRetoActivo(null)}
         />
       )}
 
@@ -970,15 +972,6 @@ export default function App() {
           onLaunch={launchReto}
           userGrado={userGrado}
           retoActivo={retoActivo}
-        />
-      )}
-
-      {/* ===== PANEL DEL RETO ACTIVO (los de escritura usan el panel del Gimnasio) ===== */}
-      {retoActivo && retoActivo.op !== 'escritura' && (
-        <RetoPanel
-          reto={retoActivo}
-          onTerminate={() => setRetoActivo(null)}
-          onNew={() => setShowRetos(true)}
         />
       )}
 

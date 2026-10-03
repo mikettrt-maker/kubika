@@ -153,9 +153,10 @@ export async function exportToPdf(canvasElement, studentName = 'Alumno', workspa
           }
         `;
         clonedDoc.head.appendChild(style);
-        // Los textareas del panel de escritura se convierten en divs para
-        // que las respuestas del alumno se vean en el PDF.
-        clonedDoc.querySelectorAll('textarea[data-escritura-input]').forEach(t => {
+        // Los campos de respuesta (inputs de operaciones y textareas de
+        // escritura) se convierten en divs para que las respuestas del
+        // alumno —y sus marcas de revisión— se vean en el PDF.
+        clonedDoc.querySelectorAll('[data-answer-input]').forEach(t => {
           const d = clonedDoc.createElement('div');
           d.className = t.className;
           d.textContent = t.value || '';
