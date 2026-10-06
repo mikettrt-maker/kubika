@@ -544,7 +544,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
               {/* Hoja */}
               <div className="bg-white rounded-lg shadow-xl p-2">
                 {reto && (
-                  <div className="mb-1.5 pb-1 border-b border-slate-200 flex items-center justify-between gap-4 text-[11px] font-bold text-slate-700">
+                  <div className="mb-2 pb-1.5 border-b border-slate-200 flex items-center justify-between gap-4 text-[13px] font-bold text-slate-700">
                     <span>Reto: {reto.grado}° · {opLabel(reto.op)} · Nivel {reto.nivel}</span>
                     <span className="font-semibold text-slate-500">
                       Nombre: {displayName || '____________'} · Fecha: {new Date().toLocaleDateString('es-MX')}
@@ -636,7 +636,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
           />
           </div>
 
-          <p className="text-xs text-slate-400 mt-4 text-center no-print" style={{ maxWidth: cols * CELL_W + 440 }}>
+          <p className="text-sm text-slate-400 mt-4 text-center no-print" style={{ maxWidth: cols * CELL_W + 460 }}>
             Clic para seleccionar · arrastra para elegir un rango · escribe para responder · doble clic para editar · Enter baja, Tab pasa a la siguiente · flechas para moverte entre celdas · guías A-T o de valor posicional · a la derecha pon tus respuestas y pulsa Validar
           </p>
         </div>

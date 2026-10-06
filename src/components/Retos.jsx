@@ -6,8 +6,8 @@ const GRADOS = [4, 5, 6];
 function StepTitle({ n, children }) {
   return (
     <div className="flex items-center gap-2.5 mb-3">
-      <span className="w-6 h-6 rounded-full bg-amber-500 text-white text-xs font-black flex items-center justify-center">{n}</span>
-      <h2 className="text-sm font-black text-slate-700 uppercase tracking-wide">{children}</h2>
+      <span className="w-7 h-7 rounded-full bg-amber-500 text-white text-sm font-black flex items-center justify-center">{n}</span>
+      <h2 className="text-base font-black text-slate-700 uppercase tracking-wide">{children}</h2>
       <div className="flex-1 h-px bg-slate-200" />
     </div>
   );
@@ -40,16 +40,16 @@ export default function Retos({ onClose, onLaunch, userGrado, retoActivo }) {
         style={{ background: 'linear-gradient(135deg, #f59e0b, #f97316)' }}
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
-            <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+          <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+            <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
               <circle cx="12" cy="12" r="9" />
               <circle cx="12" cy="12" r="5" />
               <circle cx="12" cy="12" r="1.4" fill="currentColor" />
             </svg>
           </div>
           <div>
-            <h1 className="text-lg font-extrabold leading-tight">Retos Matemáticos</h1>
-            <p className="text-[11px] text-white/80">8 ejercicios por nivel · algoritmos y escritura de números · 4°, 5° y 6°</p>
+            <h1 className="text-xl font-extrabold leading-tight">Retos Matemáticos</h1>
+            <p className="text-[13px] text-white/80">8 ejercicios por nivel · algoritmos y escritura de números · 4°, 5° y 6°</p>
           </div>
         </div>
         <div className="flex-1" />
@@ -66,16 +66,16 @@ export default function Retos({ onClose, onLaunch, userGrado, retoActivo }) {
 
       {/* Contenido */}
       <div className="flex-1 overflow-auto py-6 px-5">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           {retoActivo && (
-            <div className="mb-5 flex items-center gap-3 p-3 rounded-xl bg-amber-50 border border-amber-200 text-sm text-amber-800">
+            <div className="mb-5 flex items-center gap-3 p-3 rounded-xl bg-amber-50 border border-amber-200 text-base text-amber-800">
               <span className="font-bold">
                 Reto activo: {retoActivo.grado}° · {opLabel(retoActivo.op)} · Nivel {retoActivo.nivel}
               </span>
               <span className="flex-1" />
               <button
                 onClick={onClose}
-                className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold transition-all"
+                className="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-sm font-bold transition-all"
               >
                 Volver al reto
               </button>
@@ -89,7 +89,7 @@ export default function Retos({ onClose, onLaunch, userGrado, retoActivo }) {
               <button
                 key={g}
                 onClick={() => setGrado(g)}
-                className={`flex-1 py-3.5 rounded-xl border-2 text-base font-black transition-all ${
+                className={`flex-1 py-4 rounded-xl border-2 text-lg font-black transition-all ${
                   grado === g
                     ? 'bg-amber-50 border-amber-500 text-amber-700 shadow-md scale-[1.02]'
                     : 'bg-white border-slate-200 text-slate-500 hover:border-amber-300'
@@ -107,14 +107,14 @@ export default function Retos({ onClose, onLaunch, userGrado, retoActivo }) {
               <button
                 key={o.id}
                 onClick={() => setOp(o.id)}
-                className={`py-4 rounded-xl border-2 flex flex-col items-center gap-0.5 transition-all ${
+                className={`py-5 rounded-xl border-2 flex flex-col items-center gap-1 transition-all ${
                   op === o.id
                     ? 'bg-amber-50 border-amber-500 shadow-md scale-[1.02]'
                     : 'bg-white border-slate-200 hover:border-amber-300'
                 }`}
               >
-                <span className={`text-2xl font-black ${op === o.id ? 'text-amber-600' : 'text-slate-600'}`}>{o.signo}</span>
-                <span className={`text-xs font-bold ${op === o.id ? 'text-amber-700' : 'text-slate-500'}`}>{o.label}</span>
+                <span className={`text-4xl font-black ${op === o.id ? 'text-amber-600' : 'text-slate-600'}`}>{o.signo}</span>
+                <span className={`text-sm font-bold ${op === o.id ? 'text-amber-700' : 'text-slate-500'}`}>{o.label}</span>
               </button>
             ))}
           </div>
@@ -133,13 +133,13 @@ export default function Retos({ onClose, onLaunch, userGrado, retoActivo }) {
                     : 'bg-slate-50 border-slate-200 opacity-60'
                 }`}
               >
-                <span className="text-lg font-black text-slate-700 leading-none">{n}</span>
-                <span className="text-[9px] font-bold text-slate-400 leading-none mt-0.5">{nivelEtiqueta(n)}</span>
+                <span className="text-2xl font-black text-slate-700 leading-none">{n}</span>
+                <span className="text-[11px] font-bold text-slate-400 leading-none mt-1">{nivelEtiqueta(n)}</span>
               </button>
             ))}
           </div>
 
-          <p className="mt-6 text-xs text-slate-400 text-center leading-relaxed">
+          <p className="mt-6 text-sm text-slate-400 text-center leading-relaxed">
             Al lanzar un nivel se te preguntará si limpiar la cuadrícula · copia cada operación, pon tus respuestas
             en el panel derecho y pulsa Validar (cada Validar cuenta un intento con su puntaje) · descarga el PDF
             con tu resultado e intentos para el profe.

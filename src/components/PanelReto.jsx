@@ -10,9 +10,9 @@ const N = 8;
 const estadoEsc = (num, txt) => (!txt || !txt.trim() ? 'falta' : (comparaLetras(num, txt) ? 'ok' : 'mal'));
 
 function Mark({ estado }) {
-  if (estado === 'ok') return <span className="text-emerald-600 font-black text-sm leading-none">✓</span>;
-  if (estado === 'mal') return <span className="text-red-500 font-black text-sm leading-none">✗</span>;
-  return <span className="text-amber-500 font-black text-sm leading-none">?</span>;
+  if (estado === 'ok') return <span className="text-emerald-600 font-black text-lg leading-none">✓</span>;
+  if (estado === 'mal') return <span className="text-red-500 font-black text-lg leading-none">✗</span>;
+  return <span className="text-amber-500 font-black text-lg leading-none">?</span>;
 }
 
 /**
@@ -133,7 +133,7 @@ export default function PanelReto({ value, onChange, reto, onOpenRetos, defaultG
     <button
       onClick={onClick}
       title={title}
-      className="h-6 px-2 rounded-md bg-white hover:bg-slate-50 border border-slate-200 text-[10px] font-black text-slate-500 transition-all"
+      className="h-7 px-3 rounded-md bg-white hover:bg-slate-50 border border-slate-200 text-xs font-black text-slate-500 transition-all"
     >
       {children}
     </button>
@@ -141,16 +141,16 @@ export default function PanelReto({ value, onChange, reto, onOpenRetos, defaultG
 
   return (
     <aside
-      className="w-[336px] shrink-0 bg-white rounded-lg shadow-xl p-3 self-start"
+      className="w-[420px] max-w-[85vw] shrink-0 bg-white rounded-lg shadow-xl p-4 self-start"
       data-panel-reto
     >
       {/* Fila 1: título + Validar (fuera del PDF) */}
-      <div className="no-print mb-2.5 pb-2.5 border-b border-slate-200 flex items-center gap-2">
-        <span className="text-base leading-none">{esOps ? '📝' : '✍️'}</span>
-        <span className="text-[13px] font-black text-slate-700 leading-tight">{titulo}</span>
+      <div className="no-print mb-3 pb-3 border-b border-slate-200 flex items-center gap-2">
+        <span className="text-xl leading-none">{esOps ? '📝' : '✍️'}</span>
+        <span className="text-[15px] font-black text-slate-700 leading-tight">{titulo}</span>
         <div className="flex-1" />
         {faltan > 0 && (
-          <span className="px-1.5 py-0.5 rounded-md bg-amber-100 border border-amber-300 text-[10px] font-black text-amber-700">
+          <span className="px-2 py-1 rounded-md bg-amber-100 border border-amber-300 text-xs font-black text-amber-700">
             faltan {faltan}
           </span>
         )}
@@ -164,7 +164,7 @@ export default function PanelReto({ value, onChange, reto, onOpenRetos, defaultG
                 ? 'Ya validado: corrige una respuesta para contar otro intento'
                 : 'Revisar las respuestas y contar un intento'
           }
-          className={`h-7 px-3 rounded-lg border text-[11px] font-black transition-all ${
+          className={`h-9 px-4 rounded-lg border text-[13px] font-black transition-all ${
             validado && !pendiente
               ? 'bg-emerald-50 border-emerald-300 text-emerald-600'
               : complete
@@ -177,7 +177,7 @@ export default function PanelReto({ value, onChange, reto, onOpenRetos, defaultG
       </div>
 
       {/* Fila 2: controles del modo (fuera del PDF) */}
-      <div className="no-print mb-2 flex items-center gap-1.5 flex-wrap">
+      <div className="no-print mb-3 flex items-center gap-2 flex-wrap">
         {reto ? (
           <>
             {onOpenRetos && btn(onOpenRetos, 'Elegir otro reto', 'Otro reto')}
@@ -186,13 +186,13 @@ export default function PanelReto({ value, onChange, reto, onOpenRetos, defaultG
           </>
         ) : (
           <>
-            <div className="flex items-center gap-1">
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Grado</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Grado</span>
               {GRADOS.map(g => (
                 <button
                   key={g}
                   onClick={() => regen(g, state.nivel)}
-                  className={`h-6 min-w-[30px] px-1 rounded-md border text-[11px] font-black transition-all ${
+                  className={`h-8 min-w-[36px] px-2 rounded-md border text-xs font-black transition-all ${
                     state.grado === g
                       ? 'bg-indigo-600 border-indigo-600 text-white'
                       : 'bg-white border-slate-200 text-slate-500 hover:border-indigo-300'
@@ -202,12 +202,12 @@ export default function PanelReto({ value, onChange, reto, onOpenRetos, defaultG
                 </button>
               ))}
             </div>
-            <div className="flex items-center gap-1">
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-wider">Nivel</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] font-black text-slate-400 uppercase tracking-wider">Nivel</span>
               <select
                 value={state.nivel}
                 onChange={(e) => regen(state.grado, Number(e.target.value))}
-                className="h-6 rounded-md border border-slate-200 bg-white px-1 text-[11px] font-bold text-slate-600 outline-none focus:border-indigo-400"
+                className="h-8 rounded-md border border-slate-200 bg-white px-2 text-xs font-bold text-slate-600 outline-none focus:border-indigo-400"
                 title="Nivel del reto de escritura"
               >
                 {Array.from({ length: 10 }, (_, i) => i + 1).map(n => (
@@ -224,7 +224,7 @@ export default function PanelReto({ value, onChange, reto, onOpenRetos, defaultG
 
       {/* Fila 3: resumen con intentos (imprimible) o pista (no imprime) */}
       {validado ? (
-        <div className="mb-2 px-2 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-[11px] font-black text-emerald-700">
+        <div className="mb-3 px-2.5 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-[13px] font-black text-emerald-700">
           <div>
             Resultado: {okCount}/{total} correctas
             {pendiente && <span className="font-bold text-amber-600"> · cambios sin validar</span>}
@@ -239,7 +239,7 @@ export default function PanelReto({ value, onChange, reto, onOpenRetos, defaultG
           )}
         </div>
       ) : (
-        <p className="no-print mb-2 text-[10px] leading-snug text-slate-400">{hint}</p>
+        <p className="no-print mb-3 text-xs leading-snug text-slate-400">{hint}</p>
       )}
 
       {/* Ejercicios (sí van al PDF) */}
@@ -247,17 +247,17 @@ export default function PanelReto({ value, onChange, reto, onOpenRetos, defaultG
         ej.length === 0 ? (
           <p className="text-[11px] text-slate-400">Este reto no tiene ejercicios. Pulsa Terminar.</p>
         ) : (
-          <ol className="space-y-1.5">
+          <ol className="space-y-2.5">
             {ej.map((expr, i) => {
               const r = comparaRespuesta(expr, resp[i] || '');
               return (
                 <li key={i}>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-4 h-4 rounded-full bg-indigo-100 text-indigo-700 text-[9px] font-black flex items-center justify-center shrink-0">
+                  <div className="flex items-center gap-2">
+                    <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 text-[11px] font-black flex items-center justify-center shrink-0">
                       {i + 1}
                     </span>
-                    <span className="text-[11px] font-black text-slate-800 tracking-wide whitespace-nowrap flex-1 overflow-hidden text-ellipsis">{expr}</span>
-                    <span className="text-slate-400 font-bold text-[11px]">=</span>
+                    <span className="text-sm font-black text-slate-800 tracking-wide flex-1 leading-tight break-words">{expr}</span>
+                    <span className="text-slate-400 font-bold text-sm">=</span>
                     <input
                       data-answer-input
                       ref={(el) => { inpRefs.current[i] = el; }}
@@ -276,13 +276,13 @@ export default function PanelReto({ value, onChange, reto, onOpenRetos, defaultG
                       autoCorrect="off"
                       autoCapitalize="off"
                       autoComplete="off"
-                      className="w-[74px] shrink-0 rounded-md border border-slate-200 px-1 py-0.5 text-[12px] font-bold text-slate-800 text-center outline-none focus:border-indigo-400 placeholder:text-slate-300"
+                      className="w-[104px] shrink-0 rounded-md border border-slate-200 px-2 py-1.5 text-[15px] font-bold text-slate-800 text-center outline-none focus:border-indigo-400 placeholder:text-slate-300"
                       style={{ background: '#fff' }}
                     />
-                    {validado && <span className="w-3.5 flex justify-center shrink-0"><Mark estado={r.estado} /></span>}
+                    {validado && <span className="w-5 flex justify-center shrink-0"><Mark estado={r.estado} /></span>}
                   </div>
                   {validado && r.estado !== 'ok' && (
-                    <div className="text-[10px] font-bold text-red-500" style={{ paddingLeft: 22 }}>
+                    <div className="text-xs font-bold text-red-500" style={{ paddingLeft: 28 }}>
                       → {r.esperado}
                     </div>
                   )}
@@ -292,21 +292,21 @@ export default function PanelReto({ value, onChange, reto, onOpenRetos, defaultG
           </ol>
         )
       ) : (
-        <ol className="space-y-2">
+        <ol className="space-y-3">
           {nums.slice(0, N).map((n, i) => {
             const estado = estadoEsc(n, texts[i]);
             return (
               <li key={i}>
-                <div className="flex items-baseline gap-1.5">
-                  <span className="w-4 h-4 rounded-full bg-indigo-100 text-indigo-700 text-[9px] font-black flex items-center justify-center shrink-0">
+                <div className="flex items-baseline gap-2">
+                  <span className="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 text-[11px] font-black flex items-center justify-center shrink-0">
                     {i + 1}
                   </span>
-                  <span className="text-[13px] font-black text-slate-800 tracking-wide">{n}</span>
+                  <span className="text-[15px] font-black text-slate-800 tracking-wide">{n}</span>
                   {validado && <span className="ml-auto shrink-0"><Mark estado={estado} /></span>}
                 </div>
                 <textarea
                   data-answer-input
-                  rows={3}
+                  rows={4}
                   value={texts[i] || ''}
                   onChange={(e) => setText(i, e.target.value)}
                   placeholder="Escríbelo con letra…"
@@ -314,11 +314,11 @@ export default function PanelReto({ value, onChange, reto, onOpenRetos, defaultG
                   autoCorrect="off"
                   autoCapitalize="off"
                   autoComplete="off"
-                  className="mt-0.5 w-full rounded-md border border-slate-200 px-1.5 py-1 text-[12px] leading-snug text-slate-800 outline-none focus:border-indigo-400 resize-none placeholder:text-slate-300"
+                  className="mt-1 w-full rounded-md border border-slate-200 px-2 py-1.5 text-[14px] leading-snug text-slate-800 outline-none focus:border-indigo-400 resize-none placeholder:text-slate-300"
                   style={{ background: '#fff' }}
                 />
                 {validado && estado !== 'ok' && (
-                  <div className="text-[10px] font-bold text-red-500 leading-snug">
+                  <div className="text-xs font-bold text-red-500 leading-snug">
                     → {numeroALetras(n)}
                   </div>
                 )}
