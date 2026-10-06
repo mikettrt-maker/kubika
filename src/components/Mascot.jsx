@@ -173,7 +173,8 @@ const GIMNASIO_TIPS = [
       'El autocorrector está apagado a propósito: escribe exactamente como te enseñó tu maestra, sin que el sistema te cambie palabras.',
       'Cambia grado (4°, 5°, 6°) y nivel para que aparezcan cifras más largas y decimales más difíciles.',
       'Cuando tengas las 8 respuestas se activa el botón Validar: salen ✓ o ✗ y, debajo de cada fallo, la respuesta correcta.',
-      'Después descarga el PDF: tus respuestas, marcas y resultado viajan en la hoja.',
+      'Cada Validar cuenta un intento con tu puntaje (Intentos: 2 · 6/8 · 8/8); si corriges y validas otra vez, suma otro.',
+      'El resumen con tu resultado y tus intentos viaja en el PDF, así tu maestro sabe quién lo hizo a la primera.',
     ],
   },
   {

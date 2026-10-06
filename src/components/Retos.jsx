@@ -141,7 +141,8 @@ export default function Retos({ onClose, onLaunch, userGrado, retoActivo }) {
 
           <p className="mt-6 text-xs text-slate-400 text-center leading-relaxed">
             Al lanzar un nivel se te preguntará si limpiar la cuadrícula · copia cada operación, pon tus respuestas
-            en el panel derecho y pulsa Validar · descarga el PDF con tu calificación para el profe.
+            en el panel derecho y pulsa Validar (cada Validar cuenta un intento con su puntaje) · descarga el PDF
+            con tu resultado e intentos para el profe.
           </p>
         </div>
       </div>

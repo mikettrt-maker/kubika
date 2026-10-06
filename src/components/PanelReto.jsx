@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useRef, useEffect } from 'react';
 import { getChallenge, nivelEtiqueta, opLabel } from '../utils/retosGenerator';
 import { comparaRespuesta } from '../utils/validacion';
 import { comparaLetras, numeroALetras } from '../utils/numeroALetras';
@@ -16,12 +16,14 @@ function Mark({ estado }) {
 }
 
 /**
- * Panel derecho unificado del Gimnasio (v3.8.0).
+ * Panel derecho unificado del Gimnasio (v3.8.0, intentos v3.9.0).
  * Modo reto de operaciones: 8 recuadros de respuesta con validación automática.
  * Modo escritura (reto o libre): 8 números con letra, también con validación.
  * La validación se lanza con el botón Validar (solo con las 8 respuestas
  * llenas); después las marcas y el resultado se recalculan en vivo y las
  * respuestas correctas se revelan debajo de cada fallo (y van al PDF).
+ * Cada Validar cuenta un intento con su puntaje (intentos = [6, 8]); si el
+ * alumno corrige respuestas se marca "pendiente" y Validar registra otro.
  */
 export default function PanelReto({ value, onChange, reto, onOpenRetos, defaultGrado, onPatchReto, onTerminate }) {
   const state = value.escritura;
@@ -35,14 +37,14 @@ export default function PanelReto({ value, onChange, reto, onOpenRetos, defaultG
       if (!state || JSON.stringify(state.nums) !== JSON.stringify(reto.ejercicios)) {
         onChange(prev => ({
           ...prev,
-          escritura: { grado: reto.grado, nivel: reto.nivel, nums: reto.ejercicios, texts: [...EMPTY], validado: false },
+          escritura: { grado: reto.grado, nivel: reto.nivel, nums: reto.ejercicios, texts: [...EMPTY], validado: false, pendiente: false, intentos: [] },
         }));
       }
     } else if (!reto && !state) {
       const g = GRADOS.includes(defaultGrado) ? defaultGrado : 4;
       onChange(prev => prev.escritura ? prev : ({
         ...prev,
-        escritura: { grado: g, nivel: 1, nums: getChallenge(g, 'escritura', 1), texts: [...EMPTY], validado: false },
+        escritura: { grado: g, nivel: 1, nums: getChallenge(g, 'escritura', 1), texts: [...EMPTY], validado: false, pendiente: false, intentos: [] },
       }));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -53,6 +55,8 @@ export default function PanelReto({ value, onChange, reto, onOpenRetos, defaultG
   const texts = (state?.texts || []).length ? state.texts : EMPTY;
   const nums = state?.nums || [];
   const validado = esOps ? !!reto.validado : !!state?.validado;
+  const pendiente = esOps ? !!reto.pendiente : !!state?.pendiente;
+  const intentos = (esOps ? reto.intentos : state?.intentos) || [];
 
   const faltan = esOps
     ? ej.slice(0, N).filter((_, i) => !(resp[i] || '').trim()).length
@@ -61,22 +65,27 @@ export default function PanelReto({ value, onChange, reto, onOpenRetos, defaultG
   const complete = total === N && faltan === 0;
 
   let okCount = 0;
-  if (validado) {
-    if (esOps) ej.forEach((e, i) => { if (comparaRespuesta(e, resp[i] || '').estado === 'ok') okCount++; });
-    else nums.forEach((n, i) => { if (estadoEsc(n, texts[i]) === 'ok') okCount++; });
-  }
+  if (esOps) ej.forEach((e, i) => { if (comparaRespuesta(e, resp[i] || '').estado === 'ok') okCount++; });
+  else nums.forEach((n, i) => { if (estadoEsc(n, texts[i]) === 'ok') okCount++; });
 
   const validar = () => {
     if (!complete) return;
-    if (esOps) onPatchReto?.({ validado: true });
-    else onChange(prev => ({ ...prev, escritura: { ...prev.escritura, validado: true } }));
+    if (validado && !pendiente) return; // ya validado sin cambios: no cuenta doble
+    if (esOps) {
+      onPatchReto?.({ validado: true, pendiente: false, intentos: [...intentos, okCount] });
+    } else {
+      onChange(prev => ({
+        ...prev,
+        escritura: { ...prev.escritura, validado: true, pendiente: false, intentos: [...(prev.escritura?.intentos || []), okCount] },
+      }));
+    }
   };
 
   const setResp = (i, v) => {
     const next = resp.slice(0, N);
     while (next.length < N) next.push('');
     next[i] = v;
-    onPatchReto?.({ respuestas: next });
+    onPatchReto?.({ respuestas: next, ...(reto.validado ? { pendiente: true } : {}) });
   };
 
   const setText = (i, v) => {
@@ -86,23 +95,23 @@ export default function PanelReto({ value, onChange, reto, onOpenRetos, defaultG
       const t = (st.texts || []).slice();
       while (t.length <= i) t.push('');
       t[i] = v;
-      return { ...prev, escritura: { ...st, texts: t, validado: st.validado || false } };
+      return { ...prev, escritura: { ...st, texts: t, pendiente: !!st.validado } };
     });
   };
 
   const clearAnswers = () => {
     if (faltan === total) return;
     if (!confirm('¿Borrar tus respuestas?')) return;
-    if (esOps) onPatchReto?.({ respuestas: [...EMPTY], validado: false });
-    else onChange(prev => ({ ...prev, escritura: { ...prev.escritura, texts: [...EMPTY], validado: false } }));
+    if (esOps) onPatchReto?.({ respuestas: [...EMPTY], validado: false, pendiente: false });
+    else onChange(prev => ({ ...prev, escritura: { ...prev.escritura, texts: [...EMPTY], validado: false, pendiente: false } }));
   };
 
   const regen = (grado, nivel) => {
     const hasText = texts.some(t => t && t.trim());
-    if (hasText && !confirm('¿Generar otros números? Se borrarán tus respuestas de escritura.')) return;
+    if (hasText && !confirm('¿Generar otros números? Se borrarán tus respuestas y los intentos.')) return;
     onChange(prev => ({
       ...prev,
-      escritura: { grado, nivel, nums: getChallenge(grado, 'escritura', nivel), texts: [...EMPTY], validado: false },
+      escritura: { grado, nivel, nums: getChallenge(grado, 'escritura', nivel), texts: [...EMPTY], validado: false, pendiente: false, intentos: [] },
     }));
   };
 
@@ -147,17 +156,23 @@ export default function PanelReto({ value, onChange, reto, onOpenRetos, defaultG
         )}
         <button
           onClick={validar}
-          disabled={!complete || validado}
-          title={complete ? 'Revisar las 8 respuestas' : 'Faltan respuestas por escribir'}
+          disabled={!complete || (validado && !pendiente)}
+          title={
+            !complete
+              ? 'Faltan respuestas por escribir'
+              : validado && !pendiente
+                ? 'Ya validado: corrige una respuesta para contar otro intento'
+                : 'Revisar las respuestas y contar un intento'
+          }
           className={`h-7 px-3 rounded-lg border text-[11px] font-black transition-all ${
-            validado
+            validado && !pendiente
               ? 'bg-emerald-50 border-emerald-300 text-emerald-600'
               : complete
                 ? 'bg-indigo-600 border-indigo-600 text-white hover:bg-indigo-700 shadow-md'
                 : 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
           }`}
         >
-          {validado ? '✓ Validado' : 'Validar'}
+          {validado && !pendiente ? '✓ Validado' : 'Validar'}
         </button>
       </div>
 
@@ -207,10 +222,21 @@ export default function PanelReto({ value, onChange, reto, onOpenRetos, defaultG
         )}
       </div>
 
-      {/* Fila 3: resumen (imprimible) o pista (no imprime) */}
+      {/* Fila 3: resumen con intentos (imprimible) o pista (no imprime) */}
       {validado ? (
         <div className="mb-2 px-2 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-[11px] font-black text-emerald-700">
-          Resultado: {okCount}/{total} correctas
+          <div>
+            Resultado: {okCount}/{total} correctas
+            {pendiente && <span className="font-bold text-amber-600"> · cambios sin validar</span>}
+          </div>
+          {intentos.length > 0 && (
+            <div className="font-bold text-emerald-600">
+              Intentos: {intentos.length}
+              {intentos.length === 1 && intentos[0] === total
+                ? ' (a la primera)'
+                : ` · ${intentos.map(x => `${x}/${total}`).join(' · ')}`}
+            </div>
+          )}
         </div>
       ) : (
         <p className="no-print mb-2 text-[10px] leading-snug text-slate-400">{hint}</p>
