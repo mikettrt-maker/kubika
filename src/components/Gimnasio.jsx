@@ -3,9 +3,9 @@ import { exportToPdf } from '../utils/exportPdf';
 import { opLabel } from '../utils/retosGenerator';
 import PanelReto from './PanelReto';
 
-const CELL_H = 30;
-const CELL_W = 38;
-const MAX_COLS = 20; // columna T: la herramienta de escritura va a la derecha
+const CELL_H = 28;
+const CELL_W = 30;
+const MAX_COLS = 26; // columnas A–Z: celdas más chicas para que quepan más de 20
 const DARK = '2px solid #0f172a';
 const LIGHT = '1px solid #e2e8f0';
 const TRANSPARENT = '1px solid transparent';
@@ -567,7 +567,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
                     <div
                       key={key}
                       data-cell={key}
-                      className="relative flex items-center px-1.5 select-none cursor-cell"
+                      className="relative flex items-center px-1 select-none cursor-cell"
                       style={{
                         height: CELL_H,
                         backgroundColor: selected ? (isAnchor ? 'rgba(99,102,241,0.20)' : 'rgba(99,102,241,0.07)') : '#fff',
@@ -637,7 +637,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
           </div>
 
           <p className="text-sm text-slate-400 mt-4 text-center no-print" style={{ maxWidth: cols * CELL_W + 460 }}>
-            Clic para seleccionar · arrastra para elegir un rango · escribe para responder · doble clic para editar · Enter baja, Tab pasa a la siguiente · flechas para moverte entre celdas · guías A-T o de valor posicional · a la derecha pon tus respuestas y pulsa Validar
+            Clic para seleccionar · arrastra para elegir un rango · escribe para responder · doble clic para editar · Enter baja, Tab pasa a la siguiente · flechas para moverte entre celdas · guías A-Z o de valor posicional · a la derecha pon tus respuestas y pulsa Validar
           </p>
         </div>
       </div>
