@@ -172,7 +172,7 @@ const GIMNASIO_TIPS = [
       'A la derecha de la cuadrícula está el panel de respuestas: te muestra 8 ejercicios y tú escribes la respuesta en cada recuadro.',
       'El autocorrector está apagado a propósito: escribe exactamente como te enseñó tu maestra, sin que el sistema te cambie palabras.',
       'Cambia grado (4°, 5°, 6°) y nivel para que aparezcan cifras más largas y decimales más difíciles.',
-      'Cuando tengas las 8 respuestas se activa el botón Validar: salen ✓ o ✗ y, debajo de cada fallo, la respuesta correcta.',
+      'Cuando tengas las 8 respuestas se activa el botón Validar: salen ✓ o ✗. La respuesta correcta nunca se muestra: busca tus ✗, revisa la operación y vuelve a validar.',
       'Cada Validar cuenta un intento con tu puntaje (Intentos: 2 · 6/8 · 8/8); si corriges y validas otra vez, suma otro.',
       'El resumen con tu resultado y tus intentos viaja en el PDF, así tu maestro sabe quién lo hizo a la primera.',
     ],

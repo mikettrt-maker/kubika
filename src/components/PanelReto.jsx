@@ -1,7 +1,7 @@
 import { useRef, useEffect } from 'react';
 import { getChallenge, nivelEtiqueta, opLabel } from '../utils/retosGenerator';
 import { comparaRespuesta } from '../utils/validacion';
-import { comparaLetras, numeroALetras } from '../utils/numeroALetras';
+import { comparaLetras } from '../utils/numeroALetras';
 
 const GRADOS = [4, 5, 6];
 const EMPTY = ['', '', '', '', '', '', '', ''];
@@ -20,8 +20,9 @@ function Mark({ estado }) {
  * Modo reto de operaciones: 8 recuadros de respuesta con validación automática.
  * Modo escritura (reto o libre): 8 números con letra, también con validación.
  * La validación se lanza con el botón Validar (solo con las 8 respuestas
- * llenas); después las marcas y el resultado se recalculan en vivo y las
- * respuestas correctas se revelan debajo de cada fallo (y van al PDF).
+ * llenas); después las marcas y el resultado se recalculan en vivo. Las
+ * respuestas correctas NUNCA se muestran: solo ✓ o ✗ para que el alumno
+ * revise el ejercicio y encuentre su error por sí mismo.
  * Cada Validar cuenta un intento con su puntaje (intentos = [6, 8]); si el
  * alumno corrige respuestas se marca "pendiente" y Validar registra otro.
  */
@@ -237,6 +238,11 @@ export default function PanelReto({ value, onChange, reto, onOpenRetos, defaultG
                 : ` · ${intentos.map(x => `${x}/${total}`).join(' · ')}`}
             </div>
           )}
+          {okCount < total && (
+            <div className="font-bold text-red-500 mt-0.5">
+              Revisa los ejercicios marcados ✗ y vuelve a Validar: la respuesta correcta no se muestra.
+            </div>
+          )}
         </div>
       ) : (
         <p className="no-print mb-3 text-xs leading-snug text-slate-400">{hint}</p>
@@ -281,11 +287,6 @@ export default function PanelReto({ value, onChange, reto, onOpenRetos, defaultG
                     />
                     {validado && <span className="w-5 flex justify-center shrink-0"><Mark estado={r.estado} /></span>}
                   </div>
-                  {validado && r.estado !== 'ok' && (
-                    <div className="text-xs font-bold text-red-500" style={{ paddingLeft: 28 }}>
-                      → {r.esperado}
-                    </div>
-                  )}
                 </li>
               );
             })}
@@ -317,11 +318,6 @@ export default function PanelReto({ value, onChange, reto, onOpenRetos, defaultG
                   className="mt-1 w-full rounded-md border border-slate-200 px-2 py-1.5 text-[14px] leading-snug text-slate-800 outline-none focus:border-indigo-400 resize-none placeholder:text-slate-300"
                   style={{ background: '#fff' }}
                 />
-                {validado && estado !== 'ok' && (
-                  <div className="text-xs font-bold text-red-500 leading-snug">
-                    → {numeroALetras(n)}
-                  </div>
-                )}
               </li>
             );
           })}
