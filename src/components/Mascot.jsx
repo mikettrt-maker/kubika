@@ -212,6 +212,16 @@ const GIMNASIO_TIPS = [
       'La parte decimal se escribe como número normal: lees los dígitos juntos y agregas la orden que corresponda.',
     ],
   },
+  {
+    id: 'gim-relleno',
+    title: '⚡ Relleno rápido de celdas',
+    steps: [
+      'Con una celda seleccionada basta teclear: el dígito abre la celda solo (desde A1 también, sin clic).',
+      'Mientras escribes, las flechas ↑ ↓ ← → guardan y te mueven a la celda vecina: ya no necesitas Enter ni volver a hacer clic.',
+      'Activa «1 dígito ↓» en la barra Relleno: cada dígito 0-9 se guarda y salta a la celda de abajo — perfecto para algoritmos verticales.',
+      'Para escribir varios dígitos en una celda: doble clic (o apaga el modo «1 dígito»). Las flechas en medio del número mueven el cursor dentro del texto.',
+    ],
+  },
 ];
 
 /**

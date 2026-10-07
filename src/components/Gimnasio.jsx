@@ -307,6 +307,16 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
     if (key.length === 1) {
       e.preventDefault();
       const n = sel ? norm(sel) : { r1: 0, c1: 0 };
+      // Modo "1 dígito": el dígito se guarda en la celda y salta a la de abajo
+      if (value.unDigito && key >= '0' && key <= '9') {
+        const k = `${n.r1},${n.c1}`;
+        onChange(prev => ({ ...prev, cells: { ...(prev.cells || {}), [k]: key } }));
+        const nr = Math.min(rows - 1, n.r1 + 1);
+        selectCell(nr, n.c1);
+        const el = document.querySelector(`[data-cell="${nr},${n.c1}"]`);
+        if (el) el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        return;
+      }
       startEdit(n.r1, n.c1, key);
     } else if (key === 'Enter') {
       e.preventDefault();
@@ -485,6 +495,19 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
         <div className="w-px h-6 bg-slate-200" />
 
         <div className="flex items-center gap-1.5">
+          <GroupLabel>Relleno</GroupLabel>
+          <ToolBtn
+            onClick={() => { onChange(prev => ({ ...prev, unDigito: !prev.unDigito })); focusGrid(); }}
+            active={!!value.unDigito}
+            title="Un dígito por celda: al teclear 0-9 el dígito se guarda y salta solo a la celda de abajo (ideal para algoritmos verticales). Para escribir varios dígitos en una celda: doble clic, o apaga el modo."
+          >
+            1 dígito ↓
+          </ToolBtn>
+        </div>
+
+        <div className="w-px h-6 bg-slate-200" />
+
+        <div className="flex items-center gap-1.5">
           <GroupLabel>Edición</GroupLabel>
           <ToolBtn onClick={clearSelectionContent} title="Borrar el texto de las celdas seleccionadas (Supr)">Borrar</ToolBtn>
           <ToolBtn onClick={clearAll} title="Vaciar toda la cuadrícula" danger>Limpiar todo</ToolBtn>
@@ -604,6 +627,29 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
                               e.preventDefault();
                               commit();
                               selectCell(r, e.shiftKey ? Math.max(0, c - 1) : Math.min(cols - 1, c + 1));
+                            } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+                              // Flechas verticales: guardan y mueven la celda (el input
+                              // es de una sola línea, ahí no hay movimiento de cursor).
+                              e.preventDefault();
+                              commit();
+                              selectCell(
+                                e.key === 'ArrowDown' ? Math.min(rows - 1, r + 1) : Math.max(0, r - 1),
+                                c
+                              );
+                            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                              // Solo mueven la celda si el cursor está en el borde del
+                              // valor; en medio se mueve dentro del texto.
+                              const el = e.target;
+                              const enBorde = e.key === 'ArrowLeft'
+                                ? el.selectionStart === 0 && el.selectionEnd === 0
+                                : el.selectionStart === el.value.length && el.selectionEnd === el.value.length;
+                              if (enBorde) {
+                                e.preventDefault();
+                                commit();
+                                selectCell(r, e.key === 'ArrowLeft'
+                                  ? Math.max(0, c - 1)
+                                  : Math.min(cols - 1, c + 1));
+                              }
                             }
                           }}
                           className="absolute inset-0 w-full h-full px-1 text-center text-sm font-bold outline-none bg-white"
@@ -637,7 +683,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
           </div>
 
           <p className="text-sm text-slate-400 mt-4 text-center no-print" style={{ maxWidth: cols * CELL_W + 460 }}>
-            Clic para seleccionar · arrastra para elegir un rango · escribe para responder · doble clic para editar · Enter baja, Tab pasa a la siguiente · flechas para moverte entre celdas · guías A-Z o de valor posicional · a la derecha pon tus respuestas y pulsa Validar
+            Clic para seleccionar · arrastra para elegir un rango · escribe para responder · doble clic para editar · Enter baja, Tab pasa a la siguiente · mientras escribes, las flechas te mueven sin Enter · guías A-Z o de valor posicional · modo «1 dígito»: teclea y baja solo · a la derecha pon tus respuestas y pulsa Validar
           </p>
         </div>
       </div>
