@@ -27,6 +27,31 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ========== Tableta / táctil (v3.14.0) ========== */
+html, body {
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* En pantallas táctiles: objetivos de toque más grandes (sin afectar al ratón) */
+@media (pointer: coarse) {
+  .kubi-touch-btn {
+    min-height: 40px;
+    min-width: 40px;
+  }
+
+  [data-panel-reto] button,
+  [data-panel-reto] select {
+    min-height: 40px;
+  }
+
+  /* Kubi se corre a la izquierda para no tapar el panel de respuestas */
+  .kubi-float {
+    right: auto;
+    left: 1rem;
+  }
+}
+
 /* ========== Cuadrícula del Lienzo (Estilo cuaderno) ========== */
 .canvas-grid {
   background-color: var(--canvas-bg);

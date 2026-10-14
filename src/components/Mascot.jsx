@@ -261,7 +261,7 @@ export default function Mascot({ message, context }) {
 
   return (
     <div
-      className="fixed bottom-4 right-4 z-[10001] no-print flex flex-col items-end gap-2 select-none"
+      className="kubi-float fixed bottom-4 right-4 z-[10001] no-print flex flex-col items-end gap-2 select-none"
     >
       {/* ===== MINI MENÚ DE CONSEJOS ===== */}
       {menuOpen && (

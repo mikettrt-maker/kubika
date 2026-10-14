@@ -142,7 +142,7 @@ export default function PanelReto({ value, onChange, reto, onOpenRetos, defaultG
 
   return (
     <aside
-      className="w-[420px] max-w-[85vw] shrink-0 bg-white rounded-lg shadow-xl p-4 self-start"
+      className="w-full max-w-full lg:w-[420px] lg:max-w-[85vw] shrink-0 bg-white rounded-lg shadow-xl p-4 self-start"
       data-panel-reto
     >
       {/* Fila 1: título + Validar (fuera del PDF) */}

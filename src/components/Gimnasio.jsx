@@ -26,7 +26,7 @@ function ToolBtn({ onClick, active, title, children, danger }) {
     <button
       onClick={onClick}
       title={title}
-      className={`h-8 min-w-[32px] px-2 rounded-lg border text-sm font-bold transition-all
+      className={`kubi-touch-btn h-8 min-w-[32px] px-2 rounded-lg border text-sm font-bold transition-all
         ${active
           ? 'bg-indigo-600 border-indigo-600 text-white shadow-md scale-105'
           : danger
@@ -66,6 +66,9 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
   const draggingRef = useRef(false);
   const movedRef = useRef(false);
   const wasSelectedRef = useRef(false);
+  const touchTimerRef = useRef(null);
+  const lastPointerRef = useRef('mouse');
+  const startXYRef = useRef(null);
   const editRef = useRef(null);
   const rootRef = useRef(null);
   const sheetRef = useRef(null);
@@ -93,7 +96,18 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
   // Selección por arrastre vía elementFromPoint (ratón y táctil)
   useEffect(() => {
     const move = (ev) => {
-      if (!draggingRef.current) return;
+      if (!draggingRef.current) {
+        // Táctil antes del long-press: si el dedo se aleja, es un scroll → cancela el timer
+        if (lastPointerRef.current === 'touch' && touchTimerRef.current && startXYRef.current) {
+          const dx = ev.clientX - startXYRef.current.x;
+          const dy = ev.clientY - startXYRef.current.y;
+          if (dx * dx + dy * dy > 144) { // más de 12 px
+            clearTimeout(touchTimerRef.current);
+            touchTimerRef.current = null;
+          }
+        }
+        return;
+      }
       const el = document.elementFromPoint(ev.clientX, ev.clientY);
       const cellEl = el && el.closest ? el.closest('[data-cell]') : null;
       if (!cellEl) return;
@@ -104,7 +118,11 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
         return { ...prev, r2: r, c2: c };
       });
     };
-    const up = () => { draggingRef.current = false; };
+    const up = () => {
+      draggingRef.current = false;
+      clearTimeout(touchTimerRef.current);
+      touchTimerRef.current = null;
+    };
     window.addEventListener('pointermove', move);
     window.addEventListener('pointerup', up);
     window.addEventListener('pointercancel', up);
@@ -113,6 +131,15 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
       window.removeEventListener('pointerup', up);
       window.removeEventListener('pointercancel', up);
     };
+  }, []);
+
+  // Arrastre táctil de selección: mientras el dedo selecciona, el navegador no debe hacer scroll
+  useEffect(() => {
+    const onTouchMove = (ev) => {
+      if (draggingRef.current && lastPointerRef.current === 'touch') ev.preventDefault();
+    };
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    return () => window.removeEventListener('touchmove', onTouchMove);
   }, []);
 
   // Flechas del teclado aunque el foco haya quedado en el body (tras editar, clic en zona no enfocable, etc.)
@@ -156,14 +183,30 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
 
   const cancelEdit = () => { editRef.current = null; setEditing(null); focusGrid(); };
 
-  const onCellPointerDown = (r, c) => {
+  const onCellPointerDown = (r, c, e) => {
+    const pt = (e && e.pointerType) || 'mouse';
+    lastPointerRef.current = pt;
+    clearTimeout(touchTimerRef.current);
+    touchTimerRef.current = null;
     if (editing && editing.r === r && editing.c === c) return;
     wasSelectedRef.current = !!(sel && sel.r1 === r && sel.r2 === r && sel.c1 === c && sel.c2 === c);
     movedRef.current = false;
-    draggingRef.current = true;
     if (editRef.current) commit();
     selectCell(r, c);
     focusGrid();
+    // Táctil: mantener presionado ~400 ms inicia el arrastre de selección
+    // (un arrastre normal = scroll de la página). Ratón: igual que siempre.
+    if (pt === 'touch') {
+      draggingRef.current = false;
+      startXYRef.current = { x: e.clientX, y: e.clientY };
+      touchTimerRef.current = setTimeout(() => {
+        touchTimerRef.current = null;
+        draggingRef.current = true;
+        try { if (navigator.vibrate) navigator.vibrate(12); } catch { /* sin vibración */ }
+      }, 400);
+    } else {
+      draggingRef.current = true;
+    }
   };
 
   const onCellClick = (r, c) => {
@@ -451,7 +494,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
           <button
             onClick={drawGalera}
             title="Galera de división larga: selecciona divisor + dividendo en una fila"
-            className="h-8 px-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:border-indigo-400 hover:text-indigo-600 transition-all flex items-center gap-1.5 text-sm font-bold"
+            className="kubi-touch-btn h-8 px-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:border-indigo-400 hover:text-indigo-600 transition-all flex items-center gap-1.5 text-sm font-bold"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.4}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M7 4v16M7 4h13" />
@@ -469,7 +512,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
               key={hex}
               onClick={() => applyColor(hex)}
               title="Poner el color del número en las celdas seleccionadas"
-              className="w-5 h-5 rounded-full border-2 transition-all hover:scale-110"
+              className="kubi-touch-btn w-5 h-5 rounded-full border-2 transition-all hover:scale-110"
               style={{
                 backgroundColor: hex,
                 borderColor: (colors[anchorKey] || DEFAULT_COLOR) === hex ? '#0f172a' : 'transparent',
@@ -532,9 +575,9 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
       </div>
 
       {/* Cuadrícula + herramienta de escritura */}
-      <div className="flex-1 overflow-auto pt-6 px-6 pb-[240px]">
+      <div className="flex-1 overflow-auto overscroll-contain pt-6 px-6 pb-[240px]">
         <div className="inline-flex flex-col items-start mx-auto">
-          <div ref={sheetRef} className="flex gap-4 items-start">
+          <div ref={sheetRef} className="flex flex-col lg:flex-row gap-4 items-start">
             <div className="flex">
             {/* Guías de fila */}
             <div className="flex flex-col shrink-0 no-print" style={{ width: 28 }}>
@@ -590,15 +633,16 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
                     <div
                       key={key}
                       data-cell={key}
-                      className="relative flex items-center px-1 select-none cursor-cell"
+                      className="relative flex items-center px-1 select-none cursor-cell touch-manipulation"
                       style={{
                         height: CELL_H,
                         backgroundColor: selected ? (isAnchor ? 'rgba(99,102,241,0.20)' : 'rgba(99,102,241,0.07)') : '#fff',
                         ...cellBorders(r, c),
                       }}
-                      onPointerDown={() => onCellPointerDown(r, c)}
+                      onPointerDown={(e) => onCellPointerDown(r, c, e)}
                       onClick={() => onCellClick(r, c)}
                       onDoubleClick={() => startEdit(r, c)}
+                      onContextMenu={(e) => { if (lastPointerRef.current === 'touch') e.preventDefault(); }}
                     >
                       {isEditing ? (
                         <input
@@ -607,6 +651,8 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
                               el.focus();
                               if (editRef.current && editRef.current.selectAll) el.select();
                               else { el.selectionStart = el.selectionEnd = el.value.length; }
+                              // Tableta: que el teclado virtual no tape la celda
+                              try { el.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch { /* noop */ }
                             }
                           }}
                           value={draft}
@@ -616,6 +662,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
                           autoCorrect="off"
                           autoCapitalize="off"
                           autoComplete="off"
+                          inputMode="decimal"
                           onKeyDown={(e) => {
                             e.stopPropagation();
                             if (e.key === 'Escape') { e.preventDefault(); cancelEdit(); }
@@ -683,7 +730,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
           </div>
 
           <p className="text-sm text-slate-400 mt-4 text-center no-print" style={{ maxWidth: cols * CELL_W + 460 }}>
-            Clic para seleccionar · arrastra para elegir un rango · escribe para responder · doble clic para editar · Enter baja, Tab pasa a la siguiente · mientras escribes, las flechas te mueven sin Enter · guías A-Z o de valor posicional · modo «1 dígito»: teclea y baja solo · a la derecha pon tus respuestas y pulsa Validar
+            Clic para seleccionar · arrastra para elegir un rango · escribe para responder · doble clic para editar · Enter baja, Tab pasa a la siguiente · mientras escribes, las flechas te mueven sin Enter · guías A-Z o de valor posicional · modo «1 dígito»: teclea y baja solo · en tablet: toca, vuelve a tocar para escribir y mantén pulsado para elegir un rango · a la derecha pon tus respuestas y pulsa Validar
           </p>
         </div>
       </div>
