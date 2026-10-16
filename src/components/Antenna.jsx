@@ -66,7 +66,7 @@ export default function Antenna({
 
   return (
     <div
-      onMouseDown={handleMouseDown}
+      onPointerDown={handleMouseDown}
       onDoubleClick={handleDoubleClick}
       onContextMenu={handleContext}
       style={{
@@ -83,7 +83,7 @@ export default function Antenna({
     >
       {/* Barra de arrastre (siempre visible, encima de todo) */}
       <div
-        onMouseDown={handleDragHandleDown}
+        onPointerDown={handleDragHandleDown}
         style={{
           position: 'absolute',
           left: totalWidth / 2 - 16,

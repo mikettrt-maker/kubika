@@ -183,8 +183,6 @@ export default function FreeTextBox({
       window.removeEventListener('pointerup', onUp);
       window.removeEventListener('pointercancel', onUp);
       window.removeEventListener('blur', onUp);
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
       if (pointerId !== undefined) {
         try { handle.releasePointerCapture(pointerId); } catch { /* ya liberado */ }
       }
@@ -212,8 +210,6 @@ export default function FreeTextBox({
     window.addEventListener('pointerup', onUp);
     window.addEventListener('pointercancel', onUp);
     window.addEventListener('blur', onUp);
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
   };
 
   const showResize = isEditing || isSelected || hovered || isResizing;
@@ -222,6 +218,7 @@ export default function FreeTextBox({
     <div
       className={`absolute ${isEditing ? 'cursor-text' : 'cursor-grab'}
                  ${isResizing ? 'ring-2 ring-purple-500 ring-offset-2 shadow-2xl' : isSelected ? 'ring-2 ring-kubika-400 ring-offset-2' : ''}
+                 ${!isEditing ? 'touch-none' : ''}
                  transition-all duration-200
                  ${isEditing
                    ? 'border border-dashed border-kubika-400 bg-white/50 backdrop-blur-sm p-2 rounded-lg'

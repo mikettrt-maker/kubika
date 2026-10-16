@@ -182,6 +182,7 @@ export default function MathTextBox({
     <div
       className={`math-box absolute ${isEditing ? 'math-box-editing' : ''}
                  ${isSelected ? 'ring-2 ring-purple-400 ring-offset-2' : ''}
+                 ${!isEditing ? 'touch-none' : ''}
                  rounded-xl border transition-all duration-200
                  ${isEditing
                    ? 'border-purple-400 shadow-lg shadow-purple-100 p-3 bg-white/90 backdrop-blur-sm'

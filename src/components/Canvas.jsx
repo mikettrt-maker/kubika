@@ -139,6 +139,9 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
       const origX = rod.x;
       const origY = rod.y;
 
+      // Captura el puntero (ratón o dedo) para que el arrastre no se pierda
+      try { if (e.pointerId !== undefined) rodEl.setPointerCapture(e.pointerId); } catch { /* noop */ }
+
       const handleMove = (moveEvent) => {
         const snappedX = Math.round(Math.max(0, origX + moveEvent.clientX - startX) / GRID) * GRID;
         const snappedY = Math.round(Math.max(0, origY + moveEvent.clientY - startY) / GRID) * GRID;
@@ -155,12 +158,15 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
           if (r.isInvalid) return { ...r, x: origX, y: origY, isInvalid: false };
           return { ...r, isInvalid: false };
         }));
-        window.removeEventListener('mousemove', handleMove);
-        window.removeEventListener('mouseup', handleUp);
+        window.removeEventListener('pointermove', handleMove);
+        window.removeEventListener('pointerup', handleUp);
+        window.removeEventListener('pointercancel', handleUp);
+        try { if (e.pointerId !== undefined) rodEl.releasePointerCapture(e.pointerId); } catch { /* ya liberado */ }
       };
 
-      window.addEventListener('mousemove', handleMove);
-      window.addEventListener('mouseup', handleUp);
+      window.addEventListener('pointermove', handleMove);
+      window.addEventListener('pointerup', handleUp);
+      window.addEventListener('pointercancel', handleUp);
       return;
     }
 
@@ -201,12 +207,14 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
         }
         setQuadPreview(null);
         quadStart.current = null;
-        window.removeEventListener('mousemove', handleMove);
-        window.removeEventListener('mouseup', handleUp);
+        window.removeEventListener('pointermove', handleMove);
+        window.removeEventListener('pointerup', handleUp);
+        window.removeEventListener('pointercancel', handleUp);
       };
 
-      window.addEventListener('mousemove', handleMove);
-      window.addEventListener('mouseup', handleUp);
+      window.addEventListener('pointermove', handleMove);
+      window.addEventListener('pointerup', handleUp);
+      window.addEventListener('pointercancel', handleUp);
       return;
     }
   };
@@ -304,6 +312,9 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
     const origY = antenna.y;
     let dragStarted = false;
 
+    const target = e.currentTarget;
+    try { if (e.pointerId !== undefined) target.setPointerCapture(e.pointerId); } catch { /* noop */ }
+
     const handleMove = (moveEvent) => {
       const dx = moveEvent.clientX - startX;
       const dy = moveEvent.clientY - startY;
@@ -318,12 +329,15 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
     };
 
     const handleUp = () => {
-      window.removeEventListener('mousemove', handleMove);
-      window.removeEventListener('mouseup', handleUp);
+      window.removeEventListener('pointermove', handleMove);
+      window.removeEventListener('pointerup', handleUp);
+      window.removeEventListener('pointercancel', handleUp);
+      try { if (e.pointerId !== undefined) target.releasePointerCapture(e.pointerId); } catch { /* ya liberado */ }
     };
 
-    window.addEventListener('mousemove', handleMove);
-    window.addEventListener('mouseup', handleUp);
+    window.addEventListener('pointermove', handleMove);
+    window.addEventListener('pointerup', handleUp);
+    window.addEventListener('pointercancel', handleUp);
   };
 
   // ========== MENÚ CONTEXTUAL ==========
@@ -1048,7 +1062,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
       className="relative flex-1 overflow-auto bg-slate-100 canvas-inset-shadow"
       onDragOver={handleDragOver}
       onDrop={handleDrop}
-      onMouseDown={(e) => { handleCanvasMouseDown(e); if (e.target.tagName !== 'INPUT') containerRef.current?.focus(); }}
+      onPointerDown={(e) => { handleCanvasMouseDown(e); if (e.target.tagName !== 'INPUT') containerRef.current?.focus(); }}
       onClick={handleCanvasClick}
       onKeyDown={handleKeyDown}
       tabIndex={-1}
@@ -1058,7 +1072,7 @@ export default function Canvas({ canvasRef, rods, setRods, mathTexts, setMathTex
       <div
         ref={setCanvasRef}
         data-canvas-inner
-        className="canvas-grid relative shadow-sm"
+        className="canvas-grid relative shadow-sm touch-manipulation"
         style={{ width: '2400px', height: '1600px', minWidth: '100%', minHeight: '100%' }}
       >
         {/* Encabezado fijo estilo libreta: fecha automática + materia (arriba a la izquierda) */}
