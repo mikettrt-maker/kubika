@@ -1,7 +1,8 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { getChallenge, nivelEtiqueta, opLabel } from '../utils/retosGenerator';
 import { comparaRespuesta } from '../utils/validacion';
 import { comparaLetras } from '../utils/numeroALetras';
+import GuiaEscritura from './GuiaEscritura';
 
 const GRADOS = [4, 5, 6];
 const EMPTY = ['', '', '', '', '', '', '', ''];
@@ -31,6 +32,7 @@ export default function PanelReto({ value, onChange, reto, onOpenRetos, defaultG
   const esRetoEsc = reto?.op === 'escritura';
   const esOps = !!(reto && reto.op && !esRetoEsc);
   const inpRefs = useRef([]);
+  const [showGuia, setShowGuia] = useState(false);
 
   // Sincronizar escritura con el reto del profe o generar una tanda inicial
   useEffect(() => {
@@ -179,6 +181,11 @@ export default function PanelReto({ value, onChange, reto, onOpenRetos, defaultG
 
       {/* Fila 2: controles del modo (fuera del PDF) */}
       <div className="no-print mb-3 flex items-center gap-2 flex-wrap">
+        {!esOps && btn(
+          () => setShowGuia(true),
+          'Kubi te cuenta, sin líos, cómo se escriben los números',
+          '✨ ¿Cómo se escribe?'
+        )}
         {reto ? (
           <>
             {onOpenRetos && btn(onOpenRetos, 'Elegir otro reto', 'Otro reto')}
@@ -323,6 +330,8 @@ export default function PanelReto({ value, onChange, reto, onOpenRetos, defaultG
           })}
         </ol>
       )}
+
+      <GuiaEscritura open={showGuia} onClose={() => setShowGuia(false)} />
     </aside>
   );
 }
