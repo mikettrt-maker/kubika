@@ -657,7 +657,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
 
               {/* Hoja */}
               <div className="bg-white rounded-lg shadow-xl p-2">
-                {reto && (
+                {reto && !modoTablas && (
                   <div className="mb-2 pb-1.5 border-b border-slate-200 flex items-center justify-between gap-4 text-[13px] font-bold text-slate-700">
                     <span>Reto: {reto.grado}° · {opLabel(reto.op)} · Nivel {reto.nivel}</span>
                     <span className="font-semibold text-slate-500">
