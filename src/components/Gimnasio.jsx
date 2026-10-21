@@ -21,17 +21,21 @@ const norm = (s) => ({
   c2: Math.max(s.c1, s.c2),
 });
 
-function ToolBtn({ onClick, active, title, children, danger }) {
+function ToolBtn({ onClick, active, title, children, danger, disabled }) {
   return (
     <button
-      onClick={onClick}
-      title={title}
-      className={`kubi-touch-btn h-8 min-w-[32px] px-2 rounded-lg border text-sm font-bold transition-all
-        ${active
-          ? 'bg-indigo-600 border-indigo-600 text-white shadow-md scale-105'
-          : danger
-            ? 'bg-white border-slate-200 text-slate-500 hover:border-red-300 hover:text-red-500'
-            : 'bg-white border-slate-200 text-slate-600 hover:border-indigo-300 hover:text-indigo-600'}`}
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      title={disabled ? 'No disponible en modo tablas de multiplicar' : title}
+      className={`h-8 min-w-[32px] px-2 rounded-lg border text-sm font-bold transition-all
+        ${disabled
+          ? 'bg-slate-100 border-slate-200 text-slate-400 cursor-not-allowed'
+          : active
+            ? 'bg-indigo-600 border-indigo-600 text-white shadow-md scale-105'
+            : danger
+              ? 'bg-white border-slate-200 text-slate-500 hover:border-red-300 hover:text-red-500'
+              : 'bg-white border-slate-200 text-slate-600 hover:border-indigo-300 hover:text-indigo-600'
+        }`}
     >
       {children}
     </button>
@@ -63,6 +67,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
   const [editing, setEditing] = useState(null);
   const [draft, setDraft] = useState('');
   const [pdfLoading, setPdfLoading] = useState(false);
+  const [modoTablas, setModoTablas] = useState(false);
   const draggingRef = useRef(false);
   const movedRef = useRef(false);
   const wasSelectedRef = useRef(false);
@@ -73,15 +78,25 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
   const rootRef = useRef(null);
   const sheetRef = useRef(null);
 
-  const rows = value.rows || 10;
-  const cols = Math.min(value.cols || 16, MAX_COLS);
+  const rows = modoTablas ? 8 : (value.rows || 10);
+  const cols = modoTablas ? 8 : Math.min(value.cols || 16, MAX_COLS);
   const cells = value.cells || {};
   const borders = value.borders || {};
   const colors = value.colors || {};
   const guideMode = value.guides === 'valor' ? 'valor' : 'letters';
   const unitsCol = Number.isInteger(value.unitsCol) ? Math.max(0, Math.min(cols - 1, value.unitsCol)) : cols - 1;
 
+  let tablaCorrectas = 0;
+  const tablaTotal = modoTablas ? rows * cols : 0;
+  if (modoTablas) {
+    for (let r = 0; r < rows; r++)
+      for (let c = 0; c < cols; c++)
+        if (cells[`${r},${c}`] === String((r + 2) * (c + 2))) tablaCorrectas++;
+  }
+  const tablaIntentos = value.tablasIntentos || [];
+
   const colLabel = (c) => {
+    if (modoTablas) return String(c + 2);
     if (guideMode !== 'valor') return String.fromCharCode(65 + c);
     const pos = c - unitsCol;
     if (pos === 0) return 'U';
@@ -329,6 +344,17 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
     focusGrid();
   };
 
+  const validarTablas = () => {
+    let correctas = 0;
+    for (let r = 0; r < rows; r++)
+      for (let c = 0; c < cols; c++) {
+        const esperado = String((r + 2) * (c + 2));
+        if (cells[`${r},${c}`] === esperado) correctas++;
+      }
+    onChange(prev => ({ ...prev, tablasIntentos: [...(prev.tablasIntentos || []), correctas] }));
+    focusGrid();
+  };
+
   // ===== Navegación con teclado =====
   const moveSel = (dr, dc) => {
     const base = sel || { r1: 0, c1: 0 };
@@ -474,27 +500,28 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
       <div className="no-print flex flex-wrap items-center gap-x-4 gap-y-2 px-5 py-2 bg-white border-b border-slate-200 shadow-sm shrink-0">
         <div className="flex items-center gap-1.5">
           <GroupLabel>Bordes</GroupLabel>
-          <ToolBtn onClick={() => applySide('t')} active={anchorBorders.includes('t')} title="Borde superior (barra sobre el dividendo)"><BorderIcon side="t" /></ToolBtn>
-          <ToolBtn onClick={() => applySide('b')} active={anchorBorders.includes('b')} title="Borde inferior (la rayita de la operación)"><BorderIcon side="b" /></ToolBtn>
-          <ToolBtn onClick={() => applySide('l')} active={anchorBorders.includes('l')} title="Borde izquierdo"><BorderIcon side="l" /></ToolBtn>
-          <ToolBtn onClick={() => applySide('r')} active={anchorBorders.includes('r')} title="Borde derecho"><BorderIcon side="r" /></ToolBtn>
-          <ToolBtn onClick={applyAllBorders} title="Borde en todo el rango seleccionado"><BorderIcon side="all" /></ToolBtn>
-          <ToolBtn onClick={clearBorders} title="Quitar bordes del rango seleccionado" danger><BorderIcon side="none" /></ToolBtn>
+            <ToolBtn onClick={() => applySide('t')} active={anchorBorders.includes('t')} disabled={modoTablas} title="Borde superior (barra sobre el dividendo)"><BorderIcon side="t" /></ToolBtn>
+          <ToolBtn onClick={() => applySide('b')} active={anchorBorders.includes('b')} disabled={modoTablas} title="Borde inferior (la rayita de la operación)"><BorderIcon side="b" /></ToolBtn>
+          <ToolBtn onClick={() => applySide('l')} active={anchorBorders.includes('l')} disabled={modoTablas} title="Borde izquierdo"><BorderIcon side="l" /></ToolBtn>
+          <ToolBtn onClick={() => applySide('r')} active={anchorBorders.includes('r')} disabled={modoTablas} title="Borde derecho"><BorderIcon side="r" /></ToolBtn>
+          <ToolBtn onClick={applyAllBorders} disabled={modoTablas} title="Borde en todo el rango seleccionado"><BorderIcon side="all" /></ToolBtn>
+          <ToolBtn onClick={clearBorders} disabled={modoTablas} title="Quitar bordes del rango seleccionado" danger><BorderIcon side="none" /></ToolBtn>
         </div>
 
         <div className="w-px h-6 bg-slate-200" />
 
         <div className="flex items-center gap-1.5">
           <GroupLabel>Signos</GroupLabel>
-          <ToolBtn onClick={() => putSign('+')} active={cells[anchorKey] === '+'} title="Suma">+</ToolBtn>
-          <ToolBtn onClick={() => putSign('−')} active={cells[anchorKey] === '−'} title="Resta">−</ToolBtn>
-          <ToolBtn onClick={() => putSign('×')} active={cells[anchorKey] === '×'} title="Multiplicación">×</ToolBtn>
-          <ToolBtn onClick={() => putSign('÷')} active={cells[anchorKey] === '÷'} title="División">÷</ToolBtn>
-          <ToolBtn onClick={() => putSign('=')} active={cells[anchorKey] === '='} title="Igual">=</ToolBtn>
+          <ToolBtn onClick={() => putSign('+')} active={cells[anchorKey] === '+'} disabled={modoTablas} title="Suma">+</ToolBtn>
+          <ToolBtn onClick={() => putSign('−')} active={cells[anchorKey] === '−'} disabled={modoTablas} title="Resta">−</ToolBtn>
+          <ToolBtn onClick={() => putSign('×')} active={cells[anchorKey] === '×'} disabled={modoTablas} title="Multiplicación">×</ToolBtn>
+          <ToolBtn onClick={() => putSign('÷')} active={cells[anchorKey] === '÷'} disabled={modoTablas} title="División">÷</ToolBtn>
+          <ToolBtn onClick={() => putSign('=')} active={cells[anchorKey] === '='} disabled={modoTablas} title="Igual">=</ToolBtn>
           <button
             onClick={drawGalera}
             title="Galera de división larga: selecciona divisor + dividendo en una fila"
-            className="kubi-touch-btn h-8 px-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:border-indigo-400 hover:text-indigo-600 transition-all flex items-center gap-1.5 text-sm font-bold"
+            className={modoTablas ? 'kubi-touch-btn h-8 px-2.5 rounded-lg border border-slate-200 bg-slate-100 text-slate-400 cursor-not-allowed transition-all flex items-center gap-1.5 text-sm font-bold' : 'kubi-touch-btn h-8 px-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 hover:border-indigo-400 hover:text-indigo-600 transition-all flex items-center gap-1.5 text-sm font-bold'}
+            disabled={modoTablas}
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.4}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M7 4v16M7 4h13" />
@@ -513,6 +540,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
               onClick={() => applyColor(hex)}
               title="Poner el color del número en las celdas seleccionadas"
               className="kubi-touch-btn w-5 h-5 rounded-full border-2 transition-all hover:scale-110"
+              disabled={modoTablas}
               style={{
                 backgroundColor: hex,
                 borderColor: (colors[anchorKey] || DEFAULT_COLOR) === hex ? '#0f172a' : 'transparent',
@@ -529,9 +557,17 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
           <ToolBtn
             onClick={() => onChange(prev => ({ ...prev, guides: (prev.guides || 'letters') === 'letters' ? 'valor' : 'letters' }))}
             active={guideMode === 'valor'}
+            disabled={modoTablas}
             title="Guías de columna: letras (A, B, C…) o valores posicionales (UM, C, DM, U, D, C, d, c). En modo valor, clic sobre la guía para marcar la columna de UNIDADES"
           >
             {guideMode === 'valor' ? 'U·D·C' : 'A·B·C'}
+          </ToolBtn>
+          <ToolBtn
+            onClick={() => { setModoTablas(!modoTablas); focusGrid(); }}
+            active={modoTablas}
+            title="Modo tablas de multiplicar: cuadrícula del 2 al 9, escribe el producto en cada celda"
+          >
+            {modoTablas ? 'Tablas ✓' : 'Tablas ×'}
           </ToolBtn>
         </div>
 
@@ -542,6 +578,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
           <ToolBtn
             onClick={() => { onChange(prev => ({ ...prev, unDigito: !prev.unDigito })); focusGrid(); }}
             active={!!value.unDigito}
+            disabled={modoTablas}
             title="Un dígito por celda: al teclear 0-9 el dígito se guarda y salta solo a la celda de abajo (ideal para algoritmos verticales). Para escribir varios dígitos en una celda: doble clic, o apaga el modo."
           >
             1 dígito ↓
@@ -561,15 +598,15 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1">
             <GroupLabel>Filas</GroupLabel>
-            <ToolBtn onClick={() => setDim('rows', -1)} title="Quitar fila">−</ToolBtn>
+            <ToolBtn onClick={() => setDim('rows', -1)} disabled={modoTablas} title="Quitar fila">−</ToolBtn>
             <span className="text-sm font-black text-slate-700 w-5 text-center">{rows}</span>
-            <ToolBtn onClick={() => setDim('rows', 1)} title="Agregar fila">+</ToolBtn>
+            <ToolBtn onClick={() => setDim('rows', 1)} disabled={modoTablas} title="Agregar fila">+</ToolBtn>
           </div>
           <div className="flex items-center gap-1">
             <GroupLabel>Columnas</GroupLabel>
-            <ToolBtn onClick={() => setDim('cols', -1)} title="Quitar columna">−</ToolBtn>
+            <ToolBtn onClick={() => setDim('cols', -1)} disabled={modoTablas} title="Quitar columna">−</ToolBtn>
             <span className="text-sm font-black text-slate-700 w-5 text-center">{cols}</span>
-            <ToolBtn onClick={() => setDim('cols', 1)} title="Agregar columna">+</ToolBtn>
+            <ToolBtn onClick={() => setDim('cols', 1)} disabled={modoTablas} title="Agregar columna">+</ToolBtn>
           </div>
         </div>
       </div>
@@ -584,7 +621,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
               <div style={{ height: 18 }} />
               {Array.from({ length: rows }, (_, r) => (
                 <div key={r} className="flex items-center justify-center text-[10px] font-bold text-slate-400" style={{ height: CELL_H }}>
-                  {r + 1}
+                  {modoTablas ? r + 2 : r + 1}
                 </div>
               ))}
             </div>
@@ -628,7 +665,11 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
                   const isEditing = editing && editing.r === r && editing.c === c;
                   const selected = inRange(r, c);
                   const isAnchor = sel && sel.r1 === r && sel.c1 === c;
-                  const cellColor = colors[key] || DEFAULT_COLOR;
+                  let cellColor = colors[key] || DEFAULT_COLOR;
+                  if (modoTablas && text !== '') {
+                    const esperado = (r + 2) * (c + 2);
+                    cellColor = text === String(esperado) ? '#10b981' : '#ef4444';
+                  }
                   return (
                     <div
                       key={key}
@@ -718,20 +759,41 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
             </div>
           </div>
 
-          <PanelReto
-            value={value}
-            onChange={onChange}
-            reto={reto}
-            onOpenRetos={onOpenRetos}
-            defaultGrado={userGrado}
-            onPatchReto={onPatchReto}
-            onTerminate={onTerminate}
-          />
+          {!modoTablas && (
+            <PanelReto
+              value={value}
+              onChange={onChange}
+              reto={reto}
+              onOpenRetos={onOpenRetos}
+              defaultGrado={userGrado}
+              onPatchReto={onPatchReto}
+              onTerminate={onTerminate}
+            />
+          )}
           </div>
 
-          <p className="text-sm text-slate-400 mt-4 text-center no-print" style={{ maxWidth: cols * CELL_W + 460 }}>
-            Clic para seleccionar · arrastra para elegir un rango · escribe para responder · doble clic para editar · Enter baja, Tab pasa a la siguiente · mientras escribes, las flechas te mueven sin Enter · guías A-Z o de valor posicional · modo «1 dígito»: teclea y baja solo · en tablet: toca, vuelve a tocar para escribir y mantén pulsado para elegir un rango · a la derecha pon tus respuestas y pulsa Validar
-          </p>
+          {modoTablas ? (
+            <div className="text-sm leading-snug text-center no-print" style={{ maxWidth: cols * CELL_W + 460 }}>
+              <p className="text-slate-400 mt-4">
+                Tablas del 2 al 9 · escribe el producto en cada celda · los números verdes son correctos, los rojos están mal · en tablet toca y vuelve a tocar para escribir
+              </p>
+              <div className="mb-2 px-2.5 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-[13px] font-black text-emerald-700 flex items-center justify-between">
+                <div>
+                  Resultado: {tablaCorrectas}/{tablaTotal} correctas{tablaIntentos.length > 0 ? ` · ${tablaIntentos.map(x => `${x}/${tablaTotal}`).join(' · ')}` : ''}
+                </div>
+                <button
+                  onClick={validarTablas}
+                  className="h-8 px-3 rounded-md border border-emerald-200 bg-white text-emerald-700 text-[12px] font-black hover:bg-emerald-100"
+                >
+                  Validar tablas
+                </button>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-slate-400 mt-4 text-center no-print" style={{ maxWidth: cols * CELL_W + 460 }}>
+              Clic para seleccionar · arrastra para elegir un rango · escribe para responder · doble clic para editar · Enter baja, Tab pasa a la siguiente · mientras escribes, las flechas te mueven sin Enter · guías A-Z o de valor posicional · modo «1 dígito»: teclea y baja solo · en tablet: toca, vuelve a tocar para escribir y mantén pulsado para elegir un rango · a la derecha pon tus respuestas y pulsa Validar
+            </p>
+          )}
         </div>
       </div>
     </div>
