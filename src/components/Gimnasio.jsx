@@ -91,7 +91,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
   if (modoTablas) {
     for (let r = 0; r < rows; r++)
       for (let c = 0; c < cols; c++)
-        if (cells[`${r},${c}`] === String((r + 2) * (c + 2))) tablaCorrectas++;
+        if (cells[`${r},${c}`] === String((r + 1) * (c + 1))) tablaCorrectas++;
   }
   const tablaIntentos = value.tablasIntentos || [];
 
@@ -348,7 +348,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
     let correctas = 0;
     for (let r = 0; r < rows; r++)
       for (let c = 0; c < cols; c++) {
-        const esperado = String((r + 2) * (c + 2));
+        const esperado = String((r + 1) * (c + 1));
         if (cells[`${r},${c}`] === esperado) correctas++;
       }
     onChange(prev => ({ ...prev, tablasIntentos: [...(prev.tablasIntentos || []), correctas] }));
@@ -678,7 +678,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
                   const isAnchor = sel && sel.r1 === r && sel.c1 === c;
                   let cellColor = colors[key] || DEFAULT_COLOR;
                   if (modoTablas && text !== '') {
-                    const esperado = (r + 2) * (c + 2);
+                    const esperado = (r + 1) * (c + 1);
                     cellColor = text === String(esperado) ? '#10b981' : '#ef4444';
                   }
                   return (
