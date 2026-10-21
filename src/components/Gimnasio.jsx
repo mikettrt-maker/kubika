@@ -78,8 +78,8 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
   const rootRef = useRef(null);
   const sheetRef = useRef(null);
 
-  const rows = modoTablas ? 8 : (value.rows || 10);
-  const cols = modoTablas ? 8 : Math.min(value.cols || 16, MAX_COLS);
+  const rows = modoTablas ? 10 : (value.rows || 10);
+  const cols = modoTablas ? 10 : Math.min(value.cols || 16, MAX_COLS);
   const cells = value.cells || {};
   const borders = value.borders || {};
   const colors = value.colors || {};
@@ -96,7 +96,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
   const tablaIntentos = value.tablasIntentos || [];
 
   const colLabel = (c) => {
-    if (modoTablas) return String(c + 2);
+    if (modoTablas) return String(c + 1);
     if (guideMode !== 'valor') return String.fromCharCode(65 + c);
     const pos = c - unitsCol;
     if (pos === 0) return 'U';
@@ -562,10 +562,16 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
           >
             {guideMode === 'valor' ? 'U·D·C' : 'A·B·C'}
           </ToolBtn>
+        </div>
+
+        <div className="w-px h-6 bg-slate-200" />
+
+        <div className="flex items-center gap-1.5">
+          <GroupLabel>Tablas</GroupLabel>
           <ToolBtn
             onClick={() => { setModoTablas(!modoTablas); focusGrid(); }}
             active={modoTablas}
-            title="Modo tablas de multiplicar: cuadrícula del 2 al 9, escribe el producto en cada celda"
+            title="Modo tablas de multiplicar: cuadrícula 10×10 del 1 al 10, escribe el producto en cada celda"
           >
             {modoTablas ? 'Tablas ✓' : 'Tablas ×'}
           </ToolBtn>
@@ -618,10 +624,15 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
             <div className="flex">
             {/* Guías de fila */}
             <div className="flex flex-col shrink-0 no-print" style={{ width: 28 }}>
-              <div style={{ height: 18 }} />
+              <div
+                className="flex items-center justify-center text-[10px] font-bold text-slate-400"
+                style={{ height: 18 }}
+              >
+                {modoTablas ? 'X' : ''}
+              </div>
               {Array.from({ length: rows }, (_, r) => (
                 <div key={r} className="flex items-center justify-center text-[10px] font-bold text-slate-400" style={{ height: CELL_H }}>
-                  {modoTablas ? r + 2 : r + 1}
+                  {modoTablas ? r + 1 : r + 1}
                 </div>
               ))}
             </div>
@@ -775,7 +786,7 @@ export default function Gimnasio({ value, onChange, onClose, displayName, worksp
           {modoTablas ? (
             <div className="text-sm leading-snug text-center no-print" style={{ maxWidth: cols * CELL_W + 460 }}>
               <p className="text-slate-400 mt-4">
-                Tablas del 2 al 9 · escribe el producto en cada celda · los números verdes son correctos, los rojos están mal · en tablet toca y vuelve a tocar para escribir
+                Tablas del 1 al 10 · escribe el producto en cada celda · los números verdes son correctos, los rojos están mal · en tablet toca y vuelve a tocar para escribir
               </p>
               <div className="mb-2 px-2.5 py-1.5 rounded-lg bg-emerald-50 border border-emerald-200 text-[13px] font-black text-emerald-700 flex items-center justify-between">
                 <div>
